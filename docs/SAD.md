@@ -1,5 +1,13 @@
 # Software Architecture Document (SAD) — Caregiver Platform
 
+> **Scope authority (2026-11-05):** [Scope of work.md](Scope%20of%20work.md) is the sole product requirements baseline. Read [AGENT_BUILD_GUIDE.md](AGENT_BUILD_GUIDE.md) before using this reference. Build basic functioning flows while agency processes remain pending. Technical examples and existing features below do not establish client approval, scope completion, or additional product requirements.
+
+## Reference status and scope boundaries
+
+This document contains earlier architecture proposals alongside implementation notes. Preserve existing working architecture and user edits; do not execute its snippets as an implementation checklist. Inspect current code/settings for actual behavior. In particular, the current frontend uses the shared fetch wrapper (not Axios), React Router v7, and SQLite locally or configured PostgreSQL. Django media streaming is supported; S3-only/direct-upload assertions below are not universal facts.
+
+State/role access controls are retained safeguards. Billing burndown, assignment gates, retention/purge/legal-hold workflows and prescribed infrastructure are not Scope of Work requirements. Section 8 reminder jobs support required automation, but timing and delivery policy remain pending; purge jobs are not authorized by scope. Technical stack choices and performance claims below are not client business requirements. See the guide for the required basic flows and pending agency inputs.
+
 ## 1. System Overview & Architectural Vision
 
 The **Caregiver Platform** is an enterprise home health agency operating system serving Florida, Indiana, and Georgia.
@@ -455,89 +463,64 @@ graph TD
 
 ---
 
-## 10. Frontend Architecture Blueprint (React 19, shadcn/ui, TanStack Query, Axios)
+## 10. Frontend Architecture (React 19, shadcn/ui, TanStack Query, fetch)
 
 ### 10.1 Frontend Directory Structure
 
-```
+The implementation is JavaScript/JSX with Vite and Tailwind v4. See `frontend/README.md` for setup, ownership rules, and verification commands.
+
+```text
 frontend/
-├── package.json                      # React 19, @tanstack/react-query, react-hook-form, axios, tailwindcss v4
-├── vite.config.js                    # Vite 8 with @tailwindcss/vite and @/* alias
-├── jsconfig.json                     # Path alias configuration (@/* -> src/*)
-├── index.html                        # SPA HTML entry point
-└── src/
-    ├── main.jsx                      # App root with QueryClientProvider
-    ├── App.jsx                       # Master portal router & state providers
-    ├── index.css                     # Tailwind CSS v4 @import and healthcare semantic variables
-    ├── lib/
-    │   ├── api.js                    # Pre-configured Axios instance (JWT + X-Agency-State)
-    │   ├── queryClient.js            # TanStack QueryClient with production cache policies
-    │   └── utils.js                  # shadcn cn() class merger
-    ├── components/
-    │   ├── ui/                       # shadcn primitives (Button, Table, Dialog, Badge, Alert)
-    │   ├── shared/                   # StateSelector, ComplianceBadge, NavigationBar
-    │   └── forms/                    # Form fields and validation wrappers
-    ├── features/
-    │   ├── caregivers/               # Onboarding forms, credential uploaders, training viewer
-    │   ├── clients/                  # Intake wizards, authorization burndown cards
-    │   └── admin/                    # Compliance grid, split-screen document verification drawer
-    └── hooks/                        # Custom react-query queries and mutations
+  scripts/                      # Node integration and controller tests
+  src/
+    main.jsx                    # React root and StrictMode
+    App.jsx                     # Router, auth, query provider, error boundary
+    routes/AppRoutes.jsx        # URLs and lazy page entry points
+    components/ui/              # shadcn-style primitives
+    lib/utils.js                # shadcn class merger
+    features/
+      admin/
+        pages/                  # Stable route entry modules
+        authorizations/         # Authorization editor, list, constants
+        client-detail/          # Admission, care plans, schedule, assignments
+        referrals/              # Pipeline, roster, dialogs, controller
+      caregiver/
+        pages/
+        application/            # Form, schema, payload mapping, draft storage
+      client/
+        pages/
+        intake/                 # Editor session, summary, progress
+      public/                   # Public layout, pages, publications
+      auth/pages/               # Login screens
+    shared/
+      components/               # Platform compositions and portal shell
+      contexts/                 # Auth provider and context definitions
+      hooks/                    # Shared query and session hooks
+      services/api.js           # Canonical fetch transport
+      lib/                      # Role helpers and QueryClient
+      constants/                # Cross-portal states and statuses
+      utils/                    # Reusable validation, documents, packets
 ```
 
-### 10.2 HTTP & Multi-State Scoping Transport (`src/lib/api.js`)
+Colocate a workflow's supporting files and use relative imports internally. Use `@/shared/...` and `@/components/ui/...` across workflow boundaries. Public state selection comes from the URL; the removed `StateProvider` had no state consumers.
 
-Axios acts as the uniform HTTP transport boundary. All outbound requests automatically inject:
-1. **Bearer JWT**: Extracted from local session storage (`Authorization: Bearer <access_token>`).
-2. **Jurisdiction Header**: `X-Agency-State: FL | IN | GA` extracted from current user session, enabling DRF multi-tenant scoping without URL parameter pollution.
+### 10.2 HTTP & Multi-State Scoping Transport (`src/shared/services/api.js`)
 
-```javascript
-// src/lib/api.js
-import axios from 'axios'
+The canonical transport wraps `fetch`. Axios remains a dependency but is not the transport implementation. Callers use this wrapper for JSON requests and uploads so token refresh, error handling, cancellation, and jurisdiction headers remain consistent.
 
-export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 15000,
-})
+- Access tokens are stored under `localStorage['caregiver_access_token']`; refresh tokens under `localStorage['refresh']`.
+- Requests send `Authorization: Bearer <access_token>` and `X-Agency-State` from `localStorage['selected_state']` when set.
+- `VITE_API_URL` can override the default `http://localhost:8000/api/v1` base. Vite also proxies `/api` and `/media` to Django locally.
+- Auth preserves `/auth/me/` with the cached `/auth/me` compatibility fallback. Backend permissions remain authoritative for role and state access.
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  
-  const activeState = localStorage.getItem('selected_state') || 'FL'
-  config.headers['X-Agency-State'] = activeState
-  return config
-})
-```
+### 10.3 Server State Caching (`src/shared/lib/queryClient.js`)
 
-### 10.3 Server State Caching (`src/lib/queryClient.js`)
+`App.jsx` provides the shared TanStack Query client. Its current defaults are a 60-second stale time, no window-focus refetch, no mutation retries, and at most one retry for server/network query failures; HTTP errors below 500 are not retried. Garbage collection uses the library default.
 
-TanStack Query v5 manages asynchronous server state, deduplication, and cache invalidation:
-- **`staleTime: 5 * 60 * 1000` (5 minutes)**: Prevents redundant background queries for stable compliance checklists.
-- **`gcTime: 30 * 60 * 1000` (30 minutes)**: Garbage collection retention for inactive tabs.
-- **Scoped Cache Keys**: Keys include state jurisdiction: `['caregivers', selectedState, 'compliance']`.
+`useFetch` keys include the URL, parameters, and user identity. `usePaginatedFetch` adds pagination and request context. Some workflow controllers still load through `api` directly; do not assume all state is query-managed. Refresh only the resources affected by a mutation, without reinitializing neighboring editor drafts.
 
-```javascript
-// src/main.jsx
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from './lib/queryClient.js'
-import App from './App.jsx'
+### 10.4 Form Handling & Editor Ownership
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </StrictMode>
-)
-```
+The caregiver application uses React Hook Form and Zod. Its schema, payload mapping, and identity-bound seven-day draft persistence live in `features/caregiver/application`. Other editors use local React state; they do not all use React Hook Form or TanStack mutations.
 
-### 10.4 Form Handling & Validation Pattern
-
-Forms (Caregiver Onboarding, Client Intake, Document Expiry Entry) use **React Hook Form**:
-- **Performance**: Uncontrolled input refs eliminate unnecessary component re-renders during high-frequency typing.
-- **Integration**: Plugs directly into shadcn/ui components (`Input`, `Select`, `ToggleGroup`) using `register` and controller bindings.
-- **Mutations**: Form submissions trigger TanStack `useMutation` calls to `api`, followed by targeted query cache invalidations via `queryClient.invalidateQueries()`.
-
+Authorization new/edit entry points initialize complete drafts. Client intake mounts a fresh editor session when editing begins and unmounts it on cancel or successful completion, including its signature state. Client detail initializes drafts for one client and refreshes assignments or schedules separately after mutations. Navigating to another client mounts a new detail session.

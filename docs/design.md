@@ -1,5 +1,7 @@
 # Platform Design Specification: Multi-State Caregiver Platform (FL, IN, GA)
 
+> **Scope authority (2026-11-05):** [Scope of work.md](Scope%20of%20work.md) is the sole product requirements baseline. Read [AGENT_BUILD_GUIDE.md](AGENT_BUILD_GUIDE.md). This file provides visual guidance; layouts, tokens and examples are implementation choices. Build basic working flows while agency content and process remain pending. Do not infer additional business requirements from a mockup.
+
 ## 1. Product Direction & Anti-Slop Foundation
 
 Healthcare and home care operations require speed, calm visual clarity, and error prevention. Shift coordinators review hundreds of credentials daily; caregivers upload documents on mobile phones under varying light conditions; clients and family members navigate services under emotional stress.
@@ -22,7 +24,7 @@ Healthcare and home care operations require speed, calm visual clarity, and erro
 
 ### Semantic Compliance Palette
 - **Compliant / Active**: `#059669` (`emerald-600`), surface `#ecfdf5` (`emerald-50`), border `#a7f3d0` (`emerald-200`)
-- **Expiring Soon (< 30 Days)**: `#d97706` (`amber-600`), surface `#fffbeb` (`amber-50`), border `#fde68a` (`amber-200`)
+- **Expiring Soon (configured warning window; agency timing pending)**: `#d97706` (`amber-600`), surface `#fffbeb` (`amber-50`), border `#fde68a` (`amber-200`)
 - **Expired / Urgent Action**: `#dc2626` (`red-600`), surface `#fef2f2` (`red-50`), border `#fecaca` (`red-200`)
 - **Missing / Action Required**: `#475569` (`slate-600`), surface `#f8fafc` (`slate-50`), border `#cbd5e1` (`slate-300`)
 
@@ -54,8 +56,8 @@ Healthcare and home care operations require speed, calm visual clarity, and erro
 ### Global Header Chrome
 1. **Persistent State Selector**:
    - Sticky top bar dropdown/segmented control: `[ FL | IN | GA ]`.
-   - Selecting a state instantly filters forms, licensing packets, document compliance requirements, and regional contact numbers.
-   - Visual banner ribbon displays active state licensing authority (e.g., "Agency for Health Care Administration (AHCA) - FL" or "Georgia DCH").
+   - Public state switching changes the displayed services, forms, licensing and regional contact details. It never changes private-record permissions. State administrators remain locked to their assigned state; use existing super-admin controls where authorized.
+   - Display only approved agency licensing information for the selected state.
 2. **Role Switcher & Session State**:
    - Public Landing: `Caregivers | Families & Clients | Provider Portal | Contact`.
    - Authenticated Portals: Dedicated layouts per persona (Caregiver, Client, Admin).
@@ -65,11 +67,11 @@ Healthcare and home care operations require speed, calm visual clarity, and erro
 ## 5. Portal Blueprint 1: Caregiver Mobile-First Portal
 
 ### Primary User Goal
-Quick onboarding, frictionless document upload via phone camera/PDF, real-time credential compliance tracking, and in-service training video completion.
+Complete onboarding, upload documents on mobile, track credential status, and access online in-service training. Course format and completion policy require agency confirmation.
 
 ### Key Layouts & Workflows
 1. **Compliance Health Banner (Top of Screen)**:
-   - High-visibility banner if any document is Expired or Expiring < 30 days:
+   - High-visibility banner if any document is expired or within the configured warning window (timing remains pending agency confirmation):
      - Example: `[Urgent] CPR Certificate expires in 8 days. [Upload New Certificate]`.
 2. **Credential Tracker Card Group**:
    - 3-column progress summary: `Compliant (9)` | `Expiring Soon (1)` | `Missing (2)`.
@@ -79,15 +81,15 @@ Quick onboarding, frictionless document upload via phone camera/PDF, real-time c
      - TB Test (`Expired 10/01/2026` - `[Upload Now]`)
 3. **Mobile Document Upload Flow**:
    - Large touch target (min 48px height): `[ Take Photo / Choose File ]`.
-   - Client-side auto-crop & compression (< 4MB) to prevent slow cellular uploads.
-   - Expiration date field directly beneath file picker with quick year/month picker.
-   - Inline preview modal before submission with confirmation checkbox.
+   - Validate against actual supported file types and size limits; auto-crop/compression is an optional enhancement.
+   - Show expiration date input for document types configured to expire; agency confirms applicable types.
+   - Provide clear file selection, upload result and retry feedback. Preview layout is a design choice.
 4. **In-Service Training Hub**:
-   - Course cards with clean status chips: `[Completed]`, `[In Progress: 65%]`, `[Due in 14 Days]`.
-   - Dedicated full-width video player with persistent quiz checkpoint prompts.
-   - One-tap "Download Certificate" button upon passing score (>= 80%).
+   - Show saved course status and actual progress; percentages and due dates must have a real source.
+   - Provide access to supplied course content. Videos, quizzes, pass scores, validity and completion proof remain agency decisions.
+   - Offer certificate download for recorded completion; make the limits of any provisional manual completion process clear in the handoff.
 5. **Electronic Signature Pad**:
-   - Touch/stylus signature pad with fallback to typed legal signature.
+   - Accessible electronic signature capture tied to the exact presented form. Signature method and official wording require agency confirmation; do not claim legal validity from UI alone.
    - Audit trail stamping (Timestamp, IP Address, Device user agent).
 
 ---
@@ -99,16 +101,17 @@ Complete stress-free admission paperwork, upload insurance/Medicaid cards, track
 
 ### Key Layouts & Workflows
 1. **Intake Stepper (Progressive Disclosure)**:
+   - The steps below are a provisional layout, not approved form fields or mandatory clinical intake stages. Use official agency forms when supplied.
    - Step 1: Client & Emergency Contact Profile.
    - Step 2: Care Needs & Physician Information.
    - Step 3: Insurance & Medicaid Card Upload (Front & Back capture).
    - Step 4: Electronic Admission Packet & HIPAA Consent Signing.
 2. **Authorization Status Monitor**:
-   - Clean timeline view showing authorization start date, end date, authorized hours per week, and units remaining.
-   - Notification pill when re-authorization is submitted or pending state approval.
+   - Show actual authorization status, dates, uploaded records and history. Do not require billing units or calculate remaining balances solely from this design.
+   - Distinguish uploaded/pending staff review from confirmed payer approval using the agreed process; avoid implying automatic insurer/state integration.
 3. **Care Plan & Schedule Glance**:
-   - Weekly calendar feed showing confirmed caregiver shifts, caregiver name, and assigned care tasks (ADLs).
-   - Emergency contact button & non-intrusive direct messaging toggle.
+   - Show the client's actual saved care plan and service schedule. Calendar layout and staff entry are basic implementation choices; data source and clinical/scheduling workflow remain pending.
+   - Secure agency messaging is optional; do not display a nonfunctional messaging action as completed scope.
 
 ---
 
@@ -119,17 +122,17 @@ Review inbound applications, approve/reject caregiver credentials, monitor state
 
 ### Key Layouts & Workflows
 1. **Top Metric Bar (Zero Fluff)**:
-   - `Pending Applications (8)` | `Expiring Credentials <30d (24)` | `Expiring Authorizations (6)` | `Pending Intake Reviews (3)`.
+   - Example metrics: pending applications, expiring credentials, expiring authorizations and intake reviews. Show real counts; warning windows are configured defaults pending agency confirmation.
 2. **Compliance Data Table**:
    - Dense rows with fixed headers and horizontal scrolling support.
-   - Columns: `Caregiver Name`, `State (FL/IN/GA)`, `Position (CNA/HHA)`, `Compliance %`, `Next Expiring Document`, `Days Remaining`, `Actions`.
-   - Quick Action Flyout: `[View Docs]`, `[Send SMS Reminder]`, `[Approve]`, `[Flag for Audit]`.
+   - Example columns: caregiver, state, onboarding status, missing/expired requirements, next expiration and actions. A compliance percentage needs a defined denominator; do not invent one.
+   - Actions should match actual workflows: view documents, review application and send reminder. Do not claim an SMS was sent before the delivery system reports that state.
 3. **Document Verification Split-Screen Drawer**:
    - Left pane: Caregiver input details & expiration date input.
    - Right pane: High-resolution PDF/image preview with zoom, rotate, and full-screen controls.
    - Action buttons fixed at bottom: `[Reject with Reason]`, `[Approve & Record]`.
-4. **Audit & Reporting Export**:
-   - One-click export for AHCA / State surveyor audits: CSV, PDF summary with verified timestamps.
+4. **Reports**:
+   - Provide the six scope reports: caregiver compliance, expiring credentials, in-service completion, client authorizations, referral sources and website inquiries. Columns and definitions remain pending agency input. CSV/PDF export and surveyor-specific formats are optional enhancements.
 
 ---
 
@@ -167,10 +170,10 @@ The platform uses **shadcn/ui** built on Tailwind CSS v4 and React primitives. A
 | **Admin Compliance Grid** | `Table` | Fixed header, dense rows, tabular numerals |
 | **Document Inspector** | `Sheet` (Drawer) | Split-screen drawer (form fields left, zoom viewer right) |
 | **Onboarding & Upload** | `FieldGroup` + `Field` + `Input` | Semantic accessible form inputs with `data-invalid` |
-| **In-Service Training** | `Card` + `Progress` | Progress percentage bar, certificate download trigger |
+| **In-Service Training** | `Card` + `Progress` | Actual saved progress/status and certificate download; no fabricated percentages |
 | **Portal Navigation** | `Tabs` + `TabsList` | Sub-navigation between compliance, training, and profile |
 | **Audit & Confirmation** | `AlertDialog` | Confirmation for document rejection or applicant removal |
-| **Action Notifications** | `sonner` (`toast`) | Immediate feedback on upload success & reminder SMS sent |
+| **Action Notifications** | `sonner` (`toast`) | Accurate upload and delivery feedback: pending, sent or failed as recorded |
 
 ### Tailwind v4 Semantic Tokens (`frontend/src/index.css`)
 ```css
@@ -208,6 +211,8 @@ The platform uses **shadcn/ui** built on Tailwind CSS v4 and React primitives. A
 ---
 
 ## 10. Implementation Steps for Frontend
+
+The following is a historical setup reference, not a required reinstall or redesign plan. Inspect the existing frontend and reuse its components. Do not initialize shadcn or replace tokens merely because these commands are listed.
 
 1. **Configure path aliases**: Add `@/*` alias to `frontend/vite.config.js` and `frontend/jsconfig.json`.
 2. **Initialize shadcn**: Run `npx shadcn@latest init` inside `frontend/`.

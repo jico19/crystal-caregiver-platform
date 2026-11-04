@@ -1,12 +1,33 @@
 # AGENTS.md — Caregiver Platform
 
-Multi-state (FL/IN/GA) home-care platform: caregiver onboarding, client intake, compliance, training, and admin ops. Monorepo with a Django backend, a Vite/React frontend, and a contract/spec doc set. No git repo, no CI.
+Multi-state (FL/IN/GA) home-care platform: caregiver onboarding, client intake, compliance, training, and admin ops. Monorepo with a Django backend, a Vite/React frontend, and a contract/spec doc set. Git repository; no CI.
+
+## Requirements authority and delivery stage
+
+- `docs/Scope of work.md` is the sole product requirements baseline. Keep it unchanged. Later explicit user instructions can clarify scope; internal specs cannot enlarge it.
+- Read `docs/AGENT_BUILD_GUIDE.md` and the scope-aligned `docs/PRD.md` before planning or implementing. The guide identifies basic flows, pending client decisions, optional features and unsupported additions.
+- Build basic functioning flows where the agency process is unknown: real persistence, accurate statuses, permissions and feedback. Record pending policy/content/provider decisions; do not invent approval gates, billing rules, quiz scores or reminder schedules as client requirements.
+- Basic functionality is an interim delivery stage, not full client acceptance. Track technical readiness, client process confirmation and deployment evidence separately. Do not weaken security or use fake data to claim a flow works.
+- PRD, SAD, API/schema/security/design docs and dated plans are subordinate references. Inspect current code for actual technical contracts and update relevant discrepancies. Historical audits are not current completion evidence.
+- Preserve existing features, data and safeguards; narrowing scope does not authorize deleting them. Secure agency messaging is optional. Email/SMS and the six named reports remain required even when delivery details need client input.
+
+## Product boundaries and pending client processes
+
+We are building an agency website, digital front desk and paperwork office for FL/IN/GA. Care.com can inform presentation, but public caregiver search, ratings, direct family hiring and marketplace memberships are not requested features.
+
+- Use simple, working submission, upload, review, tracking and viewing flows while the agency's actual process is being confirmed. Prefer existing modules and manual staff actions over speculative automation or a new workflow engine.
+- Obtain agency input for official employment/admission packets, form fields and signature text; mandatory documents per state; application/admission approval steps; training content and completion rules; authorization review meanings; care-plan/schedule ownership; report definitions; and notification providers, recipients and timing.
+- Do not silently make every listed upload category mandatory. Support both Auto Insurance and Driver's Insurance until the agency clarifies whether they are duplicates.
+- Do not add billing/HCPCS unit calculations, automatic staffing gates, quizzes/pass scores, report exports, retention/purge rules or external integrations as mandatory requirements merely because older docs or existing code mention them.
+- Continue independent work while client input is pending. Repair broken APIs, incorrect data and security defects without treating developer problems as client-process questions.
+- Keep missing agency content and unconfigured integrations explicit. Do not fabricate official forms, clinical instructions, licensing claims, training evidence or successful email/SMS delivery. A development sender does not prove live delivery.
+- For each feature handoff, record the Scope of Work section, basic behavior delivered, verification evidence, pending client decisions and remaining deployment dependencies. Distinguish basic working functionality from confirmed agency workflow and full acceptance.
 
 ## Layout
 
 - `backend/` — Django 6.1 + DRF 3.18 + SimpleJWT (Python). Apps live under `backend/apps/*`; settings split across `config/settings/{base,development,production}.py`. Virtualenv at `backend/venv/`.
 - `frontend/` — React 19 + Vite + Tailwind CSS v4 + React Router v7 + TanStack Query v5 + Radix UI. Plain JavaScript/JSX (no TypeScript).
-- `docs/` — `PRD.md`, `SAD.md`, `API_CONTRACTS.md`, `DATABASE_SCHEMA_AND_DATA_DICTIONARY.md`, `SECURITY_REQUIREMENTS.md`, `design.md`. Source of truth for schemas/endpoints; trust these over frontend code when they conflict.
+- `docs/` — `PRD.md`, `SAD.md`, `API_CONTRACTS.md`, `DATABASE_SCHEMA_AND_DATA_DICTIONARY.md`, `SECURITY_REQUIREMENTS.md`, `design.md`. Supporting technical references subordinate to `docs/Scope of work.md`. Resolve contract differences by inspecting current backend routes, serializers, models/migrations and frontend consumers; these documents cannot introduce product requirements.
 
 ## Commands
 
@@ -23,7 +44,21 @@ Frontend (from `frontend/`):
 
 - `npm run dev` (port 5173, proxies `/api` → `http://127.0.0.1:8000`), `npm run build`, `npm run preview`.
 - `npm run lint` is **oxlint** — there is no ESLint or Prettier config.
-- No frontend test runner is configured.
+- `npm test` discovers colocated Node unit tests and integration suites in `frontend/scripts/`.
+
+## Code readability & modularity
+
+- Prioritize readability and maintainability over cleverness or unnecessary complexity. Use clear names, straightforward control flow, and the simplest design that meets the requirement.
+- Give each feature one clear purpose and each module, component, hook, service, and function one focused responsibility. Separate unrelated behavior so changes remain isolated and avoid conflicts.
+- Split code into focused modules when responsibilities can be separated meaningfully, especially when a file mixes UI, data access, and business rules. Avoid oversized files and functions, but do not add abstractions or tiny files that make the code harder to follow.
+- Keep feature-specific code within its feature. Move code into shared modules only when it is genuinely reusable, and use explicit interfaces between features instead of reaching into their internal implementation.
+- Keep refactoring relevant to the requested change; do not reorganize unrelated features.
+
+## Testing policy
+
+- Do not add or run tests for simple, low-impact code changes, such as copy edits, styling tweaks, or straightforward changes with no meaningful behavior risk. Review the diff instead.
+- Test important changes that affect business logic, authentication, permissions, state scoping, data integrity, API behavior, or critical user flows. Judge importance by risk, not by the number of lines changed.
+- Use the smallest relevant test scope. Run broader suites only when the change or a failure warrants them, or when the user explicitly requests them.
 
 ## Architecture notes
 
@@ -39,23 +74,4 @@ Frontend (from `frontend/`):
 - Backend permission classes: `backend/apps/core/permissions.py` (`IsSuperAdmin`, `IsStateScopedAdmin`, `IsCaregiver`, `IsClient`). `IsStateScopedAdmin` raises 403 for administrators with `state_id IS NULL`, and object checks enforce `obj.state_id == request.user.state_id`. Reuse these; never write ad-hoc `role == ...` checks.
 - Frontend: check roles only through helpers in `src/shared/lib/roles.js` (`isAdmin`, `isSuperAdmin`, `homePathFor`). A bare `role === 'administrator'` silently drops `super_admin` into the wrong portal.
 - State administrators are locked to their assigned state — no state switcher. Public landing pages are `/florida`, `/indiana`, `/georgia`.
-- Status enums live in `src/shared/constants/*.js` and must match `docs/DATABASE_SCHEMA_AND_DATA_DICTIONARY.md`; keep them in sync when adding states.
-
-## Gotchas
-
-- `frontend/CONTEXT.md` (auto-loaded into sessions) describes the backend as FastAPI + Supabase/GoTrue. That is **stale** — the backend is Django DRF + SimpleJWT. Also ignore `roles.js` comments referencing `supabase/migrations`. Trust `docs/` and the actual code on conflict.
-- Not a git repo and no root `.gitignore`: `backend/db.sqlite3`, `backend/venv/`, and `frontend/node_modules/` all sit in the tree. Don't delete or regenerate the DB casually.
-- `seed_initial_data` is idempotent; `seed_users.py` is not (resets passwords).
-- Frontend sometimes calls endpoints that don't exist in backend `urls.py` yet. Verify a route against `config/urls.py` + `apps/*/urls.py` and `docs/API_CONTRACTS.md` before debugging against a phantom API.
-
-## Use built-in skills when the situation fits
-
-- `tdd` / `surgical-patch` — fixing a backend bug: add/extend `apps/<app_name>/tests.py` cases first, run scoped `pytest apps/<app_name>/tests.py`, then patch.
-- `shadcn` / `emil-design-eng` / `ui-taste` — building or polishing UI. The repo already ships shadcn-style primitives under `@/components/ui/` and shared components in `src/shared/components/common/`; reuse those instead of adding new dependencies.
-- `web-design-guidelines` — before/after UI work; `docs/design.md` enforces strict anti-slop and contrast rules.
-- `diagnosing-bugs` / `investigate-first` — for hard or ambiguous failure hunts before editing code.
-- `safe-refactor` — for behavior-preserving cross-file restructures.
-- `verify-and-stop` — to prove work meets acceptance criteria without expanding scope.
-- `improve` / `improve-codebase-architecture` — for audits or handoff plans for other agents to implement.
-- `caveman*` — only when the user explicitly asks for compressed/terse output.
-- `supabase` / `supabase-postgres-best-practices` — only if a task actually touches Supabase. The backend is plain Django/Postgres, so default to standard Django migrations and ORM.
+- Status constants live in `src/shared/constants/*.js`; keep them aligned with current backend model/serializer enums and update the schema reference when relevant. Existing enum values are implementation details, not proof of client-approved workflow stages.

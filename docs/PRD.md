@@ -1,163 +1,92 @@
-# Product Requirements Document (PRD) — Caregiver Platform
+# Product Requirements — Caregiver Platform
 
-## 1. Executive Summary & Vision
+Updated: 2026-11-05. Requirements source: [Scope of work.md](Scope%20of%20work.md) only. This document is a delivery summary, not an expansion of the contract. Read [AGENT_BUILD_GUIDE.md](AGENT_BUILD_GUIDE.md) for basic implementation boundaries and client decisions. Later explicit user instructions can clarify scope.
 
-### 1.1 Product Overview
-The **Caregiver Platform** is an enterprise multi-state healthcare and home health agency management platform operating across **Florida (FL)**, **Indiana (IN)**, and **Georgia (GA)**. It provides end-to-end digital operations for home care agencies, caregivers, and clients, replacing disparate manual paper processes with a unified, HIPAA-compliant digital operating system.
+## Purpose
 
-### 1.2 Core Vision & Value Proposition
-- **Multi-Tenant State Architecture**: A single unified web application serves all three states. State is data and an explicit authorization boundary—not fragmented codebases or separate deployments.
-- **Provider & Caregiver Enablement**: Streamlined digital onboarding with atomic registration, electronic signatures, license/credential tracking, and integrated in-service training certification.
-- **Client & Family Empowerment**: Self-service client intake, digital consent agreement execution, care plan and visit schedule transparency, and insurance prior authorization tracking.
-- **Agency Operational Excellence**: Real-time administrative triage, automated pre-assignment compliance verification, Medicaid prior authorization unit burndown, and regulatory audit readiness.
-- **Django REST Framework Monolith**: Built upon **Django REST Framework (DRF 3.18+)** on **Django 6.1+ (Python 3.14/3.12+)**, leveraging declarative serializers, viewsets, Django ORM, and deterministic schema migrations, providing robust enterprise stability and rapid development velocity.
-- **Django Built-in Auth & SimpleJWT**: Self-hosted identity powered by Django's native authentication framework (`django.contrib.auth`) paired with `djangorestframework-simplejwt` for RFC 7519 JSON Web Token issuance and rotation, completely eliminating external BaaS dependencies. Role and state authorization boundaries are enforced via DRF permission classes and scoped querysets.
-- **Built-in Django Media Storage & S3 Portability**: Utilizes Django's native media storage engine (`MEDIA_ROOT` / `FileSystemStorage`) paired with cryptographic HMAC signed tokens for secure direct uploads and streaming downloads, eliminating external cloud storage dependencies while remaining compatible with AWS S3 via optional configuration (`USE_S3=true`).
+One home-care agency website and portal system serving Florida, Indiana, and Georgia. Families and prospective caregivers learn about services and apply online. Caregivers and clients manage their paperwork and view their information. Agency staff review submissions, monitor requirements and send reminders.
 
----
+The product is an agency website, digital front desk and paperwork office. A public marketplace for comparing and directly hiring independent caregivers is not requested.
 
-## 2. Target Personas & User Classes
+## Delivery stage
 
-| Persona | Role Key | Description & Responsibilities |
-|---|---|---|
-| **Super Administrator** | `super_admin` | Executive leadership and technical operations. Has unrestricted global visibility across all operating jurisdictions (FL, IN, GA). Manages agency staff, reassigns state administrators, configures global compliance settings, and conducts cross-state operational audits. |
-| **State Administrator** | `administrator` | Regional clinical director or intake coordinator assigned to a single state (`state_id`). Manages local client referrals, approves admissions, reviews caregiver applications, tracks authorization units, and enforces credential compliance. |
-| **Caregiver / Aide** | `caregiver` | Certified Nursing Assistants (CNAs), Home Health Aides (HHAs), and personal care attendants. Completes onboarding applications, uploads credentials, monitors compliance deadlines, reviews assigned client care plans and schedules, and completes annual in-service training. |
-| **Client / Patient** | `client` | Home care recipient or authorized legal representative/family member. Submits intake medical packets, signs legally binding care agreements, reviews care directives and weekly visit schedules, and submits insurance approval documents. |
-| **Public Visitor** | `public` | Prospective clients, family members, or job seekers visiting regional landing pages. Browses state-specific services, downloadable forms, regulatory licensing disclosures, career openings, or submits referral inquiries. |
+Build basic functioning flows where the agency's actual process is still unknown. Save real records, enforce access, show accurate statuses, and support the requested action. Keep agency-specific rules provisional until confirmed. Do not treat this stage as full client acceptance or invent advanced workflow requirements.
 
----
+Track technical readiness, client process confirmation and deployment evidence separately, using the guide. This document does not certify current implementation status.
 
-## 3. Product Principles & Guardrails
+## 1. Website integration
 
-1. **State as an Authorization Boundary**: Regional rules, licensing, and compliance are data-driven. Administrators can only view and mutate records belonging to their assigned state.
-2. **Zero-Trust Input Validation**: Never trust client-supplied user IDs, roles, or state scopes. Authorization boundaries are resolved solely from verified cryptographic session tokens and server-side records.
-3. **Clinical Immutability & Auditability**: Critical actions (agreements, intake signatures, caregiver approvals, data modifications) produce immutable, append-only audit records with cryptographic SHA-256 hashes.
-4. **Fail-Closed Security**: Any administrative request lacking a verified state assignment or attempting cross-state manipulation fails immediately with HTTP 403 Forbidden.
-5. **Vendor-Neutral Cloud Portability**: Zero dependency on proprietary database triggers, Edge Functions, or proprietary authentication services. Compatible with standard PostgreSQL 16+ and S3-compatible storage.
+- Link the three state websites into one unified platform and allow easy switching between Florida, Indiana and Georgia.
+- Preserve state-specific services, forms and licensing information.
+- Obtain the existing website/domain details and approved content before claiming external integration or publishing agency claims.
+- Public switching does not change a signed-in user's private-record permissions.
 
----
+## 2. Caregiver portal
 
-## 4. Functional Requirements by Domain
+### Application and documents
 
-### 4.1 Public State CMS & Marketing Portals (`/states/*`)
-- **FR-CMS-01: Multi-State Landing Pages**: The platform must deliver tailored landing pages for `/florida`, `/indiana`, and `/georgia` displaying localized agency details, regional contact information, and state accreditation badges.
-- **FR-CMS-02: State Services Catalog**: Dynamic display of covered home care services (e.g., Personal Care, Companion Care, Respite Care, Skilled Nursing) filtered by state jurisdiction.
-- **FR-CMS-03: Downloadable Forms & Resources**: Public repository of state-specific forms (admission packets, HIPAA policies, emergency contacts) accessible without authentication.
-- **FR-CMS-04: Licensing & Regulatory Disclosures**: State-specific licensing declarations, Medicaid provider IDs, and statutory regulatory notices.
-- **FR-CMS-05: State Career Board**: Real-time listing of active job openings per state with direct linkage to the online caregiver application.
-- **FR-CMS-06: Public Referral & Inquiry Submission**: Prospective clients or referral sources (hospitals, case managers) can submit contact inquiries, automatically creating a triageable referral record (`client_referrals`) in status `new`.
+- Online, mobile-friendly caregiver application, downloadable employment packet and electronic signatures.
+- Secure upload of Driver's License, CPR Certificate, CNA/HHA Certificate, TB Test, Physical Exam, Background Check, Social Security Card, Auto Insurance, Driver's Insurance, Direct Deposit Form and Other onboarding documents.
+- Track expiration dates, remind before expiration by email/SMS, and show expired, expiring-soon and missing documents.
 
-### 4.2 Caregiver Onboarding & Portal (`/caregiver/*`)
-- **FR-CG-01: Public Applicant Registration & Atomic Intake**:
-  - Prospective caregivers complete a multi-step digital application capturing personal demographics, contact info, date of birth, SSN (last 4), and work history.
-  - Interactive digital canvas capturing electronic signatures.
-  - The submission executes atomically: provisions user credentials, sets up profile, and submits the application record in status `submitted`.
-  - Backend computes a SHA-256 integrity hash (`content_hash`) over the application contents.
-- **FR-CG-02: Document Upload & Management**:
-  - Secure upload of required credentials: Driver's License, CPR Certificate, CNA/HHA License, TB Test results, Physical Exam, Level 2 Background Check, Auto Insurance, and Direct Deposit authorizations.
-  - Captures mandatory document expiration dates where applicable.
-- **FR-CG-03: Credential Compliance Checklist**:
-  - Dashboard displaying compliance status against state-mandated requirements (Missing, Expiring Soon within 30 days, Expired, Approved, Pending Review).
-- **FR-CG-04: Application Lifecycle & Resubmission**:
-  - Caregiver can track application state: `submitted` -> `under_review` -> `approved` or `rejected`.
-  - If rejected, the caregiver sees the specific administrative `rejection_reason` and can amend data, re-sign, and resubmit (moving status to `under_review`).
-- **FR-CG-05: Client Roster & Clinical Care Plans**:
-  - Active caregivers can view only clients specifically assigned to them through active `caregiver_client_assignments`.
-  - Read-only access to assigned client care plans, daily living tasks (ADLs), emergency protocols, and scheduled weekly visit blocks.
-- **FR-CG-06: In-Service Training & Certification**:
-  - Caregivers access state-mandated continuing education courses (HIPAA, Infection Control, Alzheimer's/Dementia, Fall Prevention).
-  - Track course progress and enrollments (`not_started`, `in_progress`, `completed`).
-  - Upon completion, dynamically generate and download a formal, serialized PDF Certificate of Completion.
-- **FR-CG-07: In-App Notifications & Announcements**:
-  - Real-time and persistent alerts regarding expiring credentials, training deadlines, schedule adjustments, and regional company announcements.
+Listed upload categories are not automatically mandatory in every state. Preserve both insurance categories until clarified. Official packet, application questions, mandatory requirements, expiring types, warning timing and review policy need agency input.
 
-### 4.3 Client Intake & Portal (`/client/*`)
-- **FR-CL-01: Digital Intake Questionnaire**:
-  - Admitted or prospective clients complete clinical intake questionnaires detailing medical conditions, emergency contacts, physician details, and primary insurance/Medicaid numbers.
-  - Captures electronic signature consenting to home care evaluation.
-- **FR-CL-02: Electronic Legal Agreements**:
-  - Presentation and execution of mandatory statutory documents:
-    1. *Home Care Service Agreement*
-    2. *HIPAA Privacy Practices & Disclosure Notice*
-    3. *Client Rights and Responsibilities*
-  - Digital signature capture, signer full name, timestamp, and immutable SHA-256 integrity hashing stored in `client_agreements`.
-  - Agreement history versioning allowing re-signing upon annual policy revisions.
-- **FR-CL-03: Document Upload**:
-  - Secure upload of client-side documents: Insurance Cards, Medicaid Verification, Physician Orders (485 Form), and Existing Plans of Care.
-- **FR-CL-04: Prior Authorization Self-Service Upload**:
-  - Clients can upload payer prior authorization approval letters.
-  - Ingests into the authorization review pipeline with `source = 'client'` and status `pending`.
-- **FR-CL-05: Care Plan & Schedule Visibility**:
-  - Real-time transparency into approved care plan activities, primary nurse details, and assigned caregiver visit shifts.
+### Training and dashboard
 
-### 4.4 Administrator Portal (`/admin/*`)
-- **FR-AD-01: Real-Time State Dashboard**:
-  - High-level KPIs scoped to the administrator's state: Active Caregivers, Active Clients, Pending Applications, Expiring Authorizations (<30d), and Document Review Queue.
-- **FR-AD-02: Caregiver Recruitment Funnel**:
-  - Review queue for submitted caregiver applications.
-  - Detailed applicant inspection: e-signature verification, document preview, and background check verification.
-  - Approve applicant (transitions status to `approved`) or Reject with mandatory rejection rationale.
-- **FR-AD-03: Client Admission Lifecycle**:
-  - Formal client admission workflow managing status transitions: `pending` -> `approved` -> `active`, or `discharged` / `rejected`.
-  - Sets `service_start_date`, records admitting administrator (`admitted_by`), and captures admission notes.
-- **FR-AD-04: Pre-Assignment Compliance Gate**:
-  - Automated verification engine preventing caregiver-to-client staffing unless:
-    1. Caregiver status is `active`.
-    2. All mandatory state-specific documents are approved and unexpired.
-    3. Mandatory in-service training courses are completed and within validity.
-  - Blocked assignments return explicit missing credential diagnostics.
-- **FR-AD-05: Prior Authorization & HCPCS Burndown Management**:
-  - Management of payer authorizations specifying: HCPCS Billing Code (e.g., `T1019`), unit type (`15_min`, `hourly`, `visit`), total authorized units, weekly hour caps, and validity dates.
-  - Tracks unit consumption (`units_used`) and calculates real-time remaining unit balances.
-- **FR-AD-06: Referral Pipeline Management**:
-  - Triage incoming leads from public forms or hospital partners: `new` -> `contacted` -> `converted` -> `closed`.
-  - One-click referral conversion automatically provisions a new `clients` record linked via `converted_client_id`.
-- **FR-AD-07: Clinical Care Plans & Shift Scheduling**:
-  - Build structured care plans specifying primary nurse, emergency protocols, and granular Activities of Daily Living (ADLs).
-  - Build weekly recurring shift schedules with start/end times and caregiver assignments. Validates against weekly authorization hour limits.
-- **FR-AD-08: Document Compliance Review & Requirements Matrix**:
-  - Central review queue for all uploaded documents with approve/reject workflow.
-  - Manage state-specific document requirements matrix (`document_requirements`) for caregivers and clients.
-- **FR-AD-09: User Account & Jurisdiction Administration**:
-  - View all user accounts, filter by role/state, update account status (`active`, `suspended`).
-  - Super Admin authority to reassign administrator state scopes and change user role tiers.
+- Online access to required in-service courses, course completion tracking, downloadable certificates, progress dashboard, overdue reminders and administrator reporting.
+- Dashboard: profile, uploaded documents, onboarding status, completed trainings, pending requirements and company announcements.
+- Actual lessons, course requirements, completion evidence, due dates and certificate content need agency input. A basic progress/completion implementation must describe its limits; quizzes, video-only lessons and passing scores are not prescribed.
 
-### 4.5 Automated Daemons & Compliance Tasks
-- **FR-AUT-01: Credential Expiration Scanner**: Periodic 24-hour background task scanning caregiver documents; issues alert notifications 30 days and 7 days prior to expiration.
-- **FR-AUT-02: Training Due Date Scanner**: Periodic task identifying caregivers approaching annual in-service deadlines; triggers automated reminders.
-- **FR-AUT-03: Authorization Expiration Scanner**: Scans active prior authorizations expiring within 30 days or exceeding 90% unit burndown; notifies agency billing coordinators.
-- **FR-AUT-04: HIPAA 7-Year Data Retention & Legal Hold Engine**:
-  - Soft-deleted entities retain timestamps and deleting user IDs.
-  - Daily retention purge job deletes records soft-deleted over 7 years ago, provided `legal_hold = FALSE`.
-  - Administrative endpoints to toggle `legal_hold` protection and restore accidentally soft-deleted entities.
+## 3. Client portal
 
----
+- Online intake forms, downloadable admission packet, required document uploads and electronic signatures.
+- Secure upload of Insurance Cards, Medicaid Documents, Physician Orders, Plan of Care, Identification, Authorizations and Other required documents.
+- View active authorizations, receive approval notices and expiration reminders, upload new authorizations and track history.
+- Dashboard: care plan, service schedule, forms, uploaded documents, authorization status and agency notifications.
+- Secure messaging with the agency is optional.
 
-## 5. Non-Functional Requirements (NFR)
+Begin with intake submission, document/signature records, manually maintained authorization records and client views of actual saved plans/schedules. Obtain official forms, signer rules, approval meanings, required metadata and plan/schedule source from the agency. Staff review in this platform must not imply that the platform issues insurer approval.
 
-### 5.1 Performance & Latency
-- **NFR-PERF-01**: P95 API response time for transactional read endpoints must be `< 150 ms` under standard load.
-- **NFR-PERF-02**: Paginated listing endpoints must execute in `< 100 ms` utilizing partial composite database indexes (`(state_id, <sort_col>) WHERE deleted_at IS NULL`).
-- **NFR-PERF-03**: Database queries must use connection pooling and persistent connections (`CONN_MAX_AGE` or RDS Proxy / PgBouncer pooler).
+## 4. Administrator dashboard
 
-### 5.2 Security & HIPAA Compliance
-- **NFR-SEC-01**: Passwords hashed using Argon2id with recommended parameters (memory cost >= 64MB, time cost >= 3, parallelism >= 4).
-- **NFR-SEC-02**: Stateless Bearer JWT tokens signed using HMAC-SHA256 / RS256 with an expiration horizon of 60 minutes.
-- **NFR-SEC-03**: Full audit trail recording user identity, action, table name, record ID, whitelisted old/new JSON diffs, IP address, user agent, request ID, and entity state ID.
-- **NFR-SEC-04**: Documents stored in protected storage (`MEDIA_ROOT` locally or private S3 buckets in production). Access and upload operations are strictly gated via cryptographic time-stamped HMAC tokens or authenticated RBAC checks with bounded TTL (<= 1 hour).
-- **NFR-SEC-05**: TLS 1.3 encryption enforced on all network boundaries.
+### Caregiver management
 
-### 5.3 Reliability & Availability
-- **NFR-REL-01**: 99.9% uptime target during operational hours (8:00 AM - 8:00 PM EST).
-- **NFR-REL-02**: Automated database backups with Point-in-Time Recovery (PITR) with a Recovery Point Objective (RPO) < 15 minutes and Recovery Time Objective (RTO) < 2 hours.
+Review applications; approve/reject applicants; track onboarding; monitor document compliance and training completion; send reminders; generate reports.
 
----
+### Client management
 
-## 6. Success Metrics & Key Performance Indicators (KPIs)
+Review online referrals; approve admissions; monitor authorization status; track missing documents and service start dates.
 
-1. **Caregiver Time-to-Onboard**: Reduction in caregiver onboarding duration from submission to active status by >= 60% (target < 72 hours).
-2. **Credential Compliance Rate**: Maintain >= 98% compliance across all active caregivers with zero expired certifications on active shifts.
-3. **Authorization Claim Denials**: Reduction in Medicaid claim denials due to expired authorizations or unit overages to < 1%.
-4. **Intake Completion Rate**: Digital client intake completion rate >= 90% without agency staff phone intervention.
-5. **Audit Readiness**: 100% compliance report generation time < 5 seconds for state regulatory inspections.
+### Reports
+
+1. Caregiver compliance.
+2. Expiring credentials.
+3. In-service completion.
+4. Client authorizations.
+5. Referral sources.
+6. Website inquiries.
+
+Use real records and explicit provisional definitions while report columns, classification and approval stages are confirmed. The scope requests reports, not a particular export format, clinical staffing engine or automatic billing calculation.
+
+## 5. Automation
+
+- Email notifications and SMS reminders.
+- Expiring credential alerts, authorization expiration alerts and training reminders.
+- New referral notifications and document upload confirmations.
+- Electronic signature workflow.
+
+Implement real event/reminder paths with visible delivery status and testable adapters. Actual provider setup, senders, recipients, templates, timing and escalation require agency input. Test or console delivery does not establish live delivery; both email and SMS remain required.
+
+## 6. Security and compliance
+
+The scope requests a HIPAA-compliant client portal, secure document storage, role-based access, SSL encryption, audit logs and electronic signatures. Preserve existing security boundaries during basic implementation. See [SECURITY_REQUIREMENTS.md](SECURITY_REQUIREMENTS.md) for engineering safeguards and evidence limits. Documentation or local functionality alone does not establish operational compliance.
+
+## Scope boundaries
+
+No marketplace, direct family hiring, membership system, payroll, claims/EVV integration, automatic unit burndown, mandatory staffing gates, physician approval workflow, quiz score, report export, purge engine or legal-hold administration is established by the Scope of Work. Existing implementations can remain as supporting functionality; do not expand them or make scope acceptance depend on them without explicit direction.
+
+Exact reminder windows, training validity, token lifetimes, retention periods, uptime/latency objectives and numerical business targets are implementation choices or pending decisions, not requirements supplied by this scope. Technical documents must not create client policy by repetition.
+
+## Acceptance
+
+Map every requested item to a working user action and evidence. A feature can be basic working while agency policy or production evidence remains pending. Full acceptance requires the requested flows, approved agency content/process and relevant deployment evidence. Optional messaging is assessed only if elected. Historical audits are not a current completion checklist.

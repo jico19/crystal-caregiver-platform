@@ -1,5 +1,22 @@
 # API Contracts & Interface Specification — Caregiver Platform
 
+> **Scope authority (2026-11-05):** [Scope of work.md](Scope%20of%20work.md) is the sole product requirements baseline. Read [AGENT_BUILD_GUIDE.md](AGENT_BUILD_GUIDE.md) before using this reference. Build basic functioning flows while agency processes remain pending. Technical examples and existing features below do not establish client approval, scope completion, or additional product requirements.
+
+## Contract status and feature classification
+
+This is a technical reference containing earlier examples; verify routes, serializers and consumers before changing behavior. Actual routes use trailing slashes. Example payloads, lifecycle enums and document metadata do not define an agency-approved process. Fix contracts coherently rather than imposing undocumented business fields on basic uploads.
+
+| Sections | Relationship to scope |
+|---|---|
+| Authentication; public services/forms/licensing/contact; applications; intake/signatures; documents; training; administrator reviews and six reports | Support the requested flows; exact fields/defaults and review policy remain implementation choices or pending agency input |
+| Public career board; caregiver assigned-client views; administrator analytics and user management | Supporting/existing features, not independently required by the Scope of Work |
+| Client care-plan/schedule views | Explicitly required; staff editing/assignment routes are a possible basic data source, not authorization for a full clinical or staffing workflow |
+| Authorizations | Upload, active/history/status views, staff monitoring and notifications are required; HCPCS, units-used calculations, billing burndown and weekly staffing caps are not prescribed |
+| Legal hold, retention and restoration | Additional technical capabilities; do not implement or schedule purging solely because endpoints appear here |
+| Document requirements | Support missing/expiry tracking; agency confirms which categories are mandatory and expire |
+
+Reports require six real report views; exports are not specified. The compliance endpoint may support monitoring; it does not make automatic pre-assignment blocking a client requirement. Notification/email/SMS contracts still need to support all scope events even if this reference omits them. Secure agency messaging remains optional. No section here authorizes extra mandatory approval stages.
+
 ## 1. Global API Standards (Django REST Framework)
 
 - **Framework**: Django REST Framework (DRF 3.18+) on Django 6.1+ (Python 3.14/3.12+).

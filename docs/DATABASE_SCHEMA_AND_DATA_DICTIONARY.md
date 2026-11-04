@@ -1,5 +1,13 @@
 # Database Schema & Data Dictionary — Caregiver Platform
 
+> **Scope authority (2026-11-05):** [Scope of work.md](Scope%20of%20work.md) is the sole product requirements baseline. Read [AGENT_BUILD_GUIDE.md](AGENT_BUILD_GUIDE.md) before using this reference. Build basic functioning flows while agency processes remain pending. Technical examples and existing features below do not establish client approval, scope completion, or additional product requirements.
+
+## Schema reference status
+
+The SQL and dictionary below are historical design references, not an executable migration or proof of the installed schema. Current Django models and migrations determine stored fields and enums. Reconcile relevant documentation and frontend constants with those definitions; do not change production data merely to match this DDL.
+
+Authorization unit/billing columns, staffing structures and legal-hold/soft-delete fields may support existing code, but do not establish required agency workflows. The Scope of Work does not authorize automatic unit consumption, an assignment gate, or timed purging. Do not delete existing fields or controls because they are outside explicit scope. Exact document requirements, statuses, course validity and retention policy need agency confirmation; reference seeds are not that confirmation.
+
 ## 1. Schema Design Principles & PostgreSQL Standard
 
 This schema is designed for **PostgreSQL 16+** as an enterprise, self-contained relational database:

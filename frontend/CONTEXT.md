@@ -1,6 +1,8 @@
 # Caregiver Platform — Frontend Design & RBAC Context Guide
 
-> **Target Audience**: AI coding agents implementing features, refactoring pages, or auditing security in `Caregiver-v2`.
+> **Requirements authority (2026-11-05):** Read [the Scope of Work](../docs/Scope%20of%20work.md), [agent build guide](../docs/AGENT_BUILD_GUIDE.md) and [root instructions](../AGENTS.md) first. Only the Scope of Work establishes product requirements; this file is an implementation reference. Build basic functioning flows while agency processes remain pending. Existing navigation, components and statuses do not authorize added business workflows. Secure agency messaging is optional; email/SMS and all six reports remain required.
+>
+> **Target Audience**: AI coding agents working in this repository.
 > **Primary Rule**: Always preserve design system consistency and enforce fail-closed state-scoped Role-Based Access Control (RBAC).
 
 ---
@@ -8,8 +10,9 @@
 ## 1. Project Overview & Repository Map
 
 - **Frontend**: `frontend/` — React 19, Vite, Tailwind CSS v4 (`@tailwindcss/vite`), Radix UI, Lucide React, React Router v7, TanStack Query v5.
-- **Backend**: `backend/app/` — FastAPI, SQLAlchemy 2.0, Pydantic v2, PostgreSQL 16+, native JWT / Supabase GoTrue auth.
-- **Specifications & Schemas**: `docs/` — `SECURITY_REQUIREMENTS.md`, `PRD.md`, `SAD.md`, `API_CONTRACTS.md`, `DATABASE_SCHEMA_AND_DATA_DICTIONARY.md`.
+- **Backend**: `backend/apps/` — Django + DRF + SimpleJWT, Django ORM/migrations, SQLite locally or configured PostgreSQL. No FastAPI or Supabase auth.
+- **Specifications & Schemas**: `docs/` — supporting references subordinate to `Scope of work.md`. Verify current routes, serializers, models/migrations and consumers when examples conflict.
+- **HTTP transport**: `src/shared/services/api.js` wraps fetch, adds the bearer token and `X-Agency-State`, and handles refresh. Preserve `/auth/me/` and its compatibility fallback.
 
 ---
 
@@ -123,30 +126,13 @@ export default function ExamplePage() {
    - For `administrator`: State dropdown must be **disabled or hidden**, locked strictly to the administrator's assigned state (`user.state_id` / `stateLabelFor(user)`).
    - Never allow state administrators to send query params requesting records for another state.
 
-### 3.3 Backend RBAC & State Isolation Rules (`backend/app/core/dependencies.py`)
+### 3.3 Backend RBAC & State Isolation
 
-1. **Authoritative Context**: Never trust client-supplied user, role, or state in the request body. Resolve user from Bearer JWT and PostgreSQL record.
-2. **Fail-Closed on Unassigned Admin**:
-   - If `user.role == 'administrator'` and `user.state_id IS NULL`, raise `HTTP 403 Forbidden` (`detail: "Administrator is not assigned to a state"`).
-3. **Database Scope Injection**:
-   - `require_admin_scoped` returns `AdminScope`:
-     ```python
-     # super_admin: states=None, is_super=True
-     # administrator: states=[user.state_id], is_super=False
-     ```
-   - All queries filter:
-     ```python
-     if not scope.is_super:
-         query = query.filter(Entity.state_id.in_(scope.states))
-     ```
-4. **Cross-State Access Defense**:
-   - Call `assert_state_allowed(scope, entity.state_id)` on any resource access.
-   - Cross-state tampering results in immediate `HTTP 403 Forbidden`.
+Reuse `backend/apps/core/permissions.py` and existing scoped querysets. Resolve identity, role and state from authenticated server records, not caller-supplied ownership or headers. `IsStateScopedAdmin` rejects administrators with no assigned state and enforces matching state on objects. Apply ownership/assignment checks to direct requests as well as lists. Public state switching never authorizes private-record access. Do not introduce FastAPI dependency patterns or ad-hoc role checks.
 
 ### 3.4 Audit Logging & Document Integrity
-- Every state mutation and PHI view must append to `audit_logs` (immutable table).
-- Sensitive fields (passwords, JWTs, large raw signatures) are excluded via `AUDIT_WHITELIST`.
-- Legal agreements and applications store a SHA-256 `content_hash` along with electronic signature vectors for non-repudiation.
+- Follow [the security baseline](../docs/SECURITY_REQUIREMENTS.md) for protected files, audit events and signatures. Verify actual coverage; this document does not certify an immutable database or legal non-repudiation.
+- Exclude secrets and unnecessary sensitive payloads from logs. Bind signatures to the content/version actually presented and preserve prior evidence.
 
 ---
 
@@ -159,7 +145,7 @@ Follow this 5-step checklist for any frontend page or API endpoint:
    - Ensure role check uses `isAdmin(user)` or `isSuperAdmin(user)` from `roles.js`.
 2. **Enforce State Scope**:
    - If admin page has a state filter, ensure `administrator` cannot switch outside their assigned state.
-   - Backend endpoint uses `require_admin_scoped` and checks `assert_state_allowed`.
+   - Backend endpoint reuses Django permissions and scoped querysets, with object ownership/state checks.
 3. **Apply Shell & Containers**:
    - Wrap page content in `<PageContainer>`.
    - Provide `<PageHeader title="..." subtitle="..." actions={...} />`.

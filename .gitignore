@@ -61,7 +61,8 @@ Desktop.ini
 
 # Local plans directory for generated plan files.
 /plans
-/docs
+/docs/*
+!/docs/AGENT_BUILD_GUIDE.md
 
 # Local test login credentials requested for manual testing.
 /TEST_ACCOUNTS.md
