@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from django.db.models import Count, Q
+from django.db.models import Count, Q, OuterRef, Subquery
 from rest_framework import status, permissions, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -106,26 +106,30 @@ class AdminReportsView(APIView):
 
     def get(self, request):
         states = State.objects.filter(active=True)
-        if request.user.role.name == "administrator" and request.user.state_id:
+        if not IsSuperAdmin().has_permission(request, self):
             states = states.filter(id=request.user.state_id)
-
-        report = []
-        for s in states:
-            report.append({
-                "state_code": s.code,
-                "state_name": s.name,
-                "caregivers_count": Caregiver.objects.filter(state=s, deleted_at__isnull=True).count(),
-                "clients_count": Client.objects.filter(state=s, deleted_at__isnull=True).count(),
-                "open_referrals": ClientReferral.objects.filter(state=s, status="new", deleted_at__isnull=True).count(),
-                "active_authorizations": Authorization.objects.filter(state=s, status="active", deleted_at__isnull=True).count(),
-            })
-        return Response(report)
+        from .reports import build_operational_reports
+        return Response(build_operational_reports(states))
 
 class AdminCaregiverListView(ScopedStateQuerySetMixin, generics.ListAPIView):
     """GET /api/v1/admin/caregivers - Paginated roster."""
     permission_classes = [IsStateScopedAdmin]
     serializer_class = CaregiverProfileSerializer
     queryset = Caregiver.objects.filter(deleted_at__isnull=True).select_related("state", "id")
+
+    def get_queryset(self):
+        latest_application = CaregiverApplication.objects.filter(
+            caregiver_id=OuterRef("pk"), deleted_at__isnull=True,
+        ).order_by("-submitted_at", "-created_at")
+        queryset = super().get_queryset().annotate(
+            latest_application_status=Subquery(latest_application.values("status")[:1]),
+        )
+        if self.request.query_params.get("has_application") == "true":
+            queryset = queryset.filter(latest_application_status__isnull=False)
+        application_status = self.request.query_params.get("status")
+        if application_status and application_status != "all":
+            queryset = queryset.filter(latest_application_status=application_status)
+        return queryset
 
 class AdminCaregiverAnalyticsView(APIView):
     """GET /api/v1/admin/caregivers/analytics - Application funnel conversion counts."""
@@ -236,28 +240,15 @@ class AdminCaregiverComplianceView(APIView):
     permission_classes = [IsStateScopedAdmin]
 
     def get(self, request, caregiver_id):
-        cg = get_object_or_404(Caregiver, id=caregiver_id)
-        if request.user.role.name == "administrator" and cg.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        from apps.caregivers.services import caregiver_credential_status
 
-        reqs = DocumentRequirement.objects.filter(
-            state=cg.state,
-            for_role__in=["caregiver", "both"],
-            required=True
-        ).select_related("document_type")
-
-        approved_docs = Document.objects.filter(
-            owner_id=cg.id,
-            status="approved",
-            deleted_at__isnull=True,
-        ).values_list("document_type__name", flat=True)
-
-        missing = [r.document_type.name for r in reqs if r.document_type.name not in approved_docs]
+        cg = get_object_or_404(Caregiver, id=caregiver_id, deleted_at__isnull=True)
+        self.check_object_permissions(request, cg)
+        result = caregiver_credential_status(cg)
         return Response({
             "caregiver_id": str(cg.id),
-            "compliant": len(missing) == 0,
-            "missing_requirements": missing,
-            "approved_credentials": list(approved_docs),
+            **result,
+            "approved_credentials": result["approved"] + result["expiring_soon"],
         })
 
 class AdminCaregiverAssignmentsView(APIView):

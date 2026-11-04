@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from apps.core.models import State
+from apps.compliance.audit import record_audit_log
 from .models import WebsiteContent, Service, Form, LicensingInfo, JobPosting
 from .serializers import (
     StateSerializer,
@@ -34,7 +35,7 @@ class StateDetailView(APIView):
 
     def get(self, request, state):
         state_obj = get_state_by_param(state)
-        contents = WebsiteContent.objects.filter(state=state_obj, deleted_at__isnull=True)
+        contents = WebsiteContent.objects.filter(state=state_obj, deleted_at__isnull=True).exclude(section_key="public_site_draft")
         return Response({
             "state": StateSerializer(state_obj).data,
             "content": WebsiteContentSerializer(contents, many=True).data,
@@ -96,6 +97,11 @@ class StateContactView(APIView):
             referral_source=data.get("referral_source", "Website"),
             notes=data.get("notes", ""),
             status="new",
+        )
+        record_audit_log(
+            action="CREATE_WEBSITE_INQUIRY", table_name="client_referrals",
+            record_id=referral.pk, request=request, entity_state=state_obj,
+            new_values={"status": referral.status},
         )
         return Response(
             {"referral_id": str(referral.id), "status": referral.status},

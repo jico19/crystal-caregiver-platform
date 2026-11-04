@@ -59,6 +59,7 @@ const AdminSettingsPage = lazy(() => import('../features/admin/pages/SettingsPag
 const AdminAuditLogsPage = lazy(() => import('../features/admin/pages/AuditLogsPage'));
 const AdminAnnouncementsPage = lazy(() => import('../features/admin/pages/AnnouncementsPage'));
 const AdminNotificationsPage = lazy(() => import('../features/admin/pages/NotificationsPage'));
+const WebsiteContentPage = lazy(() => import('../features/admin/pages/WebsiteContentPage'));
 
 function CaregiverApplicationRoute() {
   const { user, loading } = useAuth();
@@ -147,9 +148,10 @@ export default function AppRoutes() {
           <Route path="training" element={<AdminTrainingPage />} />
           <Route path="authorizations" element={<AdminAuthorizationsPage />} />
           <Route path="referrals" element={<AdminReferralsPage />} />
-          <Route path="reports" element={<SuperAdminOnlyRoute><AdminReportsPage /></SuperAdminOnlyRoute>} />
+          <Route path="reports" element={<AdminReportsPage />} />
           <Route path="users" element={<SuperAdminOnlyRoute><AdminUsersPage /></SuperAdminOnlyRoute>} />
           <Route path="settings" element={<SuperAdminOnlyRoute><AdminSettingsPage /></SuperAdminOnlyRoute>} />
+          <Route path="website" element={<SuperAdminOnlyRoute><WebsiteContentPage /></SuperAdminOnlyRoute>} />
           <Route path="audit-logs" element={<SuperAdminOnlyRoute><AdminAuditLogsPage /></SuperAdminOnlyRoute>} />
           <Route path="announcements" element={<AdminAnnouncementsPage />} />
           <Route path="notifications" element={<AdminNotificationsPage />} />

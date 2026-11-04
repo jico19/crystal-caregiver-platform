@@ -39,7 +39,7 @@ export default function CaregiverClientSchedulePage() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            Unable to load schedule: {error.message || 'You may not be assigned to this client.'}
+            Unable to load schedule: {error}
           </AlertDescription>
         </Alert>
         <Button variant="outline" size="sm" asChild className="gap-1.5 h-8 text-xs border-slate-200 text-slate-700 hover:bg-slate-50">
@@ -51,7 +51,7 @@ export default function CaregiverClientSchedulePage() {
     );
   }
 
-  const schedule = data?.schedule || [];
+  const schedule = Array.isArray(data) ? data : [];
   const client = data?.client;
 
   return (

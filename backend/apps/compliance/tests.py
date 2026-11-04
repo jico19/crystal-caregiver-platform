@@ -160,3 +160,29 @@ class ComplianceTests(BasePlatformTestCase):
         self.assertEqual(in_resp.status_code, status.HTTP_200_OK)
         in_items = in_resp.json().get("results", in_resp.json())
         self.assertFalse(any(item["id"] == str(log.id) for item in in_items))
+
+    def test_audit_records_cannot_be_changed_or_deleted(self):
+        from apps.compliance.models import AuditLog
+        log = AuditLog.objects.create(action="ORIGINAL", table_name="clients", record_id="record")
+        log.action = "EDITED"
+        with self.assertRaises(ValueError):
+            log.save()
+        with self.assertRaises(ValueError):
+            AuditLog.objects.filter(pk=log.pk).update(action="EDITED")
+        with self.assertRaises(ValueError):
+            AuditLog.objects.filter(pk=log.pk).delete()
+        with self.assertRaises(ValueError):
+            log.delete()
+        log.refresh_from_db()
+        self.assertEqual(log.action, "ORIGINAL")
+
+    def test_audit_admin_has_no_change_or_delete_actions(self):
+        from django.contrib import admin
+        from rest_framework.test import APIRequestFactory
+        from apps.compliance.models import AuditLog
+        request = APIRequestFactory().get("/")
+        request.user = self.super_user
+        registered = admin.site._registry[AuditLog]
+        self.assertFalse(registered.has_change_permission(request))
+        self.assertFalse(registered.has_delete_permission(request))
+        self.assertFalse(registered.has_add_permission(request))

@@ -107,9 +107,7 @@ function ClientIntakeContent({
   const [phone, setPhone] = useState(profile?.phone || '');
   const [address, setAddress] = useState(profile?.address || '');
   const [medicaidNumber, setMedicaidNumber] = useState(profile?.medicaid_number || '');
-  const [stateId, setStateId] = useState(
-    profile?.state_id ? String(profile.state_id) : user?.state_id ? String(user.state_id) : '1'
-  );
+  const stateId = String(profile?.state_id || user?.state_id || 1);
 
   // E-signature
   const [signatureData, setSignatureData] = useState(null);
@@ -146,7 +144,7 @@ function ClientIntakeContent({
       return;
     }
 
-    const phoneCheck = validatePhone(phone);
+    const phoneCheck = phone.trim() ? validatePhone(phone) : { valid: true, value: '' };
     if (!phoneCheck.valid) {
       setErrorMsg(phoneCheck.error);
       return;
@@ -165,15 +163,15 @@ function ClientIntakeContent({
       last_name: lastName.trim(),
       date_of_birth: dateOfBirth || null,
       phone: phoneCheck.value,
-      address: address.trim() || null,
-      medicaid_number: medicaidNumber.trim() || null,
+      address: address.trim(),
+      medicaid_number: medicaidNumber.trim(),
       signature_data: signatureData,
       signed_name: signedName.trim(),
     };
 
     try {
       await api.post('/clients/intake', payload, token);
-      setSuccessMsg('Your admission intake has been saved and signed successfully. Your care coordinator has been notified.');
+      setSuccessMsg('Your admission intake has been saved and signed successfully.');
       setIsEditing(false);
       await onRefetch();
     } catch (err) {
@@ -481,7 +479,7 @@ function ClientIntakeContent({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField label="Service State Jurisdiction" htmlFor="client-state" required>
-                    <Select value={stateId} onValueChange={(val) => setStateId(val)}>
+                    <Select value={stateId} disabled>
                       <SelectTrigger id="client-state" className="h-9 text-xs">
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>

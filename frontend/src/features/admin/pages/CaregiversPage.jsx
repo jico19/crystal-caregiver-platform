@@ -61,7 +61,9 @@ export default function CaregiversPage() {
   } = usePaginatedFetch({
     url: '/admin/caregivers',
     token,
-    params: statusFilter === 'all' ? {} : { status: statusFilter },
+    params: viewMode === 'applicants'
+      ? { has_application: true, ...(statusFilter === 'all' ? {} : { status: statusFilter }) }
+      : {},
     listKey: 'applications',
   });
 
@@ -70,14 +72,14 @@ export default function CaregiversPage() {
       <PageHeader
         title="Staffing & Caregiver Pool"
         subtitle="Oversight of active caregiver roster, credential compliance, and onboarding applicant review."
-        badge={`${analytics.total_caregivers} Active Caregivers`}
+        badge={`${analytics.total_caregivers} Caregivers`}
         badgeVariant="primary"
         actions={
           <div className="flex items-center gap-2">
             <Tabs value={viewMode} onValueChange={setViewMode}>
               <TabsList className="h-8">
                 <TabsTrigger value="pool" className="text-xs flex items-center gap-1.5 h-7 px-3">
-                  <Users size={13} /> Active Staff Pool
+                  <Users size={13} /> Caregiver Roster
                 </TabsTrigger>
                 <TabsTrigger value="applicants" className="text-xs flex items-center gap-1.5 h-7 px-3">
                   <FileText size={13} /> Applicant Queue ({analytics.pending_applications})
@@ -102,7 +104,7 @@ export default function CaregiversPage() {
             <CardTitle className="text-2xl font-bold text-slate-900">{analytics.total_caregivers ?? 0}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-1 text-xs text-slate-400">
-            Active pool in roster
+            Registered caregivers
           </CardContent>
         </Card>
 
@@ -128,13 +130,13 @@ export default function CaregiversPage() {
 
         <Card className="border-slate-200">
           <CardHeader className="p-4 pb-1">
-            <CardDescription className="text-xs font-medium text-slate-500">Ready for Service</CardDescription>
+            <CardDescription className="text-xs font-medium text-slate-500">Approved Applications</CardDescription>
             <CardTitle className="text-2xl font-bold text-emerald-600">
-              {Math.max(0, (Number(analytics.total_caregivers) || 0) - (Number(analytics.pending_applications) || 0))}
+              {analytics.approved ?? 0}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-1 text-xs text-slate-400">
-            Compliance cleared
+            Application review complete
           </CardContent>
         </Card>
       </div>
@@ -161,7 +163,7 @@ export default function CaregiversPage() {
               <div className="p-6">
                 <EmptyState
                   title="No caregivers found"
-                  description="No active caregivers currently registered in your jurisdiction."
+                  description="No caregivers are currently registered in your jurisdiction."
                 />
               </div>
             ) : (
@@ -184,8 +186,8 @@ export default function CaregiversPage() {
                     const address = caregiver.address ?? app.address;
                     const phone = caregiver.phone ?? app.phone;
                     const stateCode = app.states?.code ?? app.state_code ?? app.state?.code ?? '—';
-                    const compliance = app.compliance || { is_compliant: true, blocking_reasons: [] };
-                    const isCompliant = compliance.is_compliant !== false;
+                    const compliance = app.compliance;
+                    const isCompliant = compliance?.is_compliant;
                     const applicationId = app.application_id;
 
                     return (
@@ -194,7 +196,7 @@ export default function CaregiversPage() {
                           <div className="font-semibold text-slate-900 text-xs">
                             {firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || 'Caregiver'}
                           </div>
-                          <div className="text-[11px] text-slate-400">{address || 'Address on file'}</div>
+                          <div className="text-[11px] text-slate-400">{address || 'No address on file'}</div>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="font-medium text-xs text-slate-600">
@@ -205,9 +207,11 @@ export default function CaregiversPage() {
                           {phone || 'No phone'}
                         </TableCell>
                         <TableCell>
-                          {isCompliant ? (
+                          {isCompliant === undefined ? (
+                            <Badge variant="outline" className="text-[11px] text-slate-600">Not checked</Badge>
+                          ) : isCompliant ? (
                             <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[11px]">
-                              ✓ Cleared for Care
+                              ✓ Credentials current
                             </Badge>
                           ) : (
                             <Badge
@@ -220,7 +224,7 @@ export default function CaregiversPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <StatusBadge status={app.status || 'active'} size="xs" />
+                          <StatusBadge status={app.application_status || 'not_started'} size="xs" />
                         </TableCell>
                         <TableCell className="text-right">
                           {applicationId ? (
@@ -303,7 +307,7 @@ export default function CaregiversPage() {
                 </TableHeader>
                 <TableBody>
                   {applications.map((app) => {
-                    const caregiver = app.caregivers || {};
+                    const caregiver = app.caregivers || app;
 
                     return (
                       <TableRow key={app.id} className="border-slate-100 hover:bg-slate-50">
@@ -311,23 +315,23 @@ export default function CaregiversPage() {
                           {caregiver.first_name ? `${caregiver.first_name} ${caregiver.last_name}` : 'Applicant'}
                         </TableCell>
                         <TableCell className="text-slate-600 text-xs">
-                          {app.states?.code || 'FL'}
+                          {app.state_code || app.states?.code || '—'}
                         </TableCell>
                         <TableCell className="text-slate-600 text-xs">{caregiver.phone || '—'}</TableCell>
                         <TableCell className="text-slate-500 text-xs">
-                          {app.submitted_at || app.created_at
-                            ? new Date(app.submitted_at || app.created_at).toLocaleDateString()
+                          {app.application_submitted_at
+                            ? new Date(app.application_submitted_at).toLocaleDateString()
                             : '—'}
                         </TableCell>
                         <TableCell>
-                          <StatusBadge status={app.status} size="xs" />
+                          <StatusBadge status={app.application_status || 'not_started'} size="xs" />
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button size="sm" asChild className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
-                            <Link to={`/admin/caregivers/${app.id}`}>
+                          {app.application_id && <Button size="sm" asChild className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+                            <Link to={`/admin/caregivers/${app.application_id}`}>
                               Review <ArrowRight size={11} className="ml-1" />
                             </Link>
-                          </Button>
+                          </Button>}
                         </TableCell>
                       </TableRow>
                     );
@@ -352,7 +356,7 @@ export default function CaregiversPage() {
       )}
 
       {/* Staff by Branch Breakdown Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {analytics.by_state && <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 border-slate-200 flex items-center justify-between">
           <div>
             <div className="text-xs font-semibold text-slate-500">Florida Branch (FL)</div>
@@ -382,7 +386,7 @@ export default function CaregiversPage() {
           </div>
           <Badge variant="secondary">Active</Badge>
         </Card>
-      </div>
+      </div>}
     </PageContainer>
   );
 }

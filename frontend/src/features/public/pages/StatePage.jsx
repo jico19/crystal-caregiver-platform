@@ -1,62 +1,25 @@
 import { useParams, Link } from 'react-router-dom';
-import useFetch from '../../../shared/hooks/useFetch';
-import LoadingState from '../../../shared/components/common/LoadingState';
+import usePublishedSite from '../hooks/usePublishedSite';
 import PageContainer from '../../../shared/components/common/PageContainer';
 import PageHeader from '../../../shared/components/common/PageHeader';
 import EmptyState from '../../../shared/components/common/EmptyState';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../../components/ui/card';
 import { Button } from '../../../components/ui/button';
 import { Badge } from '../../../components/ui/badge';
-import { Alert, AlertTitle, AlertDescription } from '../../../components/ui/alert';
 
 export default function StatePage() {
   const { state } = useParams();
-  const { data: stateInfo, isLoading: stateLoading, error: stateError } = useFetch(`/states/${state}`);
-  const { data: servicesRes, isLoading: servicesLoading, error: servicesError } = useFetch(`/states/${state}/services`, { defaultData: [] });
+  const { site } = usePublishedSite();
+  const services = site.services;
 
-  const services = servicesRes?.services || [];
-  const loading = stateLoading || servicesLoading;
-  const error = stateError || servicesError || null;
-
-  if (loading) {
-    const formattedState = state ? state.charAt(0).toUpperCase() + state.slice(1) : 'State';
-    return (
-      <LoadingState
-        title={`Loading ${formattedState} Healthcare Office...`}
-        subtitle={`Querying database for ${formattedState} programs & credentials...`}
-        variant="page"
-      />
-    );
-  }
-
-  if (error) {
-    return (
-      <PageContainer>
-        <div className="max-w-lg mx-auto my-8">
-          <Alert variant="destructive">
-            <AlertTitle className="text-sm font-semibold">Location Not Found</AlertTitle>
-            <AlertDescription className="text-xs mt-1">
-              <p>{error}</p>
-              <div className="mt-3">
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/florida">Go to Florida Office</Link>
-                </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
-        </div>
-      </PageContainer>
-    );
-  }
-
-  const displayName = stateInfo?.name || state.charAt(0).toUpperCase() + state.slice(1);
-  const code = stateInfo?.code || '';
+  const displayName = site.state.name;
+  const code = site.state.code;
 
   return (
     <PageContainer>
       <PageHeader
-        title={`Healthcare & Home Care in ${displayName}`}
-        subtitle={`Providing compassionate, licensed home care and specialized health assistance tailored to ${displayName} regulatory standards and Medicaid programs.`}
+        title={site.overview.title}
+        subtitle={site.overview.description}
         badge={code ? <Badge variant="secondary" className="font-semibold">{code} Branch</Badge> : null}
       />
 
@@ -121,7 +84,7 @@ export default function StatePage() {
             {services.map((svc) => (
               <Card key={svc.id} className="border-slate-200 shadow-xs">
                 <CardHeader className="p-4 pb-2">
-                  <CardTitle className="text-sm font-semibold text-slate-900">{svc.name}</CardTitle>
+                  <CardTitle className="text-sm font-semibold text-slate-900">{svc.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                   <p className="text-xs text-slate-600 leading-normal m-0">

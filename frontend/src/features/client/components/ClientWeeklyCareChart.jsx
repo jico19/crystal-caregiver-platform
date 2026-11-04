@@ -7,6 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { weeklyCareHours } from '../lib/careMetrics';
 
 const chartConfig = {
   hours: {
@@ -15,40 +16,8 @@ const chartConfig = {
   },
 };
 
-const DEFAULT_SCHEDULE_DAYS = [
-  { day: 'Mon', hours: 4 },
-  { day: 'Tue', hours: 6 },
-  { day: 'Wed', hours: 4 },
-  { day: 'Thu', hours: 6 },
-  { day: 'Fri', hours: 4 },
-  { day: 'Sat', hours: 0 },
-  { day: 'Sun', hours: 0 },
-];
-
 export default function ClientWeeklyCareChart({ schedule = [] }) {
-  const chartData = useMemo(() => {
-    if (!schedule || schedule.length === 0) {
-      return DEFAULT_SCHEDULE_DAYS;
-    }
-
-    // Days map
-    const daysOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const map = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
-
-    schedule.forEach((item) => {
-      const dayKey = item.day ? item.day.slice(0, 3) : null;
-      if (dayKey && map[dayKey] !== undefined) {
-        // approximate shift length or default 4 hours if not parsed
-        const shiftDuration = item.hours ? Number(item.hours) : 4;
-        map[dayKey] += shiftDuration;
-      }
-    });
-
-    return daysOrder.map((d) => ({
-      day: d,
-      hours: map[d],
-    }));
-  }, [schedule]);
+  const chartData = useMemo(() => weeklyCareHours(schedule || []), [schedule]);
 
   const totalWeeklyHours = chartData.reduce((acc, c) => acc + c.hours, 0);
 
@@ -69,7 +38,7 @@ export default function ClientWeeklyCareChart({ schedule = [] }) {
         </span>
       </CardHeader>
       <CardContent className="p-4 pt-4">
-        <ChartContainer config={chartConfig} className="h-56 w-full">
+        {schedule.length === 0 ? <p className="text-xs text-slate-500 py-8 text-center">No care visits have been scheduled.</p> : <ChartContainer config={chartConfig} className="h-56 w-full">
           <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-slate-200" />
             <XAxis
@@ -84,7 +53,7 @@ export default function ClientWeeklyCareChart({ schedule = [] }) {
               axisLine={false}
               tickMargin={8}
               className="text-slate-500 text-xs"
-              domain={[0, 8]}
+              domain={[0, 'auto']}
             />
             <ChartTooltip
               content={
@@ -102,7 +71,7 @@ export default function ClientWeeklyCareChart({ schedule = [] }) {
               radius={[4, 4, 0, 0]}
             />
           </BarChart>
-        </ChartContainer>
+        </ChartContainer>}
       </CardContent>
     </Card>
   );

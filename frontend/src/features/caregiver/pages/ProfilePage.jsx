@@ -3,6 +3,7 @@ import { User, Save, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../../shared/hooks/useAuth';
 import useFetch from '../../../shared/hooks/useFetch';
 import { api } from '../../../shared/services/api';
+import { queryClient } from '../../../shared/lib/queryClient';
 import { validateSsnLast4, validatePhone } from '../../../shared/utils/validation';
 import PageContainer from '../../../shared/components/common/PageContainer';
 import PageHeader from '../../../shared/components/common/PageHeader';
@@ -24,7 +25,6 @@ export default function ProfilePage() {
   const { token, user } = useAuth();
   const { data, isLoading: loading, error: fetchError } = useFetch('/caregivers/me', {
     enabled: !!token,
-    defaultData: { profile: null },
   });
 
   if (loading) {
@@ -39,7 +39,8 @@ export default function ProfilePage() {
 
   return (
     <CaregiverProfileForm
-      initialProfile={data?.profile}
+      key={data?.id || user?.id}
+      initialProfile={data}
       token={token}
       user={user}
       fetchError={fetchError}
@@ -58,7 +59,7 @@ function CaregiverProfileForm({ initialProfile, token, user, fetchError }) {
   const [address, setAddress] = useState(initialProfile?.address || '');
   const [dateOfBirth, setDateOfBirth] = useState(initialProfile?.date_of_birth || '');
   const [ssnLast4, setSsnLast4] = useState(initialProfile?.ssn_last4 || '');
-  const [stateId, setStateId] = useState(initialProfile?.state_id ? String(initialProfile.state_id) : (user?.state_id ? String(user.state_id) : '1'));
+  const stateId = String(initialProfile?.state ?? initialProfile?.state_id ?? user?.state_id ?? '');
 
   async function handleSave(e) {
     e.preventDefault();
@@ -85,17 +86,17 @@ function CaregiverProfileForm({ initialProfile, token, user, fetchError }) {
     setSaving(true);
 
     const payload = {
-      state_id: parseInt(stateId, 10),
       first_name: firstName.trim(),
       last_name: lastName.trim(),
-      phone: phoneCheck.value,
-      address: address.trim() || null,
+      phone: phoneCheck.value || '',
+      address: address.trim(),
       date_of_birth: dateOfBirth || null,
-      ssn_last4: ssnCheck.value,
+      ssn_last4: ssnCheck.value || '',
     };
 
     try {
       await api.patch('/caregivers/me/profile', payload, token);
+      await queryClient.invalidateQueries({ queryKey: ['/caregivers/me'] });
       setSuccessMsg('Your profile has been updated successfully.');
     } catch (err) {
       setErrorMsg(err.detail || 'Failed to update profile. Please verify your information.');
@@ -162,7 +163,7 @@ function CaregiverProfileForm({ initialProfile, token, user, fetchError }) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField label="Licensing State Branch" id="state" required>
-                <Select value={stateId} onValueChange={(val) => setStateId(val)}>
+                <Select value={stateId} disabled>
                   <SelectTrigger id="state" className="h-9 text-xs">
                     <SelectValue placeholder="Select state" />
                   </SelectTrigger>
@@ -224,7 +225,7 @@ function CaregiverProfileForm({ initialProfile, token, user, fetchError }) {
             <div className="pt-2">
               <Button
                 type="submit"
-                disabled={saving}
+                disabled={saving || !initialProfile || Boolean(fetchError)}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white h-9 text-xs gap-1.5"
               >
                 {saving ? (

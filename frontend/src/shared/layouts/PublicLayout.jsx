@@ -1,4 +1,5 @@
-import { Outlet, Link, useParams } from 'react-router-dom';
+import { Outlet, Link, Navigate, useParams } from 'react-router-dom';
+import { VALID_STATES } from '../constants/states';
 import StateSwitcher from '../../features/public/components/StateSwitcher';
 import {
   DropdownMenu,
@@ -10,6 +11,7 @@ import { Button } from '../../components/ui/button';
 
 export default function PublicLayout() {
   const { state = 'florida' } = useParams();
+  if (!VALID_STATES.includes(state)) return <Navigate to="/florida" replace />;
 
   const navLinks = [
     { label: 'Services', to: `/${state}/services` },

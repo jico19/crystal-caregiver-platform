@@ -160,18 +160,18 @@ export default function DocumentsPage() {
                   return (
                     <TableRow key={doc.id} className="border-slate-100 hover:bg-slate-50">
                       <TableCell className="font-semibold text-slate-900 text-xs">
-                        {doc.document_types?.name || 'Document'}
+                        {doc.document_type_name || 'Document'}
                       </TableCell>
                       <TableCell className="text-slate-600 text-xs">
-                        {doc.users?.email || doc.owner_id?.slice(0, 8)}
+                        {doc.owner_email || doc.owner_id?.slice(0, 8)}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="font-medium text-xs text-slate-600">
-                          {doc.states?.code || 'FL'}
+                          {doc.state_code || 'Unknown'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-slate-600 text-xs">
-                        {new Date(doc.uploaded_at).toLocaleDateString()}
+                        {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : 'Unknown'}
                       </TableCell>
                       <TableCell className="text-slate-600 text-xs">
                         {doc.expiration_date || 'None'}

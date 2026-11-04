@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '../../../shared/services/api';
+import { queryClient } from '../../../shared/lib/queryClient';
 import { STATUS_META } from '../../../shared/utils/caregiverStatus';
 import { saveDraft, loadDraft, clearDraft } from '../../../shared/utils/draftStorage';
 import {
@@ -53,7 +54,7 @@ export function useCaregiverApplication({ token, user, login }) {
   function buildServerValues(profile, app) {
     return {
       ...applicationDefaultValues,
-      state_id: profile?.state_id ?? stateIdFallback(),
+      state_id: profile?.state ?? profile?.state_id ?? stateIdFallback(),
       first_name: profile?.first_name || '',
       last_name: profile?.last_name || '',
       phone: profile?.phone || '',
@@ -66,7 +67,12 @@ export function useCaregiverApplication({ token, user, login }) {
   }
 
   function buildDraftValues(draft) {
-    if (!draft) return applicationDefaultValues;
+    if (!draft) return {
+      ...applicationDefaultValues,
+      state_id: stateIdFallback(),
+      notes: initialJob ? `Applying for: ${initialJob}` : '',
+      email: user?.email || '',
+    };
     return {
       ...applicationDefaultValues,
       first_name: draft.firstName ?? '',
@@ -85,6 +91,7 @@ export function useCaregiverApplication({ token, user, login }) {
     let isMounted = true;
 
     async function hydrate() {
+      setErrorMsg('');
       if (!token) {
         if (!isMounted) return;
         reset(buildDraftValues(loadDraft('anon')));
@@ -94,17 +101,24 @@ export function useCaregiverApplication({ token, user, login }) {
 
       try {
         const [appRes, profRes] = await Promise.all([
-          api.get('/caregivers/me/application', token),
-          api.get('/caregivers/me', token),
+          api.get('/caregivers/me/application', token).catch((error) => {
+            if (error.status === 404) return null;
+            throw error;
+          }),
+          api.get('/caregivers/me', token).catch((error) => {
+            if (error.status === 404) return null;
+            throw error;
+          }),
         ]);
         if (!isMounted) return;
 
         const serverApp = appRes?.application || appRes;
         if (serverApp?.id) setApplication(serverApp);
 
-        const hasServerData = Boolean(serverApp?.id) || Boolean(profRes?.profile);
+        const serverProfile = profRes?.profile || profRes;
+        const hasServerData = Boolean(serverApp?.id) || Boolean(serverProfile?.id);
         if (hasServerData) {
-          reset(buildServerValues(profRes?.profile, serverApp));
+          reset(buildServerValues(serverProfile, serverApp));
         } else {
           reset(buildDraftValues(loadDraft(draftIdentity)));
         }
@@ -189,16 +203,18 @@ export function useCaregiverApplication({ token, user, login }) {
       try {
         if (application?.status === 'rejected') {
           const res = await api.post('/caregivers/applications/resubmit', payload, token);
-          setApplication(res.application || res);
+          setApplication(res.application || { id: res.application_id, status: res.status });
           setSuccessMode('resubmit');
           setSuccessMsg('Your application has been resubmitted and is back under review.');
         } else {
           const res = await api.post('/caregivers/applications/resubmit', payload, token);
-          setApplication(res.application || res);
+          setApplication(res.application || { id: res.application_id, status: res.status });
           setSuccessMode('new');
           setSuccessMsg('Your application has been successfully updated.');
         }
         clearDraft();
+        queryClient.invalidateQueries({ queryKey: ['/caregivers/me'] });
+        queryClient.invalidateQueries({ queryKey: ['/caregivers/me/application'] });
         setDraftSavedAt(null);
         setIsSuccessSubmitted(true);
       } catch (err) {
@@ -211,18 +227,18 @@ export function useCaregiverApplication({ token, user, login }) {
         state_id: values.state_id,
         first_name: values.first_name,
         last_name: values.last_name,
-        phone: payload.phone,
-        address: payload.address,
+        phone: payload.phone || '',
+        address: payload.address || '',
         date_of_birth: payload.date_of_birth,
-        ssn_last4: payload.ssn_last4,
-        notes: payload.notes,
+        ssn_last4: payload.ssn_last4 || '',
+        notes: payload.notes || '',
         signature_data: payload.signature_data,
         signed_name: payload.signed_name,
       };
 
       try {
         const res = await api.post('/caregivers/apply-public', publicPayload);
-        setApplication(res.application);
+        setApplication(res.application || { id: res.application_id, status: res.status });
         setSuccessMode('new');
         setSuccessMsg('Your application and portal account have been created successfully!');
         clearDraft();

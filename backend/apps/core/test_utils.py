@@ -2,6 +2,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from apps.core.models import State, Role
 
 User = get_user_model()
@@ -12,6 +13,11 @@ class BasePlatformTestCase(APITestCase):
     Ensures seed data (states, roles, document types, courses, default superadmin)
     is available, with helper methods for token authentication.
     """
+
+    def setUp(self):
+        super().setUp()
+        # Authentication attempts in one test must not throttle another test.
+        cache.clear()
 
     @classmethod
     def setUpTestData(cls):

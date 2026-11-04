@@ -59,6 +59,7 @@ export default function AdminLayout() {
       items: [
         { label: 'User & Staff Access', to: '/admin/users', icon: 'users' },
         { label: 'Compliance Settings', to: '/admin/settings', icon: 'settings' },
+        { label: 'Website Content', to: '/admin/website', icon: 'settings' },
         { label: 'Security Audit Logs', to: '/admin/audit-logs', icon: 'audit' },
         { label: 'Announcements', to: '/admin/announcements', icon: 'announcements' },
         { label: 'Notifications', to: '/admin/notifications', icon: 'notifications', hasBadge: true, badgeCount: unreadCount },

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../../../shared/services/api';
+import usePublishedSite from '../hooks/usePublishedSite';
 import { validateEmail, validatePhone } from '../../../shared/utils/validation';
 import PageContainer from '../../../shared/components/common/PageContainer';
 import PageHeader from '../../../shared/components/common/PageHeader';
@@ -21,6 +22,8 @@ import { Alert, AlertDescription } from '../../../components/ui/alert';
 export default function ContactPage() {
   const { state = 'florida' } = useParams();
   const stateName = state.charAt(0).toUpperCase() + state.slice(1);
+  const { site } = usePublishedSite();
+  const contact = site.contact;
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -68,10 +71,10 @@ export default function ContactPage() {
     const payload = {
       first_name: firstName.trim(),
       last_name: lastName.trim(),
-      phone: validPhone,
-      email: validEmail,
+      phone: validPhone || '',
+      email: validEmail || '',
       referral_source: referralSource,
-      notes: notes.trim() || null,
+      notes: notes.trim(),
     };
 
     try {
@@ -233,9 +236,11 @@ export default function ContactPage() {
             </CardHeader>
             <CardContent className="p-5 pt-0">
               <div className="text-xs text-slate-600 leading-relaxed flex flex-col gap-2">
-                <div><strong className="text-slate-800">Operating Hours:</strong> Mon - Fri: 8:00 AM - 5:00 PM EST</div>
-                <div><strong className="text-slate-800">Clinical On-Call:</strong> 24/7 Registered Nurse Emergency Line</div>
-                <div><strong className="text-slate-800">Response Time:</strong> Clinical triage within 2 business hours</div>
+                {contact.phone && <div><strong className="text-slate-800">Phone:</strong> <a href={`tel:${contact.phone}`}>{contact.phone}</a></div>}
+                {contact.email && <div><strong className="text-slate-800">Email:</strong> <a href={`mailto:${contact.email}`}>{contact.email}</a></div>}
+                {contact.address && <div><strong className="text-slate-800">Address:</strong> {contact.address}</div>}
+                {contact.office_hours && <div><strong className="text-slate-800">Office hours:</strong> {contact.office_hours}</div>}
+                {!Object.values(contact).some(Boolean) && <p>Office contact details have not been published yet.</p>}
               </div>
             </CardContent>
           </Card>
@@ -244,7 +249,7 @@ export default function ContactPage() {
             <CardHeader className="p-5 pb-2">
               <CardTitle className="text-sm font-semibold text-slate-900">Already registered?</CardTitle>
               <CardDescription className="text-xs text-slate-500">
-                Existing caregivers and client families can access direct messaging and real-time records inside the portals.
+                Existing caregivers and clients can sign in to view their records. Online submissions require the agency service to be available.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-5 pt-0">

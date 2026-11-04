@@ -84,7 +84,7 @@ export default function ReportsPage() {
     <PageContainer>
       <PageHeader
         title="Reports"
-        description={`Operational snapshot across all states, generated ${data.generated_at ? new Date(data.generated_at).toLocaleString() : ''}.`}
+        description={`Operational snapshot for ${(data.state_codes || []).join(', ')}, generated ${data.generated_at ? new Date(data.generated_at).toLocaleString() : ''}.`}
       />
 
       {errorMsg && (
@@ -228,7 +228,7 @@ export default function ReportsPage() {
               </TableHeader>
               <TableBody>
                 {training.rows.map((r) => (
-                  <TableRow key={r.course_id} className="border-slate-100 hover:bg-slate-50">
+                  <TableRow key={`${r.course_id}-${r.state_code}`} className="border-slate-100 hover:bg-slate-50">
                     <TableCell className="font-medium text-slate-900 text-xs">{r.name}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="font-medium text-xs text-slate-600">{r.state_code || '—'}</Badge>
@@ -282,7 +282,7 @@ export default function ReportsPage() {
               </TableHeader>
               <TableBody>
                 {authorizations.rows.map((r) => (
-                  <TableRow key={r.authorization_number || `${r.client_name}-${r.end_date}`} className="border-slate-100 hover:bg-slate-50">
+                  <TableRow key={r.id} className="border-slate-100 hover:bg-slate-50">
                     <TableCell className="font-mono text-xs font-medium text-slate-900 whitespace-nowrap">{r.authorization_number || '—'}</TableCell>
                     <TableCell className="font-medium text-slate-900 text-xs">{r.client_name}</TableCell>
                     <TableCell>

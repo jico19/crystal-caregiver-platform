@@ -40,6 +40,7 @@ export default function StateAdminLayout() {
       label: 'Regional Overview',
       items: [
         { label: 'Operations Dashboard', to: '/admin/dashboard', icon: 'dashboard' },
+        { label: 'Reports', to: '/admin/reports', icon: 'reports' },
       ],
     },
     {

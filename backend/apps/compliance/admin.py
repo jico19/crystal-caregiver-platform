@@ -8,6 +8,15 @@ class AuditLogAdmin(admin.ModelAdmin):
     search_fields = ("table_name", "record_id", "user__email", "action")
     readonly_fields = ("id", "user", "action", "table_name", "record_id", "old_values", "new_values", "ip_address", "user_agent", "request_id", "entity_state", "created_at")
 
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "type", "title", "read", "created_at")

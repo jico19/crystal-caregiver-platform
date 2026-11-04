@@ -4,6 +4,22 @@ from django.conf import settings
 from django.utils import timezone
 from apps.core.models import State, SoftDeleteModel
 
+class AuditLogQuerySet(models.QuerySet):
+    def update(self, **kwargs):
+        raise ValueError("Audit records cannot be changed.")
+
+    def delete(self):
+        raise ValueError("Audit records cannot be deleted.")
+
+    def bulk_update(self, objs, fields, batch_size=None):
+        raise ValueError("Audit records cannot be changed.")
+
+    def bulk_create(self, objs, **kwargs):
+        if kwargs.get("update_conflicts"):
+            raise ValueError("Audit records cannot be changed.")
+        return super().bulk_create(objs, **kwargs)
+
+
 class AuditLog(models.Model):
     """Append-only table recording access, changes, and compliance events."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -30,6 +46,16 @@ class AuditLog(models.Model):
         related_name="audit_logs",
     )
     created_at = models.DateTimeField(default=timezone.now)
+    objects = AuditLogQuerySet.as_manager()
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            raise ValueError("Audit records cannot be changed.")
+        kwargs["force_insert"] = True
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValueError("Audit records cannot be deleted.")
 
     class Meta:
         db_table = "audit_logs"

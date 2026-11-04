@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "state": {"code": "GA", "name": "Georgia", "slug": "georgia"},
+  "published_at": null,
+  "overview": {"title": "Home care in Georgia", "description": ""},
+  "contact": {"phone": "", "email": "", "address": "", "office_hours": ""},
+  "services": [], "forms": [], "licensing": [], "careers": []
+}

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import EmptyState from '../../../shared/components/common/EmptyState';
 import LoadingState from '../../../shared/components/common/LoadingState';
+import { stateLabelFor } from '../../../shared/lib/roles';
 
 export default function CaregiverClientsPage() {
   const { data, loading, error } = useFetch('/caregivers/me/clients');
@@ -29,13 +30,13 @@ export default function CaregiverClientsPage() {
         <Alert variant="destructive" className="my-4">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>Failed to load assigned clients: {error.message || 'Unknown error'}</AlertDescription>
+          <AlertDescription>Failed to load assigned clients: {error}</AlertDescription>
         </Alert>
       </PageContainer>
     );
   }
 
-  const clients = data?.clients || [];
+  const clients = Array.isArray(data) ? data : [];
 
   return (
     <PageContainer>
@@ -59,9 +60,9 @@ export default function CaregiverClientsPage() {
                     <User className="h-4 w-4 text-emerald-600" />
                     {client.first_name} {client.last_name}
                   </h3>
-                  <Badge variant="outline" className="text-slate-700 border-slate-200 text-xs capitalize font-normal">
-                    {client.assignment_role || 'Primary'}
-                  </Badge>
+                  {client.assignment_role && (
+                    <Badge variant="outline" className="text-slate-700 border-slate-200 text-xs capitalize font-normal">{client.assignment_role}</Badge>
+                  )}
                 </div>
 
                 <div className="text-xs text-slate-600 space-y-1.5 mb-4 leading-normal">
@@ -77,10 +78,10 @@ export default function CaregiverClientsPage() {
                       <span className="truncate">{client.address}</span>
                     </div>
                   )}
-                  {client.states?.name && (
+                  {(client.state_code || client.states?.name) && (
                     <div className="inline-flex items-center gap-1.5 w-full">
                       <Building2 size={12} className="text-slate-400 shrink-0" />
-                      <span>State: {client.states.name}</span>
+                      <span>State: {client.states?.name || stateLabelFor(client)}</span>
                     </div>
                   )}
                 </div>

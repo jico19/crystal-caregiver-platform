@@ -9,17 +9,23 @@ logger = logging.getLogger(__name__)
 
 signer = TimestampSigner(salt="caregiver-document-token")
 
-def generate_document_token(doc_id: str) -> str:
-    """Generates a secure, time-stamped signature for document upload or download."""
-    return signer.sign(str(doc_id))
+def generate_document_token(doc_id: str, *, purpose: str) -> str:
+    """Sign a document identifier for one specific operation."""
+    if purpose not in ("upload", "download"):
+        raise ValueError("Document token purpose must be upload or download.")
+    return signer.sign(f"{purpose}:{doc_id}")
 
-def verify_document_token(doc_id: str, token: str, max_age: int = 3600) -> bool:
-    """Verifies that a token was signed for the given doc_id and is within max_age."""
+def verify_document_token(doc_id: str, token: str, *, purpose: str, max_age=None) -> bool:
+    """Verify the document, operation, and advertised lifetime together."""
     if not token or not doc_id:
         return False
+    if purpose not in ("upload", "download"):
+        return False
+    if max_age is None:
+        max_age = getattr(settings, "S3_PRESIGNED_EXPIRATION_SECONDS", 900)
     try:
         unsigned_id = signer.unsign(token, max_age=max_age)
-        return unsigned_id == str(doc_id)
+        return unsigned_id == f"{purpose}:{doc_id}"
     except (BadSignature, SignatureExpired):
         return False
 
@@ -75,7 +81,7 @@ class StorageService:
 
         # Built-in Django media storage upload endpoint
         if doc_id:
-            token = generate_document_token(str(doc_id))
+            token = generate_document_token(str(doc_id), purpose="upload")
             return f"/api/v1/documents/{doc_id}/upload-file/?token={token}"
         return f"/api/v1/documents/upload-file/"
 
@@ -100,7 +106,7 @@ class StorageService:
 
         # Built-in Django media storage download endpoint
         if doc_id:
-            token = generate_document_token(str(doc_id))
+            token = generate_document_token(str(doc_id), purpose="download")
             return f"/api/v1/documents/{doc_id}/file/?token={token}"
         media_url = getattr(settings, "MEDIA_URL", "/media/").rstrip("/")
         return f"{media_url}/{storage_key.lstrip('/')}"
@@ -126,8 +132,17 @@ class StorageService:
         return default_storage.open(clean_key, mode)
 
     def exists(self, storage_key: str) -> bool:
-        """Checks if a file exists in default Django media storage."""
+        """Check the storage backend that issued the upload URL."""
         clean_key = storage_key.lstrip("/")
+        if self.use_s3 and self.client:
+            from botocore.exceptions import ClientError
+            try:
+                self.client.head_object(Bucket=self.bucket_name, Key=clean_key)
+                return True
+            except ClientError as error:
+                if error.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
+                    return False
+                raise
         return default_storage.exists(clean_key)
 
     def delete_file(self, storage_key: str) -> None:

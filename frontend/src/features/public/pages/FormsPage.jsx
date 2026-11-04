@@ -1,6 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import useFetch from '../../../shared/hooks/useFetch';
-import LoadingState from '../../../shared/components/common/LoadingState';
+import usePublishedSite from '../hooks/usePublishedSite';
 import PageContainer from '../../../shared/components/common/PageContainer';
 import PageHeader from '../../../shared/components/common/PageHeader';
 import EmptyState from '../../../shared/components/common/EmptyState';
@@ -10,9 +9,8 @@ import { Alert, AlertDescription } from '../../../components/ui/alert';
 
 export default function FormsPage() {
   const { state = 'florida' } = useParams();
-  const { data, isLoading: loading, error: errorMsg } = useFetch(`/states/${state}/forms`, { defaultData: [] });
-
-  const forms = data?.forms || [];
+  const { site, error: errorMsg } = usePublishedSite();
+  const forms = site.forms;
   const stateName = state.charAt(0).toUpperCase() + state.slice(1);
 
   return (
@@ -24,7 +22,7 @@ export default function FormsPage() {
           </Link>
         }
         title={`${stateName} Client & Regulatory Forms`}
-        subtitle="Download state-mandated disclosures, Medicaid intake authorization packets, and client rights documentation."
+        subtitle={`Download the public forms published by our ${stateName} office.`}
       />
 
       {errorMsg && (
@@ -33,14 +31,7 @@ export default function FormsPage() {
         </Alert>
       )}
 
-      {loading ? (
-        <LoadingState
-          title={`Loading ${stateName} State Forms & Packets...`}
-          subtitle={`Retrieving verified regulatory documents for ${stateName}...`}
-          variant="table"
-          count={3}
-        />
-      ) : forms.length === 0 ? (
+      {forms.length === 0 ? (
         <EmptyState
           title={`No downloadable forms currently listed for ${stateName}`}
           description="Please contact our regional office directly for specialized document packets and disclosures."
@@ -59,7 +50,7 @@ export default function FormsPage() {
               <CardContent className="p-5 flex justify-between items-center flex-wrap gap-4">
                 <div className="max-w-2xl">
                   <h2 className="text-sm font-semibold text-slate-900 m-0">
-                    {f.name}
+                    {f.title}
                   </h2>
                   <p className="text-xs text-slate-600 leading-normal mt-1 mb-0">
                     {f.description}
@@ -70,21 +61,13 @@ export default function FormsPage() {
                   <Button
                     variant="outline"
                     size="sm"
+                    disabled={!f.file_url}
                     className="border-slate-200 text-slate-700 text-xs hover:bg-slate-100"
-                    asChild
+                    asChild={Boolean(f.file_url)}
                   >
-                    <a
-                      href={f.file_url || '#'}
-                      download
-                      onClick={(e) => {
-                        if (f.file_url === '#') {
-                          e.preventDefault();
-                          alert('This official packet is issued directly upon intake initiation.');
-                        }
-                      }}
-                    >
-                      Download Form ↓
-                    </a>
+                    {f.file_url ? (
+                      <a href={f.file_url} download>Download Form ↓</a>
+                    ) : 'Download unavailable'}
                   </Button>
                 </div>
               </CardContent>

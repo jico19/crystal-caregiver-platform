@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import EmptyState from '../../../shared/components/common/EmptyState';
 import StatusBadge from '../../../shared/components/common/StatusBadge';
 import LoadingState from '../../../shared/components/common/LoadingState';
+import { scheduleHours, scheduleTime } from '../lib/careMetrics';
 
 const DAYS_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -33,15 +34,14 @@ export default function SchedulePage() {
   const sortedSchedule = useMemo(() => {
     const list = data?.schedule || (Array.isArray(data) ? data : []);
     return [...list].sort((a, b) => {
-      const idxA = DAYS_ORDER.findIndex((d) => (a.day || '').toLowerCase().startsWith(d.toLowerCase().slice(0, 3)));
-      const idxB = DAYS_ORDER.findIndex((d) => (b.day || '').toLowerCase().startsWith(d.toLowerCase().slice(0, 3)));
+      const idxA = DAYS_ORDER.indexOf(a.day_of_week);
+      const idxB = DAYS_ORDER.indexOf(b.day_of_week);
       return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
     });
   }, [data]);
 
-  // Approximate total hours
   const totalWeeklyHours = useMemo(() => {
-    return sortedSchedule.reduce((acc, curr) => acc + (Number(curr.hours) || 4), 0);
+    return sortedSchedule.reduce((acc, curr) => acc + (scheduleHours(curr) ?? 0), 0);
   }, [sortedSchedule]);
 
   if (loading) {
@@ -58,10 +58,10 @@ export default function SchedulePage() {
     <PageContainer>
       <PageHeader
         title="Care Visit Schedule"
-        subtitle="Weekly in-home appointments confirmed by your agency care coordinator."
+        subtitle="Weekly in-home appointments recorded by your agency care coordinator."
         badge={
           sortedSchedule.length > 0 ? (
-            <StatusBadge status="active" label={`${sortedSchedule.length} Weekly Visits Confirmed`} />
+            <StatusBadge status="active" label={`${sortedSchedule.filter((item) => item.status !== 'cancelled').length} Weekly Visits Scheduled`} />
           ) : null
         }
       />
@@ -110,7 +110,7 @@ export default function SchedulePage() {
                 {totalWeeklyHours} <span className="text-sm font-normal text-slate-600">Hours</span>
               </div>
               <span className="text-xs text-slate-500 mt-1 block">
-                Authorized under your active care allowance
+                Based on recorded start and end times
               </span>
             </Card>
 
@@ -141,15 +141,15 @@ export default function SchedulePage() {
                   <CardHeader className="p-4 pb-2 border-b border-slate-100 flex flex-row items-center justify-between">
                     <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
                       <CalendarCheck className="h-4 w-4 text-emerald-600" />
-                      {item.day}
+                      {item.day_of_week}
                     </CardTitle>
-                    <StatusBadge status={item.status || 'confirmed'} size="xs" />
+                    <StatusBadge status={item.status || 'scheduled'} size="xs" />
                   </CardHeader>
 
                   <CardContent className="p-4 flex flex-col flex-1">
                     <div className="text-sm font-bold text-emerald-800 mb-2 flex items-center gap-1.5">
                       <Clock className="h-4 w-4 text-emerald-600 shrink-0" />
-                      {item.time || 'Morning Shift'}
+                      {scheduleTime(item)}
                     </div>
 
                     <div className="mb-4">

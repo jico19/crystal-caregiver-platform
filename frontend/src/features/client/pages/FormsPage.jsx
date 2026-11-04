@@ -55,6 +55,7 @@ export default function FormsPage() {
   );
 
   const [activeKey, setActiveKey] = useState(null);
+  const [activeRevision, setActiveRevision] = useState(null);
   const [signatureData, setSignatureData] = useState(null);
   const [signedName, setSignedName] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -63,6 +64,7 @@ export default function FormsPage() {
 
   function openSign(tpl) {
     setActiveKey(tpl.agreement_key);
+    setActiveRevision({ agreement_id: tpl.id, terms_hash: tpl.terms_hash });
     setSignatureData(null);
     setSignedName(tpl.signed_name || user?.name || '');
     setErrorMsg('');
@@ -84,15 +86,22 @@ export default function FormsPage() {
     setSubmitting(true);
     try {
       await api.post(`/clients/me/agreements/${activeKey}/sign`, {
+        ...activeRevision,
         signature_data: signatureData,
         signed_name: signedName.trim(),
       }, token);
       setToastMsg('Agreement signed and securely recorded on your clinical file.');
       setActiveKey(null);
+      setActiveRevision(null);
       setSignatureData(null);
       await refetch();
     } catch (err) {
-      setErrorMsg(err.detail || 'Failed to sign the agreement.');
+      setErrorMsg(err.detail || err.message || 'Failed to sign the agreement.');
+      if (err.status === 409) {
+        setActiveKey(null);
+        setActiveRevision(null);
+        await refetch();
+      }
     } finally {
       setSubmitting(false);
     }
@@ -112,7 +121,7 @@ export default function FormsPage() {
   const pendingAgreements = agreements.filter((a) => !isSigned(a));
   const signedAgreements = agreements.filter((a) => isSigned(a));
   const stateCode = STATE_PACKET_CODE[user?.state_id] || 'FL';
-  const stateSlug = stateCode.toLowerCase();
+  const stateSlug = { FL: 'florida', IN: 'indiana', GA: 'georgia' }[stateCode];
 
   return (
     <PageContainer size="narrow">
@@ -122,7 +131,7 @@ export default function FormsPage() {
         badge={
           <StatusBadge
             status={pendingAgreements.length === 0 && agreements.length > 0 ? 'completed' : 'pending'}
-            label={pendingAgreements.length === 0 ? 'All Signed' : `${pendingAgreements.length} Action Needed`}
+            label={agreements.length === 0 ? 'No Forms Available' : pendingAgreements.length === 0 ? 'All Signed' : `${pendingAgreements.length} Action Needed`}
           />
         }
         actions={
@@ -161,14 +170,14 @@ export default function FormsPage() {
       <div className="mb-6 p-3.5 bg-emerald-50/60 border border-emerald-200 rounded-lg flex items-start gap-3">
         <Info className="h-4 w-4 text-emerald-700 mt-0.5 shrink-0" />
         <p className="text-xs text-emerald-950 m-0 leading-relaxed">
-          State licensing regulations require electronic signatures on standard service consents before home care visits can commence. Signed agreements are permanently stamped with legal audit timestamps.
+          Review the full terms of each agency supplied form before signing. Your signature is recorded with the form revision and signing time.
         </p>
       </div>
 
       {agreements.length === 0 ? (
         <EmptyState
-          title="No Agreements Pending"
-          description="Your admission paperwork and service agreements are fully up to date."
+          title="No Agreements Available"
+          description="Your agency has not provided electronic agreements for this account yet. Contact your coordinator for the required forms."
         />
       ) : (
         <div className="space-y-6">
@@ -186,7 +195,7 @@ export default function FormsPage() {
                   </span>
                 </CardTitle>
                 <CardDescription className="text-xs text-amber-900/80">
-                  Please review and digitally sign these agreements to keep your home care service schedule active.
+                  Please review the full text of each agreement before signing.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4 divide-y divide-slate-100">
@@ -205,6 +214,7 @@ export default function FormsPage() {
                         type="button"
                         size="sm"
                         onClick={() => openSign(tpl)}
+                        disabled={!tpl.body?.trim() || !tpl.terms_hash}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white h-7 px-3 text-xs gap-1.5 shrink-0"
                       >
                         <PenTool size={11} />

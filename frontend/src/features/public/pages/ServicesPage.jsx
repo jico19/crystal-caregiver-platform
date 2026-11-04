@@ -1,6 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import useFetch from '../../../shared/hooks/useFetch';
-import LoadingState from '../../../shared/components/common/LoadingState';
+import usePublishedSite from '../hooks/usePublishedSite';
 import PageContainer from '../../../shared/components/common/PageContainer';
 import PageHeader from '../../../shared/components/common/PageHeader';
 import EmptyState from '../../../shared/components/common/EmptyState';
@@ -10,9 +9,8 @@ import { Alert, AlertDescription } from '../../../components/ui/alert';
 
 export default function ServicesPage() {
   const { state } = useParams();
-  const { data, isLoading: loading, error: errorText } = useFetch(`/states/${state}/services`, { defaultData: [] });
-
-  const services = data?.services || [];
+  const { site, error: errorText } = usePublishedSite();
+  const services = site.services;
   const error = errorText || null;
   const stateName = state ? state.charAt(0).toUpperCase() + state.slice(1) : '';
 
@@ -25,17 +23,8 @@ export default function ServicesPage() {
           </Link>
         }
         title={`Home Care Services in ${stateName}`}
-        subtitle="State approved programs for elderly care, disability assistance, and skilled nursing."
+        subtitle={`Explore the services published by our ${stateName} office.`}
       />
-
-      {loading && (
-        <LoadingState
-          title={`Loading ${stateName} Service Programs...`}
-          subtitle={`Retrieving licensed Medicaid & private-pay services for ${stateName}...`}
-          variant="cards"
-          count={3}
-        />
-      )}
 
       {error && (
         <Alert variant="destructive" className="my-4">
@@ -43,10 +32,10 @@ export default function ServicesPage() {
         </Alert>
       )}
 
-      {!loading && !error && services.length === 0 && (
+      {!error && services.length === 0 && (
         <EmptyState
           title={`No specialized listings published yet for ${stateName}`}
-          description={`We offer personal care, companion care, respite care, and skilled nursing across all licensed counties in ${stateName}.`}
+          description="Our office has not published its service listings yet."
           action={
             <div className="flex justify-center gap-3">
               <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs" asChild>
@@ -64,12 +53,12 @@ export default function ServicesPage() {
         />
       )}
 
-      {!loading && !error && services.length > 0 && (
+      {!error && services.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {services.map((svc) => (
             <Card key={svc.id} className="border-slate-200 shadow-xs">
               <CardHeader className="p-5 pb-2">
-                <CardTitle className="text-sm font-semibold text-slate-900">{svc.name}</CardTitle>
+                <CardTitle className="text-sm font-semibold text-slate-900">{svc.title}</CardTitle>
               </CardHeader>
               <CardContent className="p-5 pt-0">
                 <p className="text-xs text-slate-600 leading-normal m-0">

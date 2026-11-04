@@ -17,6 +17,7 @@ urlpatterns = [
     # REST API v1 Endpoints
     path("api/v1/auth/", include("apps.authentication.urls")),
     path("api/v1/states/", include("apps.marketing.urls")),
+    path("api/v1/admin/website/", include("apps.marketing.cms_urls")),
     path("api/v1/caregivers/", include("apps.caregivers.urls")),
     path("api/v1/clients/", include("apps.clients.urls")),
     path("api/v1/documents/", include("apps.documents.urls")),

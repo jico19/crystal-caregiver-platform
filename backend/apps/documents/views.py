@@ -43,6 +43,10 @@ class DocumentUploadIntentView(APIView):
 
         user = request.user
         doc_type = get_object_or_404(DocumentType, id=data["document_type_id"])
+        if doc_type.for_role not in ("both", getattr(user.role, "name", None)):
+            return Response({"document_type_id": ["This document type is not available for your role."]}, status=status.HTTP_400_BAD_REQUEST)
+        if doc_type.requires_expiration and not data.get("expiration_date"):
+            return Response({"expiration_date": ["An expiration date is required for this document type."]}, status=status.HTTP_400_BAD_REQUEST)
         
         # Determine jurisdiction
         state = user.state
@@ -98,13 +102,15 @@ class ClientDocumentStatusView(APIView):
 
         now = date.today()
         thirty_days = now + timedelta(days=30)
-        docs = Document.objects.filter(owner=request.user, deleted_at__isnull=True)
+        docs = Document.objects.filter(owner=request.user, state=client.state, deleted_at__isnull=True).select_related("document_type")
 
         approved = []
         expired = []
         expiring_soon = []
         for d in docs:
             if d.status == "approved":
+                if d.document_type.requires_expiration and not d.expiration_date:
+                    continue
                 if d.expiration_date and d.expiration_date < now:
                     expired.append(d.document_type.name)
                 elif d.expiration_date and d.expiration_date <= thirty_days:
@@ -114,6 +120,10 @@ class ClientDocumentStatusView(APIView):
             elif d.status == "expired":
                 expired.append(d.document_type.name)
 
+        current_names = set(approved) | set(expiring_soon)
+        expired = sorted(set(expired) - current_names)
+        expiring_soon = sorted(set(expiring_soon) - set(approved))
+
         required_types = [
             {"document_type_id": r.document_type_id, "name": r.document_type.name}
             for r in reqs
@@ -121,7 +131,7 @@ class ClientDocumentStatusView(APIView):
         missing = [
             {"document_type_id": r.document_type_id, "name": r.document_type.name}
             for r in reqs
-            if r.document_type.name not in approved
+            if r.document_type.name not in current_names
         ]
         compliant = len(missing) == 0 and len(expired) == 0
 
@@ -202,7 +212,7 @@ class DocumentFileUploadView(APIView):
         token = request.query_params.get("token")
 
         is_authorized = False
-        if token and verify_document_token(str(doc.id), token):
+        if token and verify_document_token(str(doc.id), token, purpose="upload", max_age=storage_service.expiration):
             is_authorized = True
         elif request.user and request.user.is_authenticated:
             role_name = getattr(request.user.role, "name", None)
@@ -274,7 +284,7 @@ class DocumentDirectFileView(APIView):
         token = request.query_params.get("token")
 
         is_authorized = False
-        if token and verify_document_token(str(doc.id), token):
+        if token and verify_document_token(str(doc.id), token, purpose="download", max_age=storage_service.expiration):
             is_authorized = True
         elif request.user and request.user.is_authenticated:
             role_name = getattr(request.user.role, "name", None)
@@ -342,6 +352,13 @@ class AdminDocumentListView(ScopedStateQuerySetMixin, generics.ListAPIView):
     permission_classes = [IsStateScopedAdmin]
     serializer_class = DocumentSerializer
     queryset = Document.objects.filter(deleted_at__isnull=True).select_related("owner", "document_type", "state")
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        document_status = self.request.query_params.get("status")
+        if document_status and document_status != "all":
+            queryset = queryset.filter(status=document_status)
+        return queryset
 
 class AdminDocumentReviewView(APIView):
     """POST /api/v1/admin/documents/{document_id}/review"""

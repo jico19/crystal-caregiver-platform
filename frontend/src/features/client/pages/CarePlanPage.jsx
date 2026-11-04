@@ -81,7 +81,7 @@ export default function CarePlanPage() {
       <PageHeader
         title="Personalized Care Plan"
         subtitle="Daily assistance routines, nurse directives, and safety protocols followed by your assigned caregivers."
-        badge={carePlan ? <StatusBadge status={carePlan.plan_status || 'active'} label="Plan Active" /> : null}
+        badge={carePlan ? <StatusBadge status={carePlan.plan_status || carePlan.status} /> : null}
       />
 
       {errorMsg && (

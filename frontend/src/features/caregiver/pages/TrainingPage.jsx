@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import StatusBadge from '../../../shared/components/common/StatusBadge';
 import LoadingState from '../../../shared/components/common/LoadingState';
+import EmptyState from '../../../shared/components/common/EmptyState';
 
 export default function TrainingPage() {
   const { token } = useAuth();
@@ -19,9 +20,20 @@ export default function TrainingPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const { data, isLoading: loading, error: loadError } = useFetch('/training/courses', { enabled: !!token, defaultData: [] });
-  const courses = data?.courses || [];
-  const listError = loadError || '';
+  const { data, isLoading: coursesLoading, error: loadError } = useFetch('/training/courses', { enabled: !!token });
+  const { data: enrollmentData, isLoading: enrollmentsLoading, error: enrollmentError } = useFetch('/training/my-enrollments', { enabled: !!token });
+  const enrollments = Array.isArray(enrollmentData) ? enrollmentData : [];
+  const courses = (Array.isArray(data) ? data : []).map((course) => {
+    const enrollment = enrollments.find((item) => String(item.course_id) === String(course.id));
+    return {
+      ...course,
+      enrollment_status: enrollment?.status || 'not_started',
+      completed_at: enrollment?.completed_at,
+      due_at: enrollment?.due_at,
+    };
+  });
+  const loading = coursesLoading || enrollmentsLoading;
+  const listError = loadError || enrollmentError || '';
 
   async function handleEnroll(courseId) {
     setErrorMsg('');
@@ -31,7 +43,7 @@ export default function TrainingPage() {
     try {
       await api.post(`/training/courses/${courseId}/enroll`, null, token);
       setSuccessMsg('You have enrolled in the training course.');
-      queryClient.invalidateQueries({ queryKey: ['/training/courses'] });
+      await queryClient.invalidateQueries({ queryKey: ['/training/my-enrollments'] });
     } catch (err) {
       setErrorMsg(err.detail || 'Enrollment failed.');
     } finally {
@@ -47,7 +59,7 @@ export default function TrainingPage() {
     try {
       await api.post(`/training/courses/${courseId}/complete`, null, token);
       setSuccessMsg('Course successfully marked as completed.');
-      queryClient.invalidateQueries({ queryKey: ['/training/courses'] });
+      await queryClient.invalidateQueries({ queryKey: ['/training/my-enrollments'] });
     } catch (err) {
       setErrorMsg(err.detail || 'Failed to complete course.');
     } finally {
@@ -119,6 +131,9 @@ export default function TrainingPage() {
       </div>
 
       {/* Courses List */}
+      {!listError && courses.length === 0 && (
+        <EmptyState title="No courses available" description="Your agency has not published any active courses yet." />
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses.map((course) => {
           const status = course.enrollment_status;
@@ -152,6 +167,9 @@ export default function TrainingPage() {
                 <p className="text-slate-600 text-xs leading-normal mb-4">
                   {course.description}
                 </p>
+                {course.due_at && status !== 'completed' && (
+                  <p className="text-xs text-slate-600 mb-4">Due: {new Date(`${course.due_at}T00:00:00`).toLocaleDateString()}</p>
+                )}
               </div>
 
               <div>

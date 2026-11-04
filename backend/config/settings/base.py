@@ -214,3 +214,8 @@ USE_S3 = os.environ.get("USE_S3", "false").lower() in ("true", "1", "yes") and b
 
 # Ensure local media directory exists
 MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+
+# Public publications are served by frontend/static hosting, independently of DB/media.
+# Production must point this at the persistent directory served as /published-site/.
+PUBLISHED_SITE_ROOT = Path(os.environ.get("PUBLISHED_SITE_ROOT", str(BASE_DIR.parent / "frontend" / "public" / "published-site")))
+PUBLIC_SITE_DRAFT_ASSET_ROOT = Path(os.environ.get("PUBLIC_SITE_DRAFT_ASSET_ROOT", str(BASE_DIR / "public-site-drafts")))

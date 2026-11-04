@@ -39,7 +39,7 @@ export default function CaregiverClientCarePlanPage() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            Unable to load care plan: {error.message || 'You may not be assigned to this client.'}
+            Unable to load care plan: {error}
           </AlertDescription>
         </Alert>
         <Button variant="outline" size="sm" asChild className="gap-1.5 h-8 text-xs border-slate-200 text-slate-700 hover:bg-slate-50">
@@ -51,7 +51,7 @@ export default function CaregiverClientCarePlanPage() {
     );
   }
 
-  const carePlan = data?.care_plan;
+  const carePlan = data;
   const client = data?.client;
 
   return (

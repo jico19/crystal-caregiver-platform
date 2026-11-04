@@ -67,7 +67,7 @@ function ClientProfileForm({ initialProfile, token, user, fetchError, onRefetch 
     e.preventDefault();
     setErrorMsg('');
     setToastMsg('');
-    const phoneCheck = validatePhone(phone);
+    const phoneCheck = phone.trim() ? validatePhone(phone) : { valid: true, value: '' };
     if (!phoneCheck.valid) {
       setErrorMsg(phoneCheck.error);
       return;

@@ -4,6 +4,7 @@ import { useAuth } from '../../../shared/hooks/useAuth';
 import useFetch from '../../../shared/hooks/useFetch';
 import { STATUS_META, milestoneMeta } from '../../../shared/utils/caregiverStatus';
 import { packetUrl, STATE_PACKET_CODE } from '../../../shared/utils/packets';
+import { stateOfficeTitleFor } from '../../../shared/lib/roles';
 import PageContainer from '../../../shared/components/common/PageContainer';
 import PageHeader from '../../../shared/components/common/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -24,8 +25,8 @@ export default function DashboardPage() {
   const { data: annRes, isLoading: annLoading } = useFetch('/announcements', { enabled: !!token });
   const { data: trainingRes, isLoading: trainingLoading } = useFetch('/training/my-enrollments', { enabled: !!token });
 
-  const profile = profileRes?.profile || null;
-  const application = appRes?.application || null;
+  const profile = profileRes || null;
+  const application = appRes || null;
   const documents = docRes?.documents || [];
   const announcements = annRes?.announcements || (Array.isArray(annRes) ? annRes : []);
   const enrollmentList = trainingRes?.enrollments || trainingRes?.results || (Array.isArray(trainingRes) ? trainingRes : []);
@@ -34,7 +35,6 @@ export default function DashboardPage() {
     name: enr.course_name || enr.training_courses?.name,
     enrollment_status: enr.status,
   }));
-  const docChartItems = documents.map((d) => ({ ...d, document_type: d.document_types?.name }));
   const completedTrainingCount = courses.filter((c) => c.enrollment_status === 'completed').length;
 
   const credentialStatus = credStatusRaw
@@ -63,7 +63,7 @@ export default function DashboardPage() {
     );
   }
 
-  const stateName = profile?.states?.name || (user?.state_id === 1 ? 'Florida' : user?.state_id === 2 ? 'Indiana' : 'Georgia');
+  const officeName = stateOfficeTitleFor(profile || user);
   const appStatus = application?.status || null;
   const milestone = milestoneMeta(appStatus);
 
@@ -71,7 +71,7 @@ export default function DashboardPage() {
     <PageContainer>
       <PageHeader
         title={`Welcome back, ${profile?.first_name || user?.email?.split('@')[0]}`}
-        subtitle={`Caregiver Onboarding and Compliance Portal · ${stateName} Office`}
+        subtitle={`Caregiver Onboarding and Compliance Portal · ${officeName}`}
         actions={
           <Badge variant="outline" className="text-slate-700 border-slate-200 capitalize text-xs">
             Account: {user?.status || 'active'}
@@ -125,7 +125,7 @@ export default function DashboardPage() {
                 />
               </div>
               <p className="text-slate-600 text-xs mb-3 leading-normal">
-                {appStatus ? 'Application details on file and under review.' : 'Complete candidate details and electronic signature.'}
+                {appStatus ? 'Application details are on file.' : 'Complete candidate details and electronic signature.'}
               </p>
             </div>
             <Link
@@ -193,7 +193,7 @@ export default function DashboardPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <CaregiverHoursChart />
-          <CaregiverTrainingProgressChart courses={courses} documents={docChartItems} />
+          <CaregiverTrainingProgressChart courses={courses} />
         </div>
       </div>
 
@@ -300,7 +300,7 @@ export default function DashboardPage() {
                 <ArrowRight size={12} className="text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-transform" />
               </h3>
               <p className="text-slate-600 text-xs leading-normal m-0">
-                Update your contact telephone, home address, and licensing state details anytime.
+                Update your contact telephone, home address, and personal details.
               </p>
             </div>
             <span className="text-xs font-semibold text-emerald-700 underline mt-3 block">
@@ -330,7 +330,7 @@ export default function DashboardPage() {
         </Link>
 
         <a
-          href={packetUrl(profile?.states?.code || STATE_PACKET_CODE[user?.state_id])}
+          href={packetUrl(profile?.state_code || STATE_PACKET_CODE[user?.state_id])}
           target="_blank"
           rel="noreferrer"
           className="block group"

@@ -22,12 +22,13 @@ class DocumentRequirementSerializer(serializers.ModelSerializer):
 class DocumentSerializer(serializers.ModelSerializer):
     document_type_name = serializers.CharField(source="document_type.name", read_only=True)
     owner_email = serializers.EmailField(source="owner.email", read_only=True)
+    state_code = serializers.CharField(source="state.code", read_only=True)
 
     class Meta:
         model = Document
         fields = [
             "id", "owner_id", "owner_email", "document_type_id", "document_type_name",
-            "state_id", "storage_path", "status", "expiration_date", "reviewed_at",
+            "state_id", "state_code", "storage_path", "status", "expiration_date", "reviewed_at",
             "rejection_reason", "legal_hold", "created_at", "updated_at"
         ]
         read_only_fields = ["id", "storage_path", "reviewed_at", "created_at", "updated_at"]
@@ -49,6 +50,14 @@ class UploadIntentSerializer(serializers.Serializer):
     filename = serializers.CharField(max_length=255)
     content_type = serializers.CharField(max_length=100, default="application/pdf")
     expiration_date = serializers.DateField(required=False, allow_null=True)
+
+    def validate_filename(self, value):
+        from pathlib import PurePath
+        if "/" in value or "\\" in value or value in (".", ".."):
+            raise serializers.ValidationError("Use a filename without directory paths.")
+        if PurePath(value).suffix.lower() not in (".pdf", ".png", ".jpg", ".jpeg"):
+            raise serializers.ValidationError("Only PDF, PNG, and JPEG files are supported.")
+        return value
 
 class DocumentReviewSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=["approved", "rejected"])

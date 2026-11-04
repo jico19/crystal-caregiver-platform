@@ -25,6 +25,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import ClientWeeklyCareChart from '../components/ClientWeeklyCareChart';
 import { admissionPacketUrl, STATE_PACKET_CODE } from '../../../shared/utils/packets';
+import { summarizeAuthorizationHours, scheduleTime } from '../lib/careMetrics';
 
 const CLIENT_STATUS_LABELS = {
   pending: 'Admission Under Review',
@@ -61,32 +62,10 @@ export default function DashboardPage() {
     return authorizations.filter((a) => a.status === 'active' || a.status === 'expiring_soon');
   }, [authorizations]);
 
-  const { totalRemainingHours, totalAuthorizedHours, totalUsedHours } = useMemo(() => {
-    let remH = 0;
-    let authH = 0;
-    let usedH = 0;
-
-    for (const a of activeAuths) {
-      const uTotal = a.total_units_authorized ?? 0;
-      const uUsed = a.units_used ?? 0;
-      const uRem = a.units_remaining ?? (uTotal - uUsed);
-      const is15Min = (a.unit_type || '15_min') === '15_min';
-
-      const rHours = a.remaining_hours !== undefined ? a.remaining_hours : (is15Min ? uRem * 0.25 : uRem);
-      const tHours = a.total_hours !== undefined ? a.total_hours : (is15Min ? uTotal * 0.25 : uTotal);
-      const usHours = a.hours_used !== undefined ? a.hours_used : (is15Min ? uUsed * 0.25 : uUsed);
-
-      remH += Number(rHours) || 0;
-      authH += Number(tHours) || 0;
-      usedH += Number(usHours) || 0;
-    }
-
-    return {
-      totalRemainingHours: remH,
-      totalAuthorizedHours: authH,
-      totalUsedHours: usedH,
-    };
-  }, [activeAuths]);
+  const { totalRemainingHours, totalAuthorizedHours, totalUsedHours } = useMemo(
+    () => summarizeAuthorizationHours(activeAuths), [activeAuths]
+  );
+  const visitApprovals = activeAuths.filter((authorization) => authorization.unit_type === 'visit');
 
   const overallPercent = totalAuthorizedHours > 0
     ? Math.min(100, Math.round((totalUsedHours / totalAuthorizedHours) * 100))
@@ -108,7 +87,7 @@ export default function DashboardPage() {
 
   const pendingAgreements = agreements.filter((a) => !(a.signed || a.signed_at));
   const missingDocs = docStatusRes?.missing || [];
-  const nextVisit = schedule.length > 0 ? schedule[0] : null;
+  const nextVisit = schedule.find((item) => item.status !== 'cancelled') || null;
 
   return (
     <PageContainer size="wide">
@@ -219,7 +198,7 @@ export default function DashboardPage() {
           <CardHeader className="p-4 pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <CalendarCheck className="h-4 w-4 text-emerald-600" />
-              Next Scheduled Caregiver Visit
+              Scheduled Caregiver Visit
             </CardTitle>
             <Link to="/client/schedule" className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 underline inline-flex items-center gap-1">
               Full Schedule <ArrowRight size={11} />
@@ -230,11 +209,11 @@ export default function DashboardPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-xs text-slate-500 block">Upcoming Day</span>
-                    <strong className="text-base text-slate-900">{nextVisit.day}</strong>
+                    <span className="text-xs text-slate-500 block">Scheduled Day</span>
+                    <strong className="text-base text-slate-900">{nextVisit.day_of_week}</strong>
                   </div>
                   <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-semibold">
-                    {nextVisit.time || 'Morning Shift'}
+                    {scheduleTime(nextVisit)}
                   </Badge>
                 </div>
 
@@ -346,12 +325,13 @@ export default function DashboardPage() {
                   <span className="font-semibold text-sm text-slate-900">Approved Care Allowance</span>
                 </div>
                 <StatusBadge
-                  status={totalRemainingHours > 0 ? 'active' : 'pending'}
-                  label={totalRemainingHours > 0 ? `${totalRemainingHours.toFixed(1)} hrs left` : 'Pending Approval'}
+                  status={activeAuths.length > 0 ? 'active' : 'pending'}
+                  label={visitApprovals.length > 0 && totalAuthorizedHours === 0 ? 'Visit Coverage on File' : totalRemainingHours > 0 ? `${totalRemainingHours.toFixed(1)} hrs left` : 'No Hours Remaining'}
                   size="xs"
                 />
               </div>
 
+              {visitApprovals.length > 0 && <p className="text-xs text-slate-500 mb-3">Visit approvals are shown in coverage details and are not counted as hours.</p>}
               <div className="grid grid-cols-3 gap-3 mb-4">
                 <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
                   <span className="text-xs text-slate-500 block">Total Authorized</span>

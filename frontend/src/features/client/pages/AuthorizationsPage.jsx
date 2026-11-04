@@ -16,7 +16,7 @@ import {
 import { useAuth } from '../../../shared/hooks/useAuth';
 import useFetch from '../../../shared/hooks/useFetch';
 import { api } from '../../../shared/services/api';
-import { downloadDocument } from '../../../shared/utils/documentUtils';
+import { downloadDocument, uploadDocument } from '../../../shared/utils/documentUtils';
 import { validateUploadedFile } from '../../../shared/utils/validation';
 import PageContainer from '../../../shared/components/common/PageContainer';
 import PageHeader from '../../../shared/components/common/PageHeader';
@@ -31,6 +31,7 @@ import EmptyState from '../../../shared/components/common/EmptyState';
 import StatusBadge from '../../../shared/components/common/StatusBadge';
 import Toast from '../../../shared/components/common/Toast';
 import LoadingState from '../../../shared/components/common/LoadingState';
+import { authorizationUsage, summarizeAuthorizationHours } from '../lib/careMetrics';
 
 const PROCEDURE_LABELS = {
   T1019: 'Personal Care Assistance (In-Home Aide)',
@@ -47,6 +48,7 @@ export default function AuthorizationsPage() {
     defaultData: { authorizations: [] },
   });
   const authorizations = useMemo(() => data?.authorizations || (Array.isArray(data) ? data : []), [data]);
+  const { data: documentTypes } = useFetch('/documents/types', { enabled: !!token, defaultData: [] });
   const [errorMsg, setErrorMsg] = useState('');
   const [toastMsg, setToastMsg] = useState('');
 
@@ -55,7 +57,8 @@ export default function AuthorizationsPage() {
   const [file, setFile] = useState(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [notes, setNotes] = useState('');
+  const [authorizationNumber, setAuthorizationNumber] = useState('');
+  const [uploadedDocumentId, setUploadedDocumentId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Active care allowances
@@ -63,35 +66,9 @@ export default function AuthorizationsPage() {
     return authorizations.filter((a) => a.status === 'active' || a.status === 'expiring_soon');
   }, [authorizations]);
 
-  const { totalRemainingHours, totalAuthorizedHours, totalUsedHours, totalRemainingUnits } = useMemo(() => {
-    let remH = 0;
-    let authH = 0;
-    let usedH = 0;
-    let remU = 0;
-
-    for (const a of activeAuths) {
-      const uTotal = a.total_units_authorized ?? 0;
-      const uUsed = a.units_used ?? 0;
-      const uRem = a.units_remaining ?? (uTotal - uUsed);
-      const is15Min = (a.unit_type || '15_min') === '15_min';
-
-      const rHours = a.remaining_hours !== undefined ? a.remaining_hours : (is15Min ? uRem * 0.25 : uRem);
-      const tHours = a.total_hours !== undefined ? a.total_hours : (is15Min ? uTotal * 0.25 : uTotal);
-      const usHours = a.hours_used !== undefined ? a.hours_used : (is15Min ? uUsed * 0.25 : uUsed);
-
-      remH += Number(rHours) || 0;
-      authH += Number(tHours) || 0;
-      usedH += Number(usHours) || 0;
-      remU += Number(uRem) || 0;
-    }
-
-    return {
-      totalRemainingHours: remH,
-      totalAuthorizedHours: authH,
-      totalUsedHours: usedH,
-      totalRemainingUnits: remU,
-    };
-  }, [activeAuths]);
+  const { totalRemainingHours, totalAuthorizedHours, totalUsedHours } = useMemo(
+    () => summarizeAuthorizationHours(activeAuths), [activeAuths]
+  );
 
   const overallPercent = totalAuthorizedHours > 0
     ? Math.min(100, Math.round((totalUsedHours / totalAuthorizedHours) * 100))
@@ -122,22 +99,27 @@ export default function AuthorizationsPage() {
 
     setSubmitting(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('start_date', startDate);
-      formData.append('end_date', endDate);
-      if (notes.trim()) formData.append('notes', notes.trim());
-
-      await api.upload('/clients/me/authorizations', formData, token);
+      const types = documentTypes?.document_types || (Array.isArray(documentTypes) ? documentTypes : []);
+      const authorizationType = types.find((type) => type.name === 'Authorizations' && ['client', 'both'].includes(type.for_role));
+      if (!authorizationType) throw new Error('Authorization uploads are not configured. Please contact your agency.');
+      const documentId = uploadedDocumentId || await uploadDocument({
+        file, documentTypeId: authorizationType.id, expirationDate: endDate, token,
+      });
+      setUploadedDocumentId(documentId);
+      await api.post('/clients/me/authorizations', {
+        authorization_number: authorizationNumber.trim(), start_date: startDate,
+        end_date: endDate, document: documentId,
+      }, token);
       setToastMsg('Authorization letter received and submitted for administrative review.');
       setShowUpload(false);
       setFile(null);
       setStartDate('');
       setEndDate('');
-      setNotes('');
+      setAuthorizationNumber('');
+      setUploadedDocumentId(null);
       await refetch();
     } catch (err) {
-      setErrorMsg(err.detail || 'Failed to submit authorization document.');
+      setErrorMsg(err.detail || err.message || 'Failed to submit authorization document.');
     } finally {
       setSubmitting(false);
     }
@@ -186,18 +168,12 @@ export default function AuthorizationsPage() {
     },
     {
       key: 'allowance',
-      label: 'Hours Balance & Usage',
+      label: 'Allowance & Usage',
       render: (_, row) => {
-        const total = row.total_units_authorized ?? 0;
-        const used = row.units_used ?? 0;
-        const remaining = row.units_remaining ?? (total - used);
-        const is15Min = (row.unit_type || '15_min') === '15_min';
-        const remHours = row.remaining_hours !== undefined
-          ? Number(row.remaining_hours)
-          : (is15Min ? remaining * 0.25 : remaining);
-        const totalHours = row.total_hours !== undefined
-          ? Number(row.total_hours)
-          : (is15Min ? total * 0.25 : total);
+        const { total, used, remaining, remainingHours: remHours, totalHours } = authorizationUsage(row);
+        if (totalHours === null) {
+          return <div className="text-xs"><strong>{remaining} {row.unit_type === 'visit' ? 'visits' : 'units'} remaining</strong><div className="text-slate-500">{used} used of {total} authorized</div></div>;
+        }
         const isOver = used > total;
         const pct = total > 0 ? Math.max(0, Math.min(100, Math.round((used / total) * 100))) : 0;
         const progressBg = isOver || pct >= 90 ? 'bg-rose-500' : (pct >= 75 ? 'bg-amber-500' : 'bg-emerald-600');
@@ -304,7 +280,7 @@ export default function AuthorizationsPage() {
         <Info className="h-4 w-4 text-emerald-700 mt-0.5 shrink-0" />
         <div className="text-xs text-emerald-950 leading-relaxed">
           <strong className="block mb-0.5 font-semibold text-emerald-900">How Care Authorizations Work:</strong>
-          An authorization is an official state approval issued by Medicaid or your insurance provider specifying how many hours of care services are covered. Your care coordinator schedules caregiver shifts within these approved hours. When an authorization nears expiration, our agency submits renewal requests on your behalf.
+          An authorization records the services approved by Medicaid or your insurance provider. Upload your approval letter for agency review. Contact your care coordinator with questions about coverage or renewal.
         </div>
       </div>
 
@@ -321,7 +297,7 @@ export default function AuthorizationsPage() {
                 {totalRemainingHours.toFixed(1)} <span className="text-sm font-normal text-slate-600">Hours</span>
               </div>
               <div className="text-xs text-slate-500 mt-1">
-                {totalRemainingUnits} billing units remaining (1 unit = 15 minutes)
+                Hour totals exclude approvals measured per visit
               </div>
             </CardContent>
           </Card>
@@ -390,7 +366,7 @@ export default function AuthorizationsPage() {
                     type="file"
                     required
                     accept=".pdf,.png,.jpg,.jpeg"
-                    onChange={(e) => setFile(e.target.files[0] || null)}
+                    onChange={(e) => { setFile(e.target.files[0] || null); setUploadedDocumentId(null); }}
                     className="h-9 text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-slate-100 file:text-slate-700"
                   />
                 </FormField>
@@ -418,13 +394,14 @@ export default function AuthorizationsPage() {
                 </FormField>
               </div>
 
-              <FormField label="Optional Notes (e.g., Renewal notice, case manager name)" htmlFor="auth-upload-notes">
+              <FormField label="Authorization Number (if shown on your letter)" htmlFor="auth-upload-number">
                 <Input
-                  id="auth-upload-notes"
+                  id="auth-upload-number"
                   type="text"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="e.g., Annual renewal for 2026, authorized 20 hrs/week personal care"
+                  maxLength={100}
+                  value={authorizationNumber}
+                  onChange={(e) => setAuthorizationNumber(e.target.value)}
+                  placeholder="Enter the payer's authorization number"
                   className="h-9 text-xs"
                 />
               </FormField>

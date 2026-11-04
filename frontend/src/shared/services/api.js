@@ -25,12 +25,22 @@ function getErrorDetails(payload, fallback) {
     };
   }
 
-  const detail = payload?.detail || payload?.message || fallback;
+  const fieldErrors = Array.isArray(payload?.detail)
+    ? payload.detail
+    : payload?.field_errors || (payload && !payload.detail && !payload.message ? payload : null);
+  const fieldMessage = fieldErrors && !Array.isArray(fieldErrors)
+    ? Object.entries(fieldErrors).flatMap(([field, errors]) =>
+        (Array.isArray(errors) ? errors : [errors])
+          .filter((error) => typeof error === 'string')
+          .map((error) => `${field.replaceAll('_', ' ')}: ${error}`)
+      ).join(' ')
+    : '';
+  const detail = payload?.detail || payload?.message || fieldMessage || fallback;
   return {
     detail: typeof detail === 'string' ? detail : fallback,
     message: typeof detail === 'string' ? detail : fallback,
     code: payload?.code || null,
-    fieldErrors: Array.isArray(payload?.detail) ? payload.detail : payload?.field_errors || null,
+    fieldErrors,
   };
 }
 
@@ -122,7 +132,7 @@ function stateHeader() {
   return value ? { 'X-Agency-State': value } : {};
 }
 
-async function request(method, path, body, token, signal, isRetry = false) {
+async function request(method, path, body, token, signal, isRetry = false, responseType = 'json') {
   const headers = { 'Content-Type': 'application/json', ...stateHeader() };
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -143,7 +153,7 @@ async function request(method, path, body, token, signal, isRetry = false) {
       if (res.status === 401 && !isRetry && !path.startsWith('/auth/')) {
         const newToken = await refreshAccessToken();
         if (newToken) {
-          return request(method, path, body, newToken, signal, true);
+          return request(method, path, body, newToken, signal, true, responseType);
         }
       }
       handleStatus(res.status);
@@ -152,7 +162,7 @@ async function request(method, path, body, token, signal, isRetry = false) {
       throw new ApiError(details.message, { status: res.status, ...details });
     }
 
-    return parseResponseBody(res);
+    return responseType === 'blob' ? res.blob() : parseResponseBody(res);
   } catch (err) {
     if (err instanceof ApiError) throw err;
     if (err.name === 'AbortError') {
@@ -212,6 +222,7 @@ async function upload(path, formData, token, signal, isRetry = false) {
 
 export const api = {
   get: (path, token, signal) => request('GET', path, null, token, signal),
+  getBlob: (path, token, signal) => request('GET', path, null, token, signal, false, 'blob'),
   post: (path, body, token, signal) => request('POST', path, body, token, signal),
   put: (path, body, token, signal) => request('PUT', path, body, token, signal),
   patch: (path, body, token, signal) => request('PATCH', path, body, token, signal),

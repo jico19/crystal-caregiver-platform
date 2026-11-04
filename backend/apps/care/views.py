@@ -135,30 +135,17 @@ class AdminClientAssignmentView(APIView):
         client = get_object_or_404(Client, id=client_id)
         caregiver_id = request.data.get("caregiver_id")
         role = request.data.get("role", "primary")
-        caregiver = get_object_or_404(Caregiver, id=caregiver_id)
+        caregiver = get_object_or_404(Caregiver, id=caregiver_id, deleted_at__isnull=True)
 
         # Enforce state boundary
-        if request.user.role.name == "administrator" and client.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden: Client outside state jurisdiction."}, status=status.HTTP_403_FORBIDDEN)
+        self.check_object_permissions(request, client)
 
         if caregiver.state_id != client.state_id:
             return Response({"detail": "Caregiver state jurisdiction does not match client state."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Pre-assignment compliance check (Section 8.3)
-        from apps.documents.models import DocumentRequirement, Document
-        reqs = DocumentRequirement.objects.filter(
-            state=client.state,
-            for_role__in=["caregiver", "both"],
-            required=True
-        ).select_related("document_type")
-        
-        approved_docs = Document.objects.filter(
-            owner_id=caregiver_id,
-            status="approved",
-            deleted_at__isnull=True
-        ).values_list("document_type__name", flat=True)
+        from apps.caregivers.services import caregiver_credential_status
 
-        missing = [r.document_type.name for r in reqs if r.document_type.name not in approved_docs]
+        missing = caregiver_credential_status(caregiver)["missing_requirements"]
         if missing:
             return Response(
                 {
