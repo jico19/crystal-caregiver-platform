@@ -73,6 +73,7 @@ Public state switching must not grant access to another state's private records.
 - Do not remove existing features, reset data, run password-resetting seed scripts, or weaken controls just to narrow documentation to scope.
 - Do not treat an old plan as authorization to implement everything it lists. Check its scope and current code first.
 - Use existing patterns; keep changes focused. Test meaningful behavior and security risks with the smallest relevant scope; documentation-only changes need diff/link review.
+- Testing framework: frontend Vitest setup and migration of the four remaining Node suites are implemented. Use `npm test -- --run <test-path>` from frontend for meaningful behavior changes. Backend remains pytest with pytest-django. See frontend/README.md; do not restore deleted scripts or refer to the removed reconciliation plan as a setup prerequisite.
 - Report what changed, what was verified, what works at a basic level, and which client/deployment dependencies remain. Never claim full scope completion from a successful build or seeded demonstration.
 
 For feature work, record `Scope section | Basic behavior | Technical status + evidence | Client decision/input | Deployment evidence | Next action` in the relevant task handoff. Populate it from inspection and checks, not assumptions.

@@ -226,3 +226,7 @@ The following is a historical setup reference, not a required reinstall or redes
    - `CaregiverDashboard.jsx` (Mobile upload + training tracker)
    - `AdminComplianceTable.jsx` (Dense roster + drawer inspector)
 
+
+## Frontend renovation UI decision (2026-11-05)
+
+Retain existing Radix/Tailwind primitives. The caregiver-documents pilot corrects labels, required markers and primary-button contrast without changing global resets/tokens or public-page styling. Use primitive Card pieces under components/ui; the unused legacy common Card and navbar were removed during cleanup. See frontend/README.md for ownership and frontend/RENOVATION.md for actual verification, including the unresolved native submission check.

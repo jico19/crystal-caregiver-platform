@@ -1,5 +1,16 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+import axios from 'axios';
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 const REQUEST_TIMEOUT_MS = 15000;
+
+const client = axios.create({
+  baseURL: BASE_URL,
+  allowAbsoluteUrls: false,
+  timeout: REQUEST_TIMEOUT_MS,
+  // Keep HTTP failures in the shared ApiError/refresh flow below.
+  validateStatus: () => true,
+  responseType: 'text',
+});
 
 export class ApiError extends Error {
   constructor(message, { status = 0, detail = message, code = null, fieldErrors = null } = {}) {
@@ -30,10 +41,10 @@ function getErrorDetails(payload, fallback) {
     : payload?.field_errors || (payload && !payload.detail && !payload.message ? payload : null);
   const fieldMessage = fieldErrors && !Array.isArray(fieldErrors)
     ? Object.entries(fieldErrors).flatMap(([field, errors]) =>
-        (Array.isArray(errors) ? errors : [errors])
-          .filter((error) => typeof error === 'string')
-          .map((error) => `${field.replaceAll('_', ' ')}: ${error}`)
-      ).join(' ')
+      (Array.isArray(errors) ? errors : [errors])
+        .filter((error) => typeof error === 'string')
+        .map((error) => `${field.replaceAll('_', ' ')}: ${error}`)
+    ).join(' ')
     : '';
   const detail = payload?.detail || payload?.message || fieldMessage || fallback;
   return {
@@ -48,7 +59,8 @@ async function parseResponseBody(res) {
   if (res.status === 204) return null;
   const contentType = res.headers.get('content-type') || '';
   if (!contentType.includes('application/json')) return null;
-  return res.json();
+  const text = res.data instanceof Blob ? await res.data.text() : res.data;
+  return JSON.parse(text);
 }
 
 let unauthorizedHandler = null;
@@ -71,15 +83,13 @@ async function refreshAccessToken() {
   if (!refreshPromise) {
     refreshPromise = (async () => {
       try {
-        const res = await fetch(`${BASE_URL}/auth/token/refresh/`, {
-          method: 'POST',
+        const res = await client.post('/auth/token/refresh/', { refresh: refreshToken }, {
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refresh: refreshToken }),
         });
-        if (!res.ok) {
+        if (res.status < 200 || res.status >= 300) {
           throw new Error('Refresh token invalid');
         }
-        const data = await res.json();
+        const data = await parseResponseBody(res);
         const newAccess = data.access || data.access_token;
         if (newAccess) {
           localStorage.setItem('caregiver_access_token', newAccess);
@@ -133,23 +143,22 @@ function stateHeader() {
 }
 
 async function request(method, path, body, token, signal, isRetry = false, responseType = 'json') {
-  const headers = { 'Content-Type': 'application/json', ...stateHeader() };
+  const isUpload = body instanceof FormData;
+  // false prevents Axios defaults from overriding the browser's multipart boundary.
+  const headers = { 'Content-Type': isUpload ? false : 'application/json', ...stateHeader() };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const abortRequest = () => controller.abort();
-  signal?.addEventListener('abort', abortRequest, { once: true });
-
   try {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const res = await client.request({
+      url: path,
       method,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
-      signal: controller.signal,
+      data: body ?? undefined,
+      signal,
+      responseType: responseType === 'blob' ? 'blob' : 'text',
     });
 
-    if (!res.ok) {
+    if (res.status < 200 || res.status >= 300) {
       if (res.status === 401 && !isRetry && !path.startsWith('/auth/')) {
         const newToken = await refreshAccessToken();
         if (newToken) {
@@ -158,65 +167,20 @@ async function request(method, path, body, token, signal, isRetry = false, respo
       }
       handleStatus(res.status);
       const payload = await parseResponseBody(res).catch(() => null);
-      const details = getErrorDetails(payload, res.statusText || 'Request failed.');
+      const details = getErrorDetails(payload, res.statusText || (isUpload ? 'Upload failed.' : 'Request failed.'));
       throw new ApiError(details.message, { status: res.status, ...details });
     }
 
-    return responseType === 'blob' ? res.blob() : parseResponseBody(res);
+    return responseType === 'blob' ? res.data : await parseResponseBody(res);
   } catch (err) {
     if (err instanceof ApiError) throw err;
-    if (err.name === 'AbortError') {
-      if (signal?.aborted) throw err;
+    if (axios.isCancel(err) && signal?.aborted) {
+      throw new DOMException('The request was aborted.', 'AbortError');
+    }
+    if (axios.isCancel(err) || err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT') {
       throw new ApiError('Request timed out or was cancelled.', { code: 'REQUEST_ABORTED' });
     }
     throw new ApiError('Network request failed.', { code: 'NETWORK_ERROR' });
-  } finally {
-    clearTimeout(timeoutId);
-    signal?.removeEventListener('abort', abortRequest);
-  }
-}
-
-async function upload(path, formData, token, signal, isRetry = false) {
-  const headers = { ...stateHeader() };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const abortRequest = () => controller.abort();
-  signal?.addEventListener('abort', abortRequest, { once: true });
-
-  try {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: 'POST',
-      headers,
-      body: formData,
-      signal: controller.signal,
-    });
-
-    if (!res.ok) {
-      if (res.status === 401 && !isRetry && !path.startsWith('/auth/')) {
-        const newToken = await refreshAccessToken();
-        if (newToken) {
-          return upload(path, formData, newToken, signal, true);
-        }
-      }
-      handleStatus(res.status);
-      const payload = await parseResponseBody(res).catch(() => null);
-      const details = getErrorDetails(payload, res.statusText || 'Upload failed.');
-      throw new ApiError(details.message, { status: res.status, ...details });
-    }
-
-    return parseResponseBody(res);
-  } catch (err) {
-    if (err instanceof ApiError) throw err;
-    if (err.name === 'AbortError') {
-      if (signal?.aborted) throw err;
-      throw new ApiError('Request timed out or was cancelled.', { code: 'REQUEST_ABORTED' });
-    }
-    throw new ApiError('Network request failed.', { code: 'NETWORK_ERROR' });
-  } finally {
-    clearTimeout(timeoutId);
-    signal?.removeEventListener('abort', abortRequest);
   }
 }
 
@@ -227,6 +191,6 @@ export const api = {
   put: (path, body, token, signal) => request('PUT', path, body, token, signal),
   patch: (path, body, token, signal) => request('PATCH', path, body, token, signal),
   delete: (path, token, signal) => request('DELETE', path, null, token, signal),
-  upload: (path, formData, token, signal) => upload(path, formData, token, signal),
+  upload: (path, formData, token, signal) => request('POST', path, formData, token, signal),
 };
 

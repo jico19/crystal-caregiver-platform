@@ -44,7 +44,7 @@ Frontend (from `frontend/`):
 
 - `npm run dev` (port 5173, proxies `/api` → `http://127.0.0.1:8000`), `npm run build`, `npm run preview`.
 - `npm run lint` is **oxlint** — there is no ESLint or Prettier config.
-- `npm test` discovers colocated Node unit tests and integration suites in `frontend/scripts/`.
+- Frontend tests use **Vitest**: `npm test -- --run` for one run, `npm test -- --run <test-path>` for a focused file, and `npm run test:watch` for watch mode. Pure logic defaults to Node; component suites opt into jsdom. The four prior Node suites have been migrated without restoring deleted scripts.
 
 ## Code readability & modularity
 
@@ -56,6 +56,7 @@ Frontend (from `frontend/`):
 
 ## Testing policy
 
+- Use **Vitest for frontend tests** and **pytest with pytest-django for backend tests**. Preserve meaningful existing assertions when migrating frontend tests; do not introduce another runner.
 - Do not add or run tests for simple, low-impact code changes, such as copy edits, styling tweaks, or straightforward changes with no meaningful behavior risk. Review the diff instead.
 - Test important changes that affect business logic, authentication, permissions, state scoping, data integrity, API behavior, or critical user flows. Judge importance by risk, not by the number of lines changed.
 - Use the smallest relevant test scope. Run broader suites only when the change or a failure warrants them, or when the user explicitly requests them.
@@ -66,7 +67,7 @@ Frontend (from `frontend/`):
 - Custom user model: `AUTH_USER_MODEL = "authentication.User"`. Roles and states are FKs (`user.role.name`, `user.state`).
 - All API routes use trailing slashes under `/api/v1/...` (`config/urls.py`). The frontend auth layer calls `/auth/me/` with a cached `/auth/me` fallback — preserve both.
 - JWT via SimpleJWT (access 60 min, refresh 7 d, rotate+blacklist). Token lives in `localStorage['caregiver_access_token']`, refresh in `'refresh'`.
-- Frontend API callers use `frontend/src/shared/services/api.js` — a fetch wrapper (axios is in package.json but unused). It injects an `X-Agency-State` header from `localStorage['selected_state']` on every request; that header is in the backend CORS allow-list.
+- Frontend API callers use `frontend/src/shared/services/api.js` — an Axios wrapper that preserves parsed-data return values and `ApiError`. It injects an `X-Agency-State` header from `localStorage['selected_state']` when a specific state is selected; that header is in the backend CORS allow-list. Signed storage PUTs use native fetch directly without agency credentials.
 - Documents handled via built-in Django media storage (`backend/media/`, proxied via Vite `/media`) with HMAC signed tokens for direct upload/download; AWS S3 optional via `USE_S3=true`. Certificates/PDFs generated via reportlab.
 
 ## RBAC & state scoping (non-negotiable)

@@ -21,11 +21,11 @@ const CaregiverLoginPage = lazy(() => import('../features/auth/pages/LoginPage')
 const ClientLoginPage = lazy(() => import('../features/auth/pages/ClientLoginPage'));
 
 // Caregiver pages
-const CaregiverDashboardPage = lazy(() => import('../features/caregiver/pages/DashboardPage'));
-const CaregiverApplicationPage = lazy(() => import('../features/caregiver/pages/ApplicationPage'));
-const CaregiverDocumentsPage = lazy(() => import('../features/caregiver/pages/DocumentsPage'));
-const CaregiverTrainingPage = lazy(() => import('../features/caregiver/pages/TrainingPage'));
-const CaregiverTrainingCertificatePage = lazy(() => import('../features/caregiver/pages/TrainingCertificatePage'));
+const CaregiverDashboardPage = lazy(() => import('@/features/caregiver/dashboard/DashboardPage.jsx'));
+const CaregiverApplicationPage = lazy(() => import('@/features/caregiver/application/ApplicationPage.jsx'));
+const CaregiverDocumentsPage = lazy(() => import('@/features/caregiver/documents/DocumentsPage'));
+const CaregiverTrainingPage = lazy(() => import('@/features/caregiver/training/TrainingPage.jsx'));
+const CaregiverTrainingCertificatePage = lazy(() => import('@/features/caregiver/training/TrainingCertificatePage.jsx'));
 const CaregiverProfilePage = lazy(() => import('../features/caregiver/pages/ProfilePage'));
 const CaregiverNotificationsPage = lazy(() => import('../features/caregiver/pages/NotificationsPage'));
 const CaregiverClientsPage = lazy(() => import('../features/caregiver/pages/ClientsPage'));
@@ -33,33 +33,33 @@ const CaregiverClientCarePlanPage = lazy(() => import('../features/caregiver/pag
 const CaregiverClientSchedulePage = lazy(() => import('../features/caregiver/pages/ClientSchedulePage'));
 
 // Client pages
-const ClientDashboardPage = lazy(() => import('../features/client/pages/DashboardPage'));
-const ClientIntakePage = lazy(() => import('../features/client/pages/IntakePage'));
-const ClientFormsPage = lazy(() => import('../features/client/pages/FormsPage'));
-const ClientDocumentsPage = lazy(() => import('../features/client/pages/DocumentsPage'));
-const ClientAuthorizationsPage = lazy(() => import('../features/client/pages/AuthorizationsPage'));
+const ClientDashboardPage = lazy(() => import('@/features/client/dashboard/DashboardPage.jsx'));
+const ClientIntakePage = lazy(() => import('@/features/client/intake/IntakePage'));
+const ClientFormsPage = lazy(() => import('@/features/client/forms/FormsPage.jsx'));
+const ClientDocumentsPage = lazy(() => import('@/features/client/documents/DocumentsPage.jsx'));
+const ClientAuthorizationsPage = lazy(() => import('@/features/client/authorizations/AuthorizationsPage'));
 const ClientCarePlanPage = lazy(() => import('../features/client/pages/CarePlanPage'));
 const ClientSchedulePage = lazy(() => import('../features/client/pages/SchedulePage'));
 const ClientProfilePage = lazy(() => import('../features/client/pages/ProfilePage'));
 const ClientNotificationsPage = lazy(() => import('../features/client/pages/NotificationsPage'));
 
 // Admin pages
-const AdminDashboardPage = lazy(() => import('../features/admin/pages/DashboardPage'));
+const AdminDashboardPage = lazy(() => import('@/features/admin/dashboard/DashboardPage'));
 const AdminCaregiversPage = lazy(() => import('../features/admin/pages/CaregiversPage'));
 const AdminCaregiverDetailPage = lazy(() => import('../features/admin/pages/CaregiverDetailPage'));
 const AdminClientsPage = lazy(() => import('../features/admin/pages/ClientsPage'));
-const AdminClientDetailPage = lazy(() => import('../features/admin/pages/ClientDetailPage'));
+const AdminClientDetailPage = lazy(() => import('@/features/admin/client-detail/ClientDetailPage.jsx'));
 const AdminDocumentsPage = lazy(() => import('../features/admin/pages/DocumentsPage'));
 const AdminTrainingPage = lazy(() => import('../features/admin/pages/TrainingPage'));
-const AdminAuthorizationsPage = lazy(() => import('../features/admin/pages/AuthorizationsPage'));
-const AdminReferralsPage = lazy(() => import('../features/admin/pages/ReferralsPage'));
-const AdminReportsPage = lazy(() => import('../features/admin/pages/ReportsPage'));
+const AdminAuthorizationsPage = lazy(() => import('@/features/admin/authorizations/AuthorizationsPage.jsx'));
+const AdminReferralsPage = lazy(() => import('@/features/admin/referrals/ReferralsPage'));
+const AdminReportsPage = lazy(() => import('@/features/admin/reports/ReportsPage'));
 const AdminUsersPage = lazy(() => import('../features/admin/pages/UsersPage'));
 const AdminSettingsPage = lazy(() => import('../features/admin/pages/SettingsPage'));
 const AdminAuditLogsPage = lazy(() => import('../features/admin/pages/AuditLogsPage'));
 const AdminAnnouncementsPage = lazy(() => import('../features/admin/pages/AnnouncementsPage'));
 const AdminNotificationsPage = lazy(() => import('../features/admin/pages/NotificationsPage'));
-const WebsiteContentPage = lazy(() => import('../features/admin/pages/WebsiteContentPage'));
+const WebsiteContentPage = lazy(() => import('@/features/admin/website/WebsiteContentPage.jsx'));
 
 function CaregiverApplicationRoute() {
   const { user, loading } = useAuth();

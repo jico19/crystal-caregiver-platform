@@ -4,7 +4,7 @@
 
 ## Reference status and scope boundaries
 
-This document contains earlier architecture proposals alongside implementation notes. Preserve existing working architecture and user edits; do not execute its snippets as an implementation checklist. Inspect current code/settings for actual behavior. In particular, the current frontend uses the shared fetch wrapper (not Axios), React Router v7, and SQLite locally or configured PostgreSQL. Django media streaming is supported; S3-only/direct-upload assertions below are not universal facts.
+This document contains earlier architecture proposals alongside implementation notes. Preserve existing working architecture and user edits; do not execute its snippets as an implementation checklist. Inspect current code/settings for actual behavior. In particular, the current frontend uses the shared Axios wrapper, React Router v7, and SQLite locally or configured PostgreSQL. Django media streaming is supported; S3-only/direct-upload assertions below are not universal facts.
 
 State/role access controls are retained safeguards. Billing burndown, assignment gates, retention/purge/legal-hold workflows and prescribed infrastructure are not Scope of Work requirements. Section 8 reminder jobs support required automation, but timing and delivery policy remain pending; purge jobs are not authorized by scope. Technical stack choices and performance claims below are not client business requirements. See the guide for the required basic flows and pending agency inputs.
 
@@ -13,7 +13,7 @@ State/role access controls are retained safeguards. Billing burndown, assignment
 The **Caregiver Platform** is an enterprise home health agency operating system serving Florida, Indiana, and Georgia.
 This architecture is designed as a **modern cloud-native monolith**:
 - **Monolithic Backend Core**: A Django REST Framework (DRF) backend on Python 3.14 (3.12+) with clean layered separation of concerns (Views/ViewSets -> Serializers -> Domain Services/Managers -> Models/ORM -> Persistence).
-- **Single Page Application (SPA)**: A React 19 frontend compiled with Vite, styled with Tailwind CSS v4 and shadcn/ui, using React Hook Form for client validations, TanStack Query (React Query v5) for server cache management, and Axios for HTTP transport with multi-state and JWT header injection.
+- **Single Page Application (SPA)**: A React 19 frontend compiled with Vite, styled with Tailwind CSS v4 and shadcn/ui, using React Hook Form for client validations, TanStack Query (React Query v5) for server cache management, and the shared Axios wrapper for HTTP transport with multi-state and JWT header injection.
 - **Pure Relational Engine**: Standard PostgreSQL 16+ managed through Django ORM and migrations, serving as the single source of truth for transactional data, compliance audits, and multi-tenant state isolation.
 - **Built-in Django Media Storage**: Native Django media storage engine (`MEDIA_ROOT` / `FileSystemStorage`) paired with cryptographic HMAC signed tokens for direct uploads and streaming downloads, proxied via Vite `/media`, with optional AWS S3 support (`USE_S3=true`).
 - **Built-in Authentication & SimpleJWT**: Self-hosted authentication utilizing Django's native authentication system (`django.contrib.auth`) paired with `djangorestframework-simplejwt` for RFC 7519 JSON Web Token issuance and rotation, eliminating external BaaS dependencies.
@@ -70,7 +70,7 @@ flowchart TD
 | | Styling & Primitives | **Tailwind CSS (v4) + shadcn/ui** | Semantic token architecture, accessible primitives, zero-slop UI components. |
 | | Form Engine | **React Hook Form (v7+)** | Minimal re-renders, uncontrolled input performance, deep schema validation. |
 | | State & Fetching | **TanStack Query (React Query v5)** | Declarative server cache management, automated deduplication, and cache invalidation. |
-| | HTTP Client | **Axios (v1+)** | Unified instance with auto-token injection and `X-Agency-State` header forwarding. |
+| | HTTP Client | **Axios (v1+)** | Shared wrapper with explicit bearer tokens and `X-Agency-State` header forwarding. |
 | | Routing | **React Router v6** | Declarative portal routing and role-based route guards. |
 | **Backend** | Runtime & API | **Django REST Framework (DRF 3.18+) on Django 6.1+ (Python 3.14/3.12+)** | Battle-tested monolith framework, declarative views and viewsets, robust request routing, and built-in administrative capabilities. |
 | | Data Validation | **DRF Serializers / ModelSerializers** | Declarative schema validation, nested payload handling, and standardized error formatting. |
@@ -463,7 +463,7 @@ graph TD
 
 ---
 
-## 10. Frontend Architecture (React 19, shadcn/ui, TanStack Query, fetch)
+## 10. Frontend Architecture (React 19, shadcn/ui, TanStack Query, Axios)
 
 ### 10.1 Frontend Directory Structure
 
@@ -471,7 +471,7 @@ The implementation is JavaScript/JSX with Vite and Tailwind v4. See `frontend/RE
 
 ```text
 frontend/
-  scripts/                      # Node integration and controller tests
+  vitest.config.js              # Node default; jsdom opt-in suites
   src/
     main.jsx                    # React root and StrictMode
     App.jsx                     # Router, auth, query provider, error boundary
@@ -480,37 +480,47 @@ frontend/
     lib/utils.js                # shadcn class merger
     features/
       admin/
-        pages/                  # Stable route entry modules
+        pages/                  # Remaining small route pages
         authorizations/         # Authorization editor, list, constants
         client-detail/          # Admission, care plans, schedule, assignments
-        referrals/              # Pipeline, roster, dialogs, controller
+        referrals/              # Pipeline, roster, dialogs, records
+        dashboard/              # Executive/regional views and charts
+        reports/                # Six sections and response mapping
+        website/                # Drafts, fields and collections
       caregiver/
         pages/
-        application/            # Form, schema, payload mapping, draft storage
+        application/            # Form, schema and payload mapping
+        documents/              # Upload form, list, scoped queries
+        training/               # Courses, records/actions and certificates
+        dashboard/              # Query normalization and charts
       client/
         pages/
         intake/                 # Editor session, summary, progress
-      public/                   # Public layout, pages, publications
+        authorizations/         # Client uploads/retry and coverage
+        documents/              # Client document workflow
+        forms/                  # Version-bound signature workflow
+        dashboard/              # Client data boundary and care views
+      public/                   # Pages, publications and state switcher
       auth/pages/               # Login screens
     shared/
       components/               # Platform compositions and portal shell
       contexts/                 # Auth provider and context definitions
       hooks/                    # Shared query and session hooks
-      services/api.js           # Canonical fetch transport
+      services/api.js           # Canonical Axios transport
       lib/                      # Role helpers and QueryClient
       constants/                # Cross-portal states and statuses
       utils/                    # Reusable validation, documents, packets
 ```
 
-Colocate a workflow's supporting files and use relative imports internally. Use `@/shared/...` and `@/components/ui/...` across workflow boundaries. Public state selection comes from the URL; the removed `StateProvider` had no state consumers.
+Colocate a workflow's supporting files and use relative imports internally. Use `@/shared/...` and `@/components/ui/...` across workflow boundaries. Public state selection comes from the URL. The existing StateProvider remains in App.jsx; this renovation does not replace provider architecture.
 
 ### 10.2 HTTP & Multi-State Scoping Transport (`src/shared/services/api.js`)
 
-The canonical transport wraps `fetch`. Axios remains a dependency but is not the transport implementation. Callers use this wrapper for JSON requests and uploads so token refresh, error handling, cancellation, and jurisdiction headers remain consistent.
+The canonical transport wraps a configured Axios instance. Callers retain the existing method signatures, parsed-data/blob return values and `ApiError` contract for JSON requests and uploads. A shared request handler preserves one concurrent refresh operation, one retry after refresh, rotating refresh tokens, session events, cancellation, a 15-second timeout and jurisdiction headers. Signed storage PUTs continue using native `fetch` directly without agency credentials.
 
 - Access tokens are stored under `localStorage['caregiver_access_token']`; refresh tokens under `localStorage['refresh']`.
 - Requests send `Authorization: Bearer <access_token>` and `X-Agency-State` from `localStorage['selected_state']` when set.
-- `VITE_API_URL` can override the default `http://localhost:8000/api/v1` base. Vite also proxies `/api` and `/media` to Django locally.
+- `VITE_API_URL` supplies the API base URL. Vite also proxies `/api` and `/media` to Django locally.
 - Auth preserves `/auth/me/` with the cached `/auth/me` compatibility fallback. Backend permissions remain authoritative for role and state access.
 
 ### 10.3 Server State Caching (`src/shared/lib/queryClient.js`)
@@ -521,6 +531,10 @@ The canonical transport wraps `fetch`. Axios remains a dependency but is not the
 
 ### 10.4 Form Handling & Editor Ownership
 
-The caregiver application uses React Hook Form and Zod. Its schema, payload mapping, and identity-bound seven-day draft persistence live in `features/caregiver/application`. Other editors use local React state; they do not all use React Hook Form or TanStack mutations.
+The caregiver application uses React Hook Form and Zod. Its schema and payload mapping live in `features/caregiver/application`; identity-bound seven-day draft persistence remains in `shared/utils/draftStorage.js`. Other editors use local React state; they do not all use React Hook Form or TanStack mutations.
 
-Authorization new/edit entry points initialize complete drafts. Client intake mounts a fresh editor session when editing begins and unmounts it on cancel or successful completion, including its signature state. Client detail initializes drafts for one client and refreshes assignments or schedules separately after mutations. Navigating to another client mounts a new detail session.
+Authorization new/edit entry points initialize complete drafts. Client intake retains session-local drafts across edit/cancel and resets them on account/record changes. Client detail has separate admission, schedule, assignment and care-plan editors; saved-record bundle refreshes do not reinitialize neighboring drafts. Navigating to another client mounts a new detail session.
+
+### 10.5 Verification and UI layers
+
+Vitest owns frontend suites; Node logic is the default and components opt into jsdom. The four historical Node suites were migrated; deleted scripts remain deleted. See frontend/README.md and frontend/RENOVATION.md for commands and evidence limits. Existing Radix/Tailwind primitives are retained; shared page compositions keep focused APIs; the unused legacy composed Card/navbar were removed. Temporary browser fixtures used synthetic transport and were removed after verification; retained captures are not backend/deployment evidence.

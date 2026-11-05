@@ -5,6 +5,8 @@
 > **Target Audience**: AI coding agents working in this repository.
 > **Primary Rule**: Always preserve design system consistency and enforce fail-closed state-scoped Role-Based Access Control (RBAC).
 
+Frontend tests use **Vitest**; backend tests use **pytest with pytest-django**. Vitest is configured in vitest.config.js. Use `npm test -- --run <test-path>` or `npm run test:watch`. The four remaining Node suites were migrated with their assertions preserved; deleted scripts stay deleted. Keep tests scoped to meaningful behavior changes; documentation/copy-only edits need diff review.
+
 ---
 
 ## 1. Project Overview & Repository Map
@@ -12,7 +14,7 @@
 - **Frontend**: `frontend/` — React 19, Vite, Tailwind CSS v4 (`@tailwindcss/vite`), Radix UI, Lucide React, React Router v7, TanStack Query v5.
 - **Backend**: `backend/apps/` — Django + DRF + SimpleJWT, Django ORM/migrations, SQLite locally or configured PostgreSQL. No FastAPI or Supabase auth.
 - **Specifications & Schemas**: `docs/` — supporting references subordinate to `Scope of work.md`. Verify current routes, serializers, models/migrations and consumers when examples conflict.
-- **HTTP transport**: `src/shared/services/api.js` wraps fetch, adds the bearer token and `X-Agency-State`, and handles refresh. Preserve `/auth/me/` and its compatibility fallback.
+- **HTTP transport**: `src/shared/services/api.js` wraps a configured Axios instance, adds the bearer token and `X-Agency-State`, and handles refresh. Callers receive parsed data and shared `ApiError` errors. Preserve `/auth/me/` and its compatibility fallback. Signed storage PUTs use native fetch directly without agency credentials.
 
 ---
 
@@ -52,18 +54,18 @@ When building or modifying pages, use these standard components from `src/shared
 
 1. **Layout Wrapper**: `PageContainer` (`size="default" | "narrow" | "wide"`).
 2. **Page Header**: `PageHeader` (`title`, `subtitle`, `badge`, `actions`, `breadcrumbs`).
-3. **Card Container**: `Card` (`title`, `subtitle`, `actions`, `compact`).
+3. **Card Container**: primitive `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` from `@/components/ui/card`.
 4. **Data Grid**: `DataTable` (pagination, search, sorting, empty states).
 5. **Status Badges**: `StatusBadge` (`status`, `label`, `size="xs"|"sm"|"md"`).
 6. **Feedback & States**: `LoadingState`, `Skeleton`, `EmptyState`, `ErrorBoundary`.
-7. **Interactive Modals**: `ConfirmModal` for confirmations/deletions.
+7. **Interactive Modals**: Radix-based `Dialog` primitives for confirmations/deletions.
 8. **UI Primitives (`src/components/ui/`)**: `Button`, `Badge`, `Input`, `Select`, `Dialog`, `Tabs`, `Table`, `DropdownMenu`.
 
 ### 2.5 Standard Page Template Pattern
 ```jsx
 import PageContainer from '../../../shared/components/common/PageContainer';
 import PageHeader from '../../../shared/components/common/PageHeader';
-import Card from '../../../shared/components/common/Card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import StatusBadge from '../../../shared/components/common/StatusBadge';
 import { Button } from '@/components/ui/button';
 import useFetch from '../../../shared/hooks/useFetch';
@@ -82,8 +84,12 @@ export default function ExamplePage() {
           </Button>
         }
       />
-      <Card title="Section Overview" subtitle="Key details and status">
-        {/* Table, metrics, or form contents */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Section Overview</CardTitle>
+          <CardDescription>Key details and status</CardDescription>
+        </CardHeader>
+        <CardContent>{/* Table, metrics, or form contents */}</CardContent>
       </Card>
     </PageContainer>
   );
@@ -156,3 +162,7 @@ Follow this 5-step checklist for any frontend page or API endpoint:
    - Provide `<Skeleton>` or `<LoadingState>` while fetching.
    - Provide `<EmptyState>` when lists are empty.
    - Handle API errors gracefully with `<Alert variant="destructive">` or Toast.
+
+## Renovated workflow ownership (2026-11-05)
+
+See [README.md](README.md) for the current workflow folders, primitive/composition distinction and verification commands, and [RENOVATION.md](RENOVATION.md) for evidence and remaining limits. Routes import migrated workflow pages directly; obsolete route bridges were removed. Keep feature data normalization and editor drafts local to the workflow; generic file, validation and transport helpers remain shared. Existing Radix/Tailwind primitives are retained.
