@@ -1,8 +1,0 @@
-{
-  "schema_version": 1,
-  "state": {"code": "FL", "name": "Florida", "slug": "florida"},
-  "published_at": null,
-  "overview": {"title": "Home care in Florida", "description": ""},
-  "contact": {"phone": "", "email": "", "address": "", "office_hours": ""},
-  "services": [], "forms": [], "licensing": [], "careers": []
-}

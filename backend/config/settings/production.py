@@ -1,14 +1,23 @@
-from .base import *
+"""Deployment baseline only; hosting and service configuration remain pending."""
+from .base import *  # noqa: F403
+import os
 
-DEBUG = False
+from django.core.exceptions import ImproperlyConfigured
 
-# Production Security Headers
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = "DENY"
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-SECURE_SSL_REDIRECT = True
+from .base import required_env
+
+ALLOWED_HOSTS = [host.strip() for host in required_env("DJANGO_ALLOWED_HOSTS").split(",") if host.strip()]
+if not ALLOWED_HOSTS or "*" in ALLOWED_HOSTS:
+    raise ImproperlyConfigured("Provide explicit DJANGO_ALLOWED_HOSTS.")
+DATABASES = {"default": {
+    "ENGINE": "django.db.backends.postgresql",
+    "NAME": required_env("DB_NAME"),
+    "USER": required_env("DB_USER"),
+    "PASSWORD": required_env("DB_PASSWORD"),
+    "HOST": required_env("DB_HOST"),
+    "PORT": os.environ.get("DB_PORT", "5432"),
+    "OPTIONS": {"sslmode": "verify-full"},
+}}
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True

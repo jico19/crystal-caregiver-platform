@@ -1,56 +1,39 @@
-from rest_framework import status
-from rest_framework.request import Request
+from django.conf import settings
+from django.urls import reverse
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.test import APIRequestFactory
-from apps.core.test_utils import BasePlatformTestCase, User
-from apps.core.permissions import IsSuperAdmin, IsStateScopedAdmin
-from apps.core.models import State
-
-class CorePlatformTests(BasePlatformTestCase):
-    def test_health_check(self):
-        response = self.client.get("/api/health/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()["status"], "healthy")
-
-    def test_core_rbac_permissions(self):
-        factory = APIRequestFactory()
-        is_super = IsSuperAdmin()
-        is_state_admin = IsStateScopedAdmin()
-
-        # Super admin has global permission
-        req = factory.get("/")
-        req.user = self.super_user
-        self.assertTrue(is_super.has_permission(req, None))
-        self.assertTrue(is_state_admin.has_permission(req, None))
-
-        # Regular user lacks super admin permission.
-        fl_admin = User.objects.create_user(
-            email="fl.scoped@test.com", password="password123",
-            role=self.admin_role, state=self.fl,
-        )
-        req.user = fl_admin
-        self.assertFalse(is_super.has_permission(req, None))
-        self.assertTrue(is_state_admin.has_permission(req, None))
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
-from django.test import SimpleTestCase
-from unittest.mock import patch
-from apps.core.storage import generate_document_token, verify_document_token
+def test_public_health_response(client):
+    response = client.get(reverse("health"))
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
 
 
-class DocumentTokenTests(SimpleTestCase):
-    def test_token_is_bound_to_upload_or_download(self):
-        upload = generate_document_token("document", purpose="upload")
-        download = generate_document_token("document", purpose="download")
-        self.assertTrue(verify_document_token("document", upload, purpose="upload"))
-        self.assertTrue(verify_document_token("document", download, purpose="download"))
-        self.assertFalse(verify_document_token("document", upload, purpose="download"))
-        self.assertFalse(verify_document_token("document", download, purpose="upload"))
-        self.assertFalse(verify_document_token("other-document", download, purpose="download"))
+def test_health_rejects_writes(client):
+    assert client.post(reverse("health"), {}).status_code == 405
 
-    def test_token_expires_at_the_advertised_lifetime(self):
-        with patch("django.core.signing.time.time", return_value=100000):
-            token = generate_document_token("document", purpose="download")
-        with patch("django.core.signing.time.time", return_value=100901):
-            self.assertFalse(verify_document_token("document", token, purpose="download", max_age=900))
-        with patch("django.core.signing.time.time", return_value=100899):
-            self.assertTrue(verify_document_token("document", token, purpose="download", max_age=900))
+
+def test_default_api_denies_anonymous_requests():
+    class PrivateView(APIView):
+        def get(self, request):
+            return Response({"private": True})
+
+    assert PrivateView.authentication_classes == [SessionAuthentication]
+    assert PrivateView.permission_classes == [IsAuthenticated]
+    response = PrivateView.as_view()(APIRequestFactory().get("/private/"))
+    assert response.status_code == 403
+    assert "django.middleware.csrf.CsrfViewMiddleware" in settings.MIDDLEWARE
+
+
+def test_custom_user_persists_with_hashed_password(db, django_user_model):
+    user = django_user_model.objects.create_user(
+        username="synthetic-user", password="synthetic-test-password",
+    )
+    user.refresh_from_db()
+    assert django_user_model._meta.label == "accounts.User"
+    assert user.check_password("synthetic-test-password")
+    assert user.password != "synthetic-test-password"
