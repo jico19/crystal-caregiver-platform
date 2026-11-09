@@ -69,7 +69,7 @@ Frontend:
 
 Backend:
 - One domain per app. Business rules live in `services.py` (split into a `services/` package past ~300 lines).
-- Keep views, serializers, and services separate in their own modules or packages. Views handle HTTP requests and responses, serializers handle input validation and data representation, and services handle business rules and orchestration. Put each responsibility in its proper layer; do not mix them in one file.
+- Keep views, serializers, and services separate. All backend serializers, including request inputs and response/schema contracts, must live in the owning app's dedicated `serializers/` folder, split into modules by responsibility. Do not use app-root `serializers.py`, `*_serializers.py`, or serializer definitions inside views. Views handle HTTP requests and responses, serializers handle input validation and data representation, and services handle business rules and orchestration. Put each responsibility in its proper layer; do not mix them in one file.
 - Views and serializers stay thin; use separate files once `views.py` or `serializers.py` passes ~300 lines.
 - Permissions go in `permissions.py`, filters in `filters.py`, tests in `tests/test_<topic>.py`.
 

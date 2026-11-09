@@ -1,5 +1,7 @@
+"""Strict inputs for application transitions, document review, and demo completion."""
+
 from rest_framework import serializers
-from apps.accounts.serializers import StrictSerializer
+from apps.accounts.serializers.inputs import StrictSerializer
 
 
 class TransitionInput(StrictSerializer):

@@ -1,15 +1,9 @@
+"""Strict account inputs and reusable Django password validation."""
+
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
-from apps.operations.models import StateBranch
-from .models import User
-
-
-# Represent the public branch directory without exposing internal identifiers.
-class BranchSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StateBranch
-        fields = ["public_id", "state_code", "display_name"]
+from ..models import User
 
 
 class StrictSerializer(serializers.Serializer):

@@ -3,7 +3,7 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from .models import BranchContent
-from .content_serializers import BranchContentSerializer
+from .serializers.content import BranchContentSerializer
 
 
 class BranchContentList(generics.ListAPIView):

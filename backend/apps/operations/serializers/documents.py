@@ -1,7 +1,9 @@
+"""Synthetic upload inputs and authorized document/version representations."""
+
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
-from apps.accounts.serializers import StrictSerializer
-from .models import Document, DocumentVersion, DocumentReview
+from apps.accounts.serializers.inputs import StrictSerializer
+from ..models import Document, DocumentVersion, DocumentReview
 
 
 class UploadInput(StrictSerializer):

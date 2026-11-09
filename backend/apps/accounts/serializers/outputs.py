@@ -1,3 +1,5 @@
+"""Schema contracts for branch, session, invitation, and authentication responses."""
+
 from rest_framework import serializers
 
 

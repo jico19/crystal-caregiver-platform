@@ -1,6 +1,6 @@
 import uuid
 from drf_spectacular.utils import extend_schema
-from .contracts import SessionOutput, CSRFOutput, AuthOutput, DetailOutput, InvitationOutput
+from .serializers.outputs import SessionOutput, CSRFOutput, AuthOutput, DetailOutput, InvitationOutput
 from django.db.models import Q
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
@@ -14,8 +14,8 @@ from rest_framework.views import APIView
 from apps.operations.models import StateBranch, AgencyAdmin, BranchStaff, Caregiver, Client
 from .access import admin_branches
 from .permissions import IsBusinessAdmin
-from .serializers import (
-    BranchSerializer,
+from .serializers.branches import BranchSerializer
+from .serializers.inputs import (
     LoginInput,
     InvitationInput,
     AcceptInput,

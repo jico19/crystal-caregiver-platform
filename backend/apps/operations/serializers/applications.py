@@ -1,6 +1,8 @@
+"""Caregiver application inputs, original forms, and review history representations."""
+
 from rest_framework import serializers
-from apps.accounts.serializers import PasswordInput
-from .models import FormVersion, CaregiverApplication, ApplicationReview
+from apps.accounts.serializers.inputs import PasswordInput
+from ..models import FormVersion, CaregiverApplication, ApplicationReview
 
 
 # Validate synthetic caregiver application fields in the domain that owns them.

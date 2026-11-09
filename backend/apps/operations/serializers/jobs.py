@@ -1,8 +1,8 @@
 """Public job representations and their published application form schema."""
 
 from rest_framework import serializers
-from .models import JobPosting
-from .application_serializers import FormVersionSerializer
+from ..models import JobPosting
+from .applications import FormVersionSerializer
 
 
 # Keep public listing fields separate from HTTP routing and query scoping.

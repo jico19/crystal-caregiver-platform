@@ -1,6 +1,6 @@
 from django.contrib.auth import login
 from drf_spectacular.utils import extend_schema
-from apps.accounts.contracts import ApplicationOutput
+from apps.accounts.serializers.outputs import ApplicationOutput
 from django.db.models import Q, Prefetch
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
@@ -12,11 +12,11 @@ from apps.accounts.access import admin_branches, scope_people
 from apps.accounts.permissions import IsBusinessAdmin
 from apps.accounts.views import PublicAuthView, identity
 from .models import JobPosting, Caregiver, Client, CaregiverApplication, ApplicationReview
-from .review_inputs import TransitionInput
+from .serializers.reviews import TransitionInput
 from .services import apply_to_job
-from .application_serializers import ApplicationInput, ApplicationSerializer, ApplicationDetailSerializer
-from .job_serializers import JobSerializer, JobDetailSerializer
-from .person_serializers import PersonSerializer, ClientSerializer
+from .serializers.applications import ApplicationInput, ApplicationSerializer, ApplicationDetailSerializer
+from .serializers.jobs import JobSerializer, JobDetailSerializer
+from .serializers.people import PersonSerializer, ClientSerializer
 
 
 def published_jobs():
@@ -99,7 +99,7 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=["post"], permission_classes=[IsBusinessAdmin], serializer_class=TransitionInput)
     @extend_schema(request=TransitionInput, responses=ApplicationDetailSerializer)
     def transitions(self, request, public_id=None):
-        from .review_inputs import TransitionInput
+        from .serializers.reviews import TransitionInput
         from .services.transitions import transition_application
         data = TransitionInput(data=request.data)
         data.is_valid(raise_exception=True)

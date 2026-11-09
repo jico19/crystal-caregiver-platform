@@ -6,13 +6,13 @@ from drf_spectacular.utils import extend_schema
 from apps.accounts.access import scope_people, admin_branches
 from apps.accounts.permissions import IsBusinessAdmin
 from .models import Caregiver, Document, DocumentVersion
-from .document_serializers import DocumentSerializer, DocumentVersionSerializer, UploadInput
-from .review_inputs import ReviewInput, CompletionInput
+from .serializers.documents import DocumentSerializer, DocumentVersionSerializer, UploadInput
+from .serializers.reviews import ReviewInput, CompletionInput
 from .services.documents import upload_document, review_document
 from .services.checklist import onboarding_snapshot, complete_onboarding
 from .private_files import attachment
 from .filters import OnboardingFilter
-from .onboarding_serializers import OnboardingOutput
+from .serializers.onboarding import OnboardingOutput
 
 
 def scoped_caregivers(user):

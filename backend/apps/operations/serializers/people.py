@@ -1,7 +1,7 @@
 """Directory representations for already authorized caregiver and client records."""
 
 from rest_framework import serializers
-from .models import Caregiver, Client
+from ..models import Caregiver, Client
 
 
 # Shared directory fields are serialized only after the view scopes the records.
