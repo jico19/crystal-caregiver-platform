@@ -13,30 +13,30 @@ Verify each exists before using it. If one is missing, add it under TODO and ask
 
 ```text
 Backend (run from backend/)
-  install:    TODO: confirm (pip/uv/poetry)
+  install:    python -m pip install -r requirements-dev.txt
   dev:        python manage.py runserver
   test:       pytest
   lint:       not configured (removed by owner request)
   format:     not configured (removed by owner request)
   migrate:    python manage.py makemigrations && python manage.py migrate
-  seed:       python manage.py seed_demo   (TODO: create in Phase 0)
-  deploy chk: python manage.py check --deploy --settings=config.settings.prod
+  seed:       python manage.py seed_demo
+  deploy chk: python manage.py check --deploy --settings=config.settings.production
 
 Frontend (run from frontend/)
-  install:    TODO: confirm (npm/pnpm)
+  install:    npm ci
   dev:        npm run dev
   test:       npm run test
   lint:       npm run lint        (Oxlint, including React rules)
   format:     npm run format      (oxfmt .)
   typecheck:  npm run typecheck   (tsc --noEmit)
-  e2e:        TODO: pick Playwright, add in Phase 3
+  e2e:        npm run test:e2e (Playwright)
 ```
 
 ## Tooling
 
 - Whenever touching frontend code, read and apply both the `tailwind-design-system`
   and `vercel-react-best-practices` skills.
-- Python and Node versions: TODO: confirm and pin (`.python-version`, `.nvmrc`).
+- Runtime pins: `.python-version` (Python 3.14.4), `frontend/.nvmrc` (Node 24).
 - Frontend formatting uses Oxfmt and lint uses Oxlint. Never format frontend code by hand.
 - Backend formatting and lint tooling were removed by owner request; no replacement is configured.
 - If a formatter or lint command is missing or fails to run, stop and report it. Don't skip it.

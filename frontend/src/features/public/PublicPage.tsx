@@ -5,6 +5,8 @@ import type { Job, Page } from "../../api/types";
 import { Failure } from "../../components/Failure";
 import { Loading } from "../../components/Loading";
 
+import { BranchDetails } from "./components/BranchDetails";
+
 const states: Record<string, string> = {
   FL: "Florida",
   IN: "Indiana",
@@ -66,18 +68,7 @@ export default function PublicPage() {
             See caregiver opportunities
           </a>
         </div>
-        <div className="rounded-md bg-accent p-12 max-md:p-7">
-          <p className="mb-6 text-caption text-muted-foreground">Your public branch</p>
-          <h2 className="mb-6 font-serif text-section">{states[state]}</h2>
-          <p className="mb-6 max-w-[62ch]">
-            Illustrative support with daily living, companionship, and care coordination.
-          </p>
-          <hr className="my-6 border-border" />
-          <p className="mb-6 max-w-[62ch]">
-            Services, licensing details, and contact information await agency confirmation.
-          </p>
-          <Link to="/login">Open your portal →</Link>
-        </div>
+        <BranchDetails state={state} name={states[state]} />
       </section>
 
       <section className="page-section" id="jobs">

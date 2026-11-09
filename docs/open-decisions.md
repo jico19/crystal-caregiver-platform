@@ -44,3 +44,12 @@ specifications only; application implementation remains gated on Phase 0.
 Exact fields, transitions, expiry calculations and acceptance criteria are versioned
 in the linked specs. All content remains illustrative until agency review; no
 production storage/vendor or legal policy is approved here.
+
+## Implementation instructions recorded 2026-11-09
+
+- Owner explicitly requested implementing the Phase 1 specs. Use SQLite for the
+  development/prototype implementation. PostgreSQL validation is deferred until
+  migration work; it no longer blocks prototype implementation. Do not claim
+  PostgreSQL results from SQLite tests or production readiness.
+- Owner confirmed pip/npm installation commands. A PostgreSQL driver was approved
+  but is not installed while SQLite is the chosen database; add it when needed.

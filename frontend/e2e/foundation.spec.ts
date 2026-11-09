@@ -52,6 +52,28 @@ test("public job application creates portal access and survives logout/login", a
   await page.goto("/portal/super-admin");
   await expect(page.getByRole("heading", { name: "Access denied" })).toBeVisible();
 });
+test("public state content and job context follow state selection", async ({ page }) => {
+  await page.goto("/states/FL");
+  for (const [code, name] of [
+    ["IN", "Indiana"],
+    ["GA", "Georgia"],
+    ["FL", "Florida"],
+  ]) {
+    await page
+      .getByRole("navigation", { name: "Public state selection" })
+      .getByRole("link", { name })
+      .click();
+    await expect(page).toHaveURL(`/states/${code}`);
+    await expect(
+      page.getByText(`${name}: illustrative daily-living`, { exact: false }),
+    ).toBeVisible();
+    await expect(page.getByText(`Official ${name} licensing`, { exact: false })).toBeVisible();
+    await page.getByRole("link", { name: "View job & apply" }).first().click();
+    await expect(page.getByText(`Careers / ${code}`, { exact: true })).toBeVisible();
+    await page.goto(`/states/${code}`);
+  }
+});
+
 for (const width of [1440, 1024, 768, 390]) {
   test(`public page fits ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });

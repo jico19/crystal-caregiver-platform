@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from apps.accounts import views as auth
 from apps.operations import api
+from apps.operations.public_content import BranchContentList
 
 router = DefaultRouter()
 router.register("jobs", api.JobViewSet)
@@ -11,6 +12,7 @@ router.register("clients", api.ClientViewSet)
 router.register("applications", api.ApplicationViewSet)
 
 urlpatterns = [
+    path("branch-content/", BranchContentList.as_view()),
     path("", include(router.urls)),
     path("jobs/<uuid:public_id>/apply/", api.ApplyView.as_view()),
     path("branches/", auth.BranchList.as_view()),

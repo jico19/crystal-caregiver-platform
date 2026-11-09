@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 from apps.accounts.models import User
+from apps.operations.demo_content import seed_branch_content
 from apps.operations.models import (
     Agency,
     StateBranch,
@@ -38,6 +39,7 @@ class Command(BaseCommand):
                     "timezone": "America/New_York",
                 },
             )
+            seed_branch_content(branch)
             staff = self.account(f"state-admin-{state.lower()}")
             BranchStaff.objects.get_or_create(
                 branch=branch, user=staff, defaults={"role": "administrator"}

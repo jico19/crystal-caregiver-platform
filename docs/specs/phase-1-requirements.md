@@ -13,8 +13,9 @@ sections 2, 4 and 6, and [recorded decisions](../open-decisions.md).
 This package specifies synthetic caregiver applications, administrator review,
 employment packets, fixture document uploads, checklists and onboarding views.
 It does not implement them or approve agency policy. Phase 0 must close before
-application implementation starts. Remaining foundation work and unverified
-PostgreSQL validation remain blockers; see [evidence](../phase-0-evidence.md).
+application implementation starts. Owner instruction on 2026-11-09 defers
+PostgreSQL validation until migration work; SQLite is used for the prototype.
+Remaining foundation work must be verified; see [evidence](../phase-0-evidence.md).
 
 Client workflows, training, reminders, announcements, electronic signatures,
 report exports, production storage and external vendors are excluded. No real

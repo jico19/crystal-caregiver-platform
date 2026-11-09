@@ -12,18 +12,21 @@ from model existence alone. Deliver model → service → API → React screen �
 
 ### T0 — prerequisite gate
 
-- [ ] Close Phase 0 and record evidence in the overall phase tracker. Resolve the
+- [x] Close Phase 0 and record evidence in the overall phase tracker. Resolve the
   frontend verification and command discrepancies; finish
   foundation content/docs and security checks. Do not change tooling/dependencies
   without the repository-required approval.
-- [ ] Obtain a disposable PostgreSQL test environment and verify existing
-  migrations/integrity. None is currently available; do not substitute SQLite
-  results for this gate or create a production database.
-- [ ] Review this package against code at implementation start and verify all
+- [x] Verify migrations/integrity on SQLite for the prototype. Owner instruction
+  on 2026-11-09 defers PostgreSQL validation until migration work; it does not
+  block this prototype. Record the deferred validation without claiming it passed.
+- [x] Review this package against code at implementation start and verify all
   required commands exist. Resolve new business questions in open decisions.
 
 Evidence: foundation check results and PostgreSQL migration/integrity results.
 Requirements P1-01, P1-16–17; scenarios A9, A10, A12. T1–T5 depend on T0.
+
+T0 evidence: [foundation verification](../phase-0-evidence.md). SQLite prototype;
+PostgreSQL validation explicitly deferred by owner instruction.
 
 ### T1 — versioned application and readable details
 
@@ -109,7 +112,8 @@ Requirements P1-07–08, P1-14–17. Depends on T4.
 Every slice adds negative tests with its endpoints, including anonymous, wrong
 caregiver/branch/agency, ordinary staff, forged fields and CSRF. Use synthetic data
 and temporary private storage. Tests must not invoke external delivery/signatures.
-Test DB constraints through direct writes on PostgreSQL as well as local SQLite;
+Test DB constraints through direct writes on local SQLite; PostgreSQL validation
+is deferred by owner instruction until migration work;
 test additive migration upgrades without editing historical migration files.
 
 Before use, verify these existing commands and execute from their corresponding

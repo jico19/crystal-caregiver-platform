@@ -17,49 +17,19 @@ caregiver/client directories, application status reads, portal shells, seed data
 and audit infrastructure. These are existing capabilities, not newly verified
 acceptance results. Operational workflows below remain pending.
 
-## Phase 0 — reconcile foundation and scope section 1
+## Phase 0 - verified SQLite foundation
 
-- [ ] Reconcile Phase 0 checklist against code and test evidence before closing it.
-- [ ] Repair missing README document links or create the intended scope,
-  architecture, security checklist and schema documents from current code.
-- [ ] Reconcile documented commands, runtime pins and actual tooling. Record
-  missing commands as TODOs; ask before dependency or formatter/lint changes.
-- [ ] Validate existing PostgreSQL migrations and integrity constraints.
-- [x] Record agency decisions on branch boundaries and staff permissions in
-  [open-decisions.md](open-decisions.md); keep unapproved staff access disabled.
-- [ ] Provide configurable state-specific services, forms, licensing and contact
-  content. Use illustrative content until agency approval; verify FL/IN/GA switching
-  preserves the selected state's content and application context.
-
-### Reconciliation status — 2026-11-09
-
-Phase 0 remains open. See [verification evidence](phase-0-evidence.md) for the
-commands inspected, results and outstanding decisions.
-
-- [x] Confirm Oxfmt/Oxlint as the intended frontend tools and update AGENTS.md.
-- [x] Inspect runtime pins: Python 3.14.4 matches `.python-version`; Node 24.15.0
-  matches the major version in `frontend/.nvmrc`.
-- [x] Record the owner's decision to retain current demo branch boundaries and
-  leave ordinary staff management access disabled.
-- [ ] Finish command reconciliation: confirm pip/npm installation commands,
-  correct stale settings module references and remove the stale seed-command TODO.
-- [x] Reconcile verification tooling: backend formatting/lint tooling was removed
-  by owner request. Frontend format, lint, typecheck, unit and browser checks passed
-  in commit `40f3c6b`; see the updated verification evidence.
-- [ ] Provide a disposable PostgreSQL database and run migration/integrity checks.
-  Owner confirmed none is currently available; this gate remains pending.
-- [ ] Create the missing README-linked scope, architecture, security checklist
-  and schema documents from current code.
-- [ ] Implement configurable state content and verify state switching/application
-  context. Existing generic copy and state-filtered jobs do not close this item.
-- [ ] Complete the remaining acceptance checks before closing Phase 0.
+See [verification evidence](phase-0-evidence.md). Foundation documentation,
+command reconciliation, configurable public state content, security tests and
+browser journeys pass on SQLite. PostgreSQL validation is deferred by owner
+instruction until migration work and has not passed.
 
 ## Phase 1 — caregiver onboarding and documents (scope sections 2, 4, 6)
 
 Specifications: [requirements](specs/phase-1-requirements.md),
 [technical design](specs/phase-1-design.md), and
 [implementation tasks](specs/phase-1-tasks.md). Specs are prepared; implementation
-remains pending and gated on Phase 0 completion.
+is authorized after the verified SQLite foundation. PostgreSQL validation is deferred.
 
 - [ ] Confirm application fields, onboarding steps, required credentials and
   review permissions per branch; record unresolved rules before implementation.
