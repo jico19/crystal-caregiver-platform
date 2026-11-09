@@ -25,7 +25,8 @@ from apps.operations.models import (
     JobSubmission,
     AuditEvent,
 )
-from .models import User, Invitation
+# Keep synthetic account fixtures inside the owning app's test package.
+from ..models import User, Invitation
 
 pytestmark = pytest.mark.django_db
 PASSWORD = "Synthetic-only-Long-Passphrase!42"

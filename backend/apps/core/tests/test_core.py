@@ -1,3 +1,5 @@
+"""Core liveness, default access, and custom-user integration checks."""
+
 from django.conf import settings
 from django.urls import reverse
 from rest_framework.authentication import SessionAuthentication

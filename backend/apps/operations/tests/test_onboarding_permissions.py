@@ -1,6 +1,7 @@
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
-from apps.accounts.test_foundation import browser, UserFactory
+# Reuse synthetic account helpers without mixing them into production modules.
+from apps.accounts.tests.test_foundation import browser, UserFactory
 from apps.operations.models import Agency, StateBranch, AgencyAdmin, BranchStaff, Client, DocumentVersion, StoredFile
 from apps.operations.services.documents import upload_document, MAX_BYTES
 from apps.operations.tests.test_onboarding import fixture

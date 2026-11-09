@@ -40,6 +40,7 @@ Frontend (run from frontend/)
 - Frontend formatting uses Oxfmt and lint uses Oxlint. Never format frontend code by hand.
 - Backend formatting and lint tooling were removed by owner request; no replacement is configured.
 - If a formatter or lint command is missing or fails to run, stop and report it. Don't skip it.
+- Run only checks and tests relevant to the change. Do not run every test suite by default. For code organization, file moves, or comments, prefer import checks, test discovery, and structural or API-contract checks; run existing focused tests only where behavior could be affected. Do not add tests that only assert file placement or repeat the implementation. Run a full suite only when the change has broad impact, focused checks reveal a wider issue, or the owner explicitly requests it.
 
 ## Repo map
 
@@ -128,14 +129,15 @@ Never (instead → do this):
 
 ## Definition of done
 
-All must pass, then report passed / failed / skipped honestly:
+Relevant checks must pass; report passed / failed / skipped honestly and explain the scope selected. The commands below are available checks, not a requirement to run every suite for every change:
 
 ```text
-backend:  pytest
-frontend: npm run format:check && npm run lint && npm run typecheck && npm run test
+backend:  pytest <affected test files or directories>
+frontend: npm run format:check && npm run lint && npm run typecheck
+          npm run test -- <affected test files>
 ```
 
-Plus: new endpoints have permission and branch-isolation tests, and no file breaks the file-structure rules.
+Run frontend checks when frontend code is affected. Documentation-only changes need document and diff checks, not application tests. New endpoints must have permission and branch-isolation tests; no file may break the file-structure rules.
 
 ## Current focus
 

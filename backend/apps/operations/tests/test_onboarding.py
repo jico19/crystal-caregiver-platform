@@ -5,7 +5,8 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.exceptions import APIException
-from apps.accounts.test_foundation import browser
+# Keep shared sign-in helpers inside the account test package.
+from apps.accounts.tests.test_foundation import browser
 from apps.operations.models import ApplicationReview, AuditEvent, CaregiverOnboardingEvent, BranchDocumentRequirement, BranchOnboardingPolicy, DocumentVersion, DocumentReview, StoredFile
 from apps.operations.private_files import FIXTURES, private_root
 from apps.operations.services.transitions import transition_application

@@ -1,5 +1,6 @@
 import pytest
-from apps.accounts.test_foundation import graph, config
+# Reuse the account test package's synthetic users and isolated settings.
+from apps.accounts.tests.test_foundation import graph, config
 from apps.operations.demo_onboarding import seed_requirements, seed_application_version
 from apps.operations.models import CaregiverApplication
 from apps.operations.services import apply_to_job
