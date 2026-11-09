@@ -14,7 +14,9 @@ FIXTURES = Path(__file__).parent / "fixtures" / "demo"
 _writes = ContextVar("private_file_writes", default=None)
 
 
+# Track new private bytes so failed workflows can remove orphan files.
 def cleanup_private_writes(function):
+    # Isolate write tracking, clean failed writes, and always restore the outer context.
     @wraps(function)
     def wrapped(*args, **kwargs):
         paths = []
@@ -30,12 +32,14 @@ def cleanup_private_writes(function):
     return wrapped
 
 
+# Resolve and create configured private storage without publishing its location.
 def private_root():
     root = Path(getattr(settings, "PRIVATE_FILE_ROOT", settings.BASE_DIR / ".local" / "private-files"))
     root.mkdir(parents=True, exist_ok=True)
     return root
 
 
+# Store random-key bytes and integrity metadata, removing bytes if persistence fails.
 def write_private(branch, actor, filename, media_type, data):
     key = uuid.uuid4().hex
     path = private_root() / key
@@ -50,6 +54,7 @@ def write_private(branch, actor, filename, media_type, data):
     return stored, path
 
 
+# Open an already authorized private file and return a non-cacheable attachment.
 def attachment(stored):
     # Caller must scope the owning application/document BEFORE reaching here.
     key = stored.private_storage_key

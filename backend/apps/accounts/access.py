@@ -4,6 +4,7 @@ from django.db.models import Q
 from apps.operations.models import AgencyAdmin, BranchStaff, StateBranch
 
 
+# Return active branches administered through business assignments, independent of Django flags.
 def admin_branches(user):
     if not user.is_authenticated or not user.is_active:
         return StateBranch.objects.none()
@@ -16,6 +17,7 @@ def admin_branches(user):
     )
 
 
+# Restrict person queries to active owned records or branches the caller administers.
 def scope_people(queryset, user):
     if not user.is_authenticated or not user.is_active:
         return queryset.none()

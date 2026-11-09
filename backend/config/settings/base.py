@@ -10,6 +10,7 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(BASE_DIR / ".env.local")
 
 
+# Reject missing/blank required configuration without exposing its value.
 def required_env(name):
     value = os.environ.get(name, "").strip()
     if not value:

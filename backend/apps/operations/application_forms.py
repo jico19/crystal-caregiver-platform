@@ -7,6 +7,7 @@ AVAILABILITY = {"weekdays": "Weekdays", "weekends": "Weekends", "daytime": "Dayt
 EXTENDED_SCHEMA = {"fields": ["name", "email", "demo_acknowledged", "experience", "availability"], "choices": {"experience": EXPERIENCE, "availability": AVAILABILITY}}
 
 
+# Validate against the original form version and retain only supported answer fields.
 def application_answers(version, data):
     fields = version.field_schema.get("fields", [])
     extended = "experience" in fields

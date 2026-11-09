@@ -16,6 +16,7 @@ from apps.operations.services.checklist import onboarding_snapshot, complete_onb
 pytestmark = pytest.mark.django_db
 
 
+# Build exact bundled upload bytes with optional expiry metadata for lifecycle tests.
 def fixture(category="cpr", extension="pdf", expiry=True):
     media = {"pdf": "application/pdf", "png": "image/png", "jpg": "image/jpeg"}[extension]
     name = f"{category}.{extension}"
@@ -25,11 +26,13 @@ def fixture(category="cpr", extension="pdf", expiry=True):
     return data
 
 
+# Exercise submitted-to-approved transitions to establish onboarding prerequisites.
 def approve_application(graph):
     for previous, target in [("submitted", "under_review"), ("under_review", "approved")]:
         transition_application(graph["state"], graph["application"].public_id, {"expected_status": previous, "new_status": target, "comment": ""})
 
 
+# Check expected-status conflicts, rejection reasons and failed-audit rollback.
 def test_review_transitions_staleness_and_atomic_rollback(onboarding):
     graph = onboarding
     app = graph["application"]
@@ -49,6 +52,7 @@ def test_review_transitions_staleness_and_atomic_rollback(onboarding):
     assert ApplicationReview.objects.filter(application=app).count() == 2
 
 
+# Require approvals, preserve demo completion evidence and reject duplicate completion.
 def test_full_lifecycle_completion_and_historical_evidence(onboarding):
     graph = onboarding
     caregiver = graph["caregiver"]
@@ -72,6 +76,7 @@ def test_full_lifecycle_completion_and_historical_evidence(onboarding):
         CaregiverOnboardingEvent.objects.filter(caregiver=caregiver).update(evidence={})
 
 
+# Check expiry boundaries while retaining effective approval during pending replacement.
 @pytest.mark.parametrize("offset,state", [(-1, "expired"), (0, "expiring"), (30, "expiring"), (31, "valid")])
 def test_expiry_boundaries_and_replacement_effective_version(onboarding, offset, state):
     graph = onboarding
@@ -88,6 +93,7 @@ def test_expiry_boundaries_and_replacement_effective_version(onboarding, offset,
         assert row["latest_version"]["public_id"] == str(replacement.public_id)
 
 
+# Remove failed-upload bytes and roll back decisions when audit persistence fails.
 def test_file_rollback_and_decision_rollback(onboarding):
     graph = onboarding
     with patch("apps.operations.services.documents.audit", side_effect=RuntimeError("Synthetic audit failure")):
@@ -104,6 +110,7 @@ def test_file_rollback_and_decision_rollback(onboarding):
     assert version.review_status == "pending" and DocumentReview.objects.count() == 0
 
 
+# Keep application approval required without document requirements and reject negative expiry windows.
 def test_empty_requirements_and_config_edits(onboarding):
     graph = onboarding
     BranchDocumentRequirement.objects.update(required=False)
@@ -114,6 +121,7 @@ def test_empty_requirements_and_config_edits(onboarding):
         BranchOnboardingPolicy.objects.update(expiry_lead_days=-1)
 
 
+# Use the newest approval even when expired and reject another terminal review.
 def test_newest_approval_expiry_does_not_fall_back_and_review_is_terminal(onboarding):
     graph = onboarding
     first = upload_document(graph["owner"], graph["caregiver"].public_id, fixture())
@@ -127,6 +135,7 @@ def test_newest_approval_expiry_does_not_fall_back_and_review_is_terminal(onboar
     assert row["state"] == "expired" and row["effective_version"] == str(newest.public_id)
 
 
+# Leave neither changed caregiver state nor milestone evidence after a failed completion audit.
 def test_completion_audit_failure_rolls_back_milestone(onboarding):
     graph = onboarding
     approve_application(graph)
@@ -139,6 +148,7 @@ def test_completion_audit_failure_rolls_back_milestone(onboarding):
     assert not CaregiverOnboardingEvent.objects.filter(new_status="eligible").exists()
 
 
+# Preserve published packets/schemas and operator-edited requirements across reseeding.
 def test_seed_preserves_packet_published_schema_and_policy_edits(onboarding):
     from apps.operations.demo_onboarding import seed_requirements, seed_application_version
     graph = onboarding
@@ -159,12 +169,14 @@ def test_seed_preserves_packet_published_schema_and_policy_edits(onboarding):
         type(original).objects.filter(pk=original.pk).update(field_schema={})
 
 
+# Clean newly written packet bytes when a seed transaction fails.
 def test_seed_failure_removes_new_packet_bytes(onboarding):
     import io
     from django.core.management import call_command
     from apps.operations.models import JobPosting
     before = set(private_root().iterdir())
     create = JobPosting.objects.get_or_create
+    # Inject failure only after a new synthetic packet has been written.
     def fail_after_packet(*args, **kwargs):
         if kwargs.get("title", "").startswith("Extended"):
             assert len(set(private_root().iterdir()) - before) == 1
@@ -176,6 +188,7 @@ def test_seed_failure_removes_new_packet_bytes(onboarding):
     assert set(private_root().iterdir()) == before
 
 
+# Verify configured category/format uploads and exact authorized fixture downloads with private headers.
 @pytest.mark.parametrize("extension", ["pdf", "png", "jpg"])
 def test_each_category_and_format_and_exact_download(onboarding, extension):
     graph = onboarding

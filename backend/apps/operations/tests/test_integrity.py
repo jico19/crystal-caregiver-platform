@@ -15,6 +15,7 @@ pytestmark = pytest.mark.django_db
 sequence = count(1)
 
 
+# Create distinct synthetic state branches for direct-write integrity checks.
 @pytest.fixture
 def branches():
     agency = domain.Agency.objects.create(name="Synthetic Agency")
@@ -81,6 +82,7 @@ def sample(model, branch, **overrides):
     return model.objects.create(**data)
 
 
+# Copy business fields without identity/timestamps for constrained-insert attempts.
 def copy_values(record):
     return {
         f.attname: getattr(record, f.attname)
@@ -100,6 +102,7 @@ SCOPED_LINKS = [
 ]
 
 
+# Bypass model validation to exercise database cross-state relation guards.
 @pytest.mark.parametrize(
     "model,field", SCOPED_LINKS, ids=[f"{m.__name__}.{f.name}" for m, f in SCOPED_LINKS]
 )
@@ -116,6 +119,7 @@ def test_cross_state_insert_is_rejected(branches, model, field):
         model.objects.create(**values)
 
 
+# Permit records in separate states while rejecting duplicate account/branch records.
 def test_one_login_has_separate_state_records(branches, django_user_model):
     user = django_user_model.objects.create_user(username="synthetic")
     for branch in branches:
@@ -125,12 +129,14 @@ def test_one_login_has_separate_state_records(branches, django_user_model):
         sample(domain.Caregiver, branches[0], user=user)
 
 
+# Enforce the database limit on concurrent active state-admin assignments.
 def test_state_admin_cannot_hold_two_active_states(branches):
     first = sample(domain.BranchStaff, branches[0], role="administrator")
     with pytest.raises(IntegrityError), transaction.atomic():
         sample(domain.BranchStaff, branches[1], user=first.user, role="administrator")
 
 
+# Reject direct mutation and raw deletion of history/published evidence.
 @pytest.mark.parametrize(
     "model",
     [
@@ -155,6 +161,7 @@ def test_evidence_is_append_only(branches, model):
         model.objects.filter(pk=record.pk)._raw_delete("default")
 
 
+# Preserve original answers even when an update bypasses services.
 def test_submitted_answers_cannot_be_replaced(branches):
     application = sample(domain.CaregiverApplication, branches[0], submitted_at=timezone.now())
     with pytest.raises(IntegrityError), transaction.atomic():
@@ -163,6 +170,7 @@ def test_submitted_answers_cannot_be_replaced(branches):
         )
 
 
+# Keep approved evidence intact while allowing a newer pending replacement.
 def test_pending_replacement_preserves_approved_version(branches):
     approved = sample(domain.DocumentVersion, branches[0], review_status="approved")
     pending = sample(
@@ -175,6 +183,7 @@ def test_pending_replacement_preserves_approved_version(branches):
         domain.DocumentVersion.objects.filter(pk=approved.pk).update(file=pending.file)
 
 
+# Reject reversed schedule/authorization dates and out-of-range training progress.
 def test_invalid_dates_and_progress_are_rejected(branches):
     with pytest.raises(IntegrityError), transaction.atomic():
         sample(
@@ -194,6 +203,7 @@ def test_invalid_dates_and_progress_are_rejected(branches):
         )
 
 
+# Allow separate repeat assignments for the same caregiver and course version.
 def test_repeated_training_is_supported(branches):
     assignment = sample(domain.TrainingAssignment, branches[0])
     second = sample(
@@ -205,6 +215,7 @@ def test_repeated_training_is_supported(branches):
     assert second.pk != assignment.pk
 
 
+# Keep delivery simulated by default and enforce notification/channel deduplication.
 def test_delivery_deduplication_and_simulation(branches):
     notification = sample(domain.Notification, branches[0])
     delivery = sample(
@@ -217,6 +228,7 @@ def test_delivery_deduplication_and_simulation(branches):
         sample(domain.NotificationDelivery, branches[0], notification=notification, channel="email")
 
 
+# Separate the seeded category catalog from branch-specific document requirements.
 def test_catalog_does_not_impose_requirements():
     assert (
         domain.DocumentType.objects.filter(code__in=["auto_insurance", "drivers_insurance"]).count()
@@ -225,6 +237,7 @@ def test_catalog_does_not_impose_requirements():
     assert not domain.BranchDocumentRequirement.objects.exists()
 
 
+# Reject documents with missing or simultaneous caregiver/client ownership.
 def test_document_requires_exactly_one_owner(branches):
     with pytest.raises(IntegrityError), transaction.atomic():
         sample(domain.Document, branches[0], caregiver=None, client=None)
@@ -232,18 +245,21 @@ def test_document_requires_exactly_one_owner(branches):
         sample(domain.Document, branches[0], client=sample(domain.Client, branches[0]))
 
 
+# Preserve branch identity even when draft updates bypass services.
 def test_draft_cannot_move_state(branches):
     application = sample(domain.CaregiverApplication, branches[0])
     with pytest.raises(IntegrityError), transaction.atomic():
         domain.CaregiverApplication.objects.filter(pk=application.pk).update(branch=branches[1])
 
 
+# Reject certificate evidence for unfinished training.
 def test_certificate_requires_completed_training(branches):
     assignment = sample(domain.TrainingAssignment, branches[0])
     with pytest.raises(IntegrityError), transaction.atomic():
         sample(domain.TrainingCertificate, branches[0], assignment=assignment)
 
 
+# Reject illustrative signature evidence attributed to the wrong signer.
 def test_signature_rejects_unrequested_signer(branches):
     with pytest.raises(IntegrityError), transaction.atomic():
         sample(
@@ -253,6 +269,7 @@ def test_signature_rejects_unrequested_signer(branches):
         )
 
 
+# Require authorization evidence to belong to its client.
 def test_authorization_cannot_use_another_clients_document(branches):
     wrong_client = sample(domain.Client, branches[0])
     document = sample(domain.Document, branches[0], caregiver=None, client=wrong_client)

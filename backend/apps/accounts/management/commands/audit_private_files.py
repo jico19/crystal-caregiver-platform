@@ -6,9 +6,11 @@ from apps.operations.models import StoredFile
 from apps.operations.private_files import private_root
 
 
+# Expose a dry-run orphan-byte count without deleting files.
 class Command(BaseCommand):
     help = "Dry-run count of unreferenced private files older than 24 hours. Never deletes."
 
+    # Count old unreferenced keys without exposing document contents or paths.
     def handle(self, *args, **options):
         keys = set(StoredFile.objects.values_list("private_storage_key", flat=True))
         cutoff = (timezone.now() - timedelta(hours=24)).timestamp()

@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from rest_framework.views import exception_handler
 
 
+# Wrap DRF errors consistently and replace CSRF diagnostics with a safe generic message.
 def api_exception_handler(exc, context):
     response = exception_handler(exc, context)
     if response is not None:
@@ -17,6 +18,7 @@ def api_exception_handler(exc, context):
     return response
 
 
+# Return the shared safe error envelope when CSRF middleware rejects an unsafe request.
 def csrf_failure(request, reason=""):
     return JsonResponse(
         {

@@ -4,6 +4,7 @@ from django.db.models import Q
 from .base import ScopedRecord, actor, relation, unique, one_subject
 
 
+# Group branch-specific forms by audience and workflow purpose.
 class FormTemplate(ScopedRecord):
     audience = models.CharField(max_length=16)
     kind = models.CharField(max_length=32)
@@ -11,6 +12,7 @@ class FormTemplate(ScopedRecord):
     active = models.BooleanField(default=True)
 
 
+# Preserve a numbered schema, wording, and optional private packet at publication.
 class FormVersion(ScopedRecord):
     template = relation(FormTemplate)
     version_number = models.PositiveIntegerField()
@@ -27,6 +29,7 @@ class FormVersion(ScopedRecord):
         ]
 
 
+# Associate illustrative signing requests with their subject, form and intended signer.
 class SignatureRequest(ScopedRecord):
     form_version = relation(FormVersion)
     caregiver = relation("operations.Caregiver", null=True, blank=True)
@@ -51,6 +54,7 @@ class SignatureRequest(ScopedRecord):
         ]
 
 
+# Preserve illustrative signer/consent/file evidence without claiming legal validity.
 class SignatureEvent(ScopedRecord):
     request = models.OneToOneField(SignatureRequest, on_delete=models.PROTECT)
     signer = actor()

@@ -4,6 +4,7 @@ from django.db.models import Q
 from .base import Record, ScopedRecord, actor, relation, unique, one_subject, date_range
 
 
+# Record private byte metadata and storage keys rather than public media URLs.
 class StoredFile(ScopedRecord):
     private_storage_key = models.CharField(max_length=500, unique=True)
     original_name = models.CharField(max_length=255)
@@ -19,6 +20,7 @@ class StoredFile(ScopedRecord):
         ]
 
 
+# Define available categories without imposing branch-specific requirements.
 class DocumentType(Record):
     code = models.SlugField(max_length=80, unique=True)
     label = models.CharField(max_length=200)
@@ -28,6 +30,7 @@ class DocumentType(Record):
     active = models.BooleanField(default=True)
 
 
+# Configure illustrative required/expiry rules per branch and category.
 class BranchDocumentRequirement(ScopedRecord):
     document_type = relation(DocumentType)
     required = models.BooleanField(default=False)
@@ -40,6 +43,7 @@ class BranchDocumentRequirement(ScopedRecord):
         ]
 
 
+# Associate a document category with exactly one caregiver or client.
 class Document(ScopedRecord):
     document_type = relation(DocumentType)
     caregiver = relation("operations.Caregiver", null=True, blank=True)
@@ -52,6 +56,7 @@ class Document(ScopedRecord):
         ]
 
 
+# Preserve numbered file submissions and their review/expiry metadata.
 class DocumentVersion(ScopedRecord):
     document = relation(Document)
     version_number = models.PositiveIntegerField()
@@ -75,6 +80,7 @@ class DocumentVersion(ScopedRecord):
         ]
 
 
+# Record one terminal decision and reviewer evidence for a version.
 class DocumentReview(ScopedRecord):
     document_version = relation(DocumentVersion)
     reviewer = actor()

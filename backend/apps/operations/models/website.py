@@ -3,6 +3,7 @@ from django.db import models
 from .base import ScopedRecord, unique, relation
 
 
+# Store editable copy keyed by branch and purpose with an explicit publication state.
 class BranchContent(ScopedRecord):
     content_key = models.SlugField(max_length=100)
     title = models.CharField(max_length=200)
@@ -15,6 +16,7 @@ class BranchContent(ScopedRecord):
         ]
 
 
+# Store illustrative inquiry contact details, message and intake status.
 class WebsiteInquiry(ScopedRecord):
     name = models.CharField(max_length=200)
     email = models.EmailField(blank=True)
@@ -25,12 +27,14 @@ class WebsiteInquiry(ScopedRecord):
     status = models.CharField(max_length=32, default="submitted")
 
 
+# Define an optional branch-owned source for illustrative client referrals.
 class ReferralSource(ScopedRecord):
     name = models.CharField(max_length=200)
     source_type = models.CharField(max_length=64, blank=True)
     active = models.BooleanField(default=True)
 
 
+# Preserve referral source/contact snapshots and received status for a client.
 class ClientReferral(ScopedRecord):
     client = relation("operations.Client")
     source = relation(ReferralSource, null=True, blank=True)

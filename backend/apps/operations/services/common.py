@@ -8,13 +8,16 @@ from apps.accounts.access import admin_branches, scope_people
 from ..models import Caregiver, AuditEvent
 
 
+# Represent stale or unavailable workflow actions as an HTTP conflict.
 class Conflict(APIException):
     status_code = 409
     default_code = "conflict"
     default_detail = "The record changed or this action is unavailable. Refresh and try again."
 
 
+# Retry bounded database lock contention around the workflow, then surface a conflict.
 def retry_locked(function):
+    # Propagate unrelated errors and retry lock failures with a short increasing delay.
     @wraps(function)
     def run(*args, **kwargs):
         for attempt in range(8):
@@ -29,6 +32,7 @@ def retry_locked(function):
     return run
 
 
+# Resolve and lock a scoped caregiver, enforcing requested ownership or administrator access.
 def subject(actor, public_id, management=False, owner=False):
     if management and not admin_branches(actor).exists():
         raise PermissionDenied("Administrator assignment required.")
@@ -42,5 +46,6 @@ def subject(actor, public_id, management=False, owner=False):
     return person
 
 
+# Record a scoped action using public identity and explicitly selected safe metadata.
 def audit(actor, action, resource, branch, resource_type, metadata=None):
     AuditEvent.objects.create(actor=actor, action=action, resource_type=resource_type, resource_id=resource.public_id, branch=branch, occurred_at=timezone.now(), safe_metadata=metadata or {})

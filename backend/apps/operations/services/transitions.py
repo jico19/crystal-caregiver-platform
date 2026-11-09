@@ -6,6 +6,7 @@ from ..models import CaregiverApplication, ApplicationReview, CaregiverOnboardin
 from .common import subject, audit, Conflict, retry_locked
 
 
+# Apply allowed expected-status transitions and related demo onboarding history atomically.
 @retry_locked
 @transaction.atomic
 def transition_application(actor, public_id, data):

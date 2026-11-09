@@ -8,6 +8,7 @@ from django.utils import timezone
 pytestmark = pytest.mark.django_db
 
 
+# Publish a version-two opportunity for extended-answer validation tests.
 @pytest.fixture
 def extended(graph):
     old = graph["job"]
@@ -15,10 +16,12 @@ def extended(graph):
     return JobPosting.objects.create(branch=old.branch, form_version=version, title="Synthetic extended", description="Demo only", published=True)
 
 
+# Build valid synthetic extended answers while exercising whitespace normalization.
 def answers(user):
     return {"name": " Synthetic applicant ", "email": user.email, "demo_acknowledged": True, "experience": "none", "availability": ["weekdays", "daytime"]}
 
 
+# Preserve submitted answers with their original published schema in application details.
 def test_extended_answers_and_original_schema_detail(graph, extended):
     client = browser(graph["owner"])
     response = client.post(f"/api/v1/jobs/{extended.public_id}/apply/", answers(graph["owner"]), format="json")
@@ -32,6 +35,7 @@ def test_extended_answers_and_original_schema_detail(graph, extended):
     assert client.get(f"/api/v1/jobs/{extended.public_id}/").data["application_form"]["version_number"] == 2
 
 
+# Reject invalid/forged extended answers without submission data or submission audit writes.
 @pytest.mark.parametrize("field,value", [("experience", "invented"), ("availability", []), ("availability", ["weekends", "weekends"]), ("availability", ["unknown"]), ("branch_id", "forged"), ("role", "administrator"), ("name", " ")])
 def test_invalid_answers_are_atomic(graph, extended, field, value):
     data = answers(graph["owner"])
@@ -44,6 +48,7 @@ def test_invalid_answers_are_atomic(graph, extended, field, value):
     assert not AuditEvent.objects.filter(action="application.submitted").exists()
 
 
+# Retain legacy forms while checking detail ownership, administrator access and unavailable packets.
 def test_legacy_and_permissions(graph):
     owner = browser(graph["owner"])
     data = {"name": "Synthetic", "email": graph["owner"].email, "demo_acknowledged": True}
@@ -61,6 +66,7 @@ def test_legacy_and_permissions(graph):
     assert owner.get(url + "packet/").status_code == 404
 
 
+# Reject withdrawn jobs and roll back submissions whose audit fails.
 def test_stale_job_and_submission_audit_failure_are_atomic(graph, extended):
     from unittest.mock import patch
     from apps.operations.services import apply_to_job

@@ -1,3 +1,5 @@
+# Expose domain model modules through stable app-level imports.
+
 from .identity import Agency, StateBranch, AgencyAdmin, BranchStaff, Caregiver, Client
 from .jobs import JobPosting, JobSubmission
 from .onboarding import BranchOnboardingPolicy, CaregiverOnboardingEvent

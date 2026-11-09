@@ -41,8 +41,10 @@ caregiver = application.caregiver
 seed_requirements(branch)
 
 
+# Start two service calls together to exercise real SQLite contention outside test transactions.
 def race(function):
     barrier = Barrier(2)
+    # Synchronize the call, retain API failure status, and close its thread's database connections.
     def worker():
         barrier.wait()
         try:

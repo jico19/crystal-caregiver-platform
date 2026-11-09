@@ -6,6 +6,7 @@ from .models import FormVersion, DocumentType, BranchDocumentRequirement, Branch
 from .private_files import FIXTURES, write_private
 
 
+# Reuse a published demo form or create its packet with failed-write cleanup.
 def seed_application_version(branch, template):
     version = FormVersion.objects.filter(template=template, version_number=2).first()
     if version:
@@ -19,6 +20,7 @@ def seed_application_version(branch, template):
         raise
 
 
+# Create illustrative branch defaults without overwriting existing configurable policy.
 def seed_requirements(branch):
     BranchOnboardingPolicy.objects.get_or_create(branch=branch)
     for category in DocumentType.objects.filter(audience="caregiver"):

@@ -6,6 +6,7 @@ from apps.operations.models import Agency, StateBranch, BranchContent
 pytestmark = pytest.mark.django_db
 
 
+# Hide draft/inactive content and keep public state-filtered content read-only.
 def test_only_published_active_state_content_is_public():
     agency = Agency.objects.create(name="Synthetic public content")
     for state in ("FL", "IN", "GA"):
@@ -24,6 +25,7 @@ def test_only_published_active_state_content_is_public():
     assert client.get("/api/v1/branch-content/?branch__state_code=FL").data["count"] == 0
 
 
+# Preserve operator copy and publication choices across repeated public-content seeding.
 def test_seed_preserves_content_edits_and_publication():
     agency = Agency.objects.create(name="Synthetic seed")
     branch = StateBranch.objects.create(agency=agency, state_code="FL", display_name="Demo", timezone="UTC")

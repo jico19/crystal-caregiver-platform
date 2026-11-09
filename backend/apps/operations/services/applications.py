@@ -8,6 +8,7 @@ from .common import audit, retry_locked
 from ..application_forms import application_answers
 
 
+# Atomically validate availability, create version-bound application data, and record submission history.
 @retry_locked
 @transaction.atomic
 def apply_to_job(job, data, user):

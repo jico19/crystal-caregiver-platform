@@ -4,12 +4,14 @@ from django.db.models import Q
 from .base import Record, ScopedRecord, actor, relation, unique, date_range
 
 
+# Define reusable illustrative training content separately from assignments.
 class TrainingCourse(Record):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
 
 
+# Preserve numbered published training content for assignment evidence.
 class TrainingCourseVersion(Record):
     course = relation(TrainingCourse)
     version_number = models.PositiveIntegerField()
@@ -25,6 +27,7 @@ class TrainingCourseVersion(Record):
         ]
 
 
+# Track a caregiver's specific course version, due date, progress and completion times.
 class TrainingAssignment(ScopedRecord):
     caregiver = relation("operations.Caregiver")
     course_version = relation(TrainingCourseVersion)
@@ -45,6 +48,7 @@ class TrainingAssignment(ScopedRecord):
         ]
 
 
+# Link one stored certificate artifact to its assignment's completion evidence.
 class TrainingCertificate(ScopedRecord):
     assignment = models.OneToOneField(TrainingAssignment, on_delete=models.PROTECT)
     file = relation("operations.StoredFile")

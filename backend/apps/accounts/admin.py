@@ -1,3 +1,5 @@
+# Register the custom user with Django admin; portal access still depends on business assignments.
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 

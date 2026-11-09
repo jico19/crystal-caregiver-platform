@@ -13,18 +13,21 @@ from .common import subject, audit, Conflict, retry_locked
 MAX_BYTES = 5_242_880
 
 
+# Represent the synthetic upload size limit as an HTTP 413 error.
 class TooLarge(APIException):
     status_code = 413
     default_code = "too_large"
     default_detail = "Demo files must be at most 5 MiB."
 
 
+# Represent unsupported upload formats or signatures as an HTTP 415 error.
 class UnsupportedMedia(APIException):
     status_code = 415
     default_code = "unsupported_media"
     default_detail = "Use a bundled PDF, PNG or JPEG fixture."
 
 
+# Check size, type, signature, category and exact bundled-fixture digest before storing bytes.
 def fixture_bytes(data):
     file = data["file"]
     if file.size > MAX_BYTES:
@@ -50,6 +53,7 @@ def fixture_bytes(data):
     return fixture, bytes(value)
 
 
+# Authorize ownership, apply configurable date rules, and create an audited version with cleanup.
 @retry_locked
 def upload_document(actor, caregiver_id, data):
     path = None
@@ -74,11 +78,13 @@ def upload_document(actor, caregiver_id, data):
             audit(actor, "document.uploaded", version, caregiver.branch, "document", {"document": str(document.public_id)})
         return version
     except Exception:
+        # Database rollback cannot remove filesystem bytes, so failed uploads clean their own new file.
         if path:
             path.unlink(missing_ok=True)
         raise
 
 
+# Lock the authorized version and atomically record a non-stale terminal decision and audit.
 @retry_locked
 @transaction.atomic
 def review_document(actor, version_id, data):

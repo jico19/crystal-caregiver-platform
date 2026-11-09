@@ -2,6 +2,7 @@ from django.db import models
 from .base import ScopedRecord, relation, unique
 
 
+# Link a branch's illustrative opportunity to its published application form version.
 class JobPosting(ScopedRecord):
     title = models.CharField(max_length=200)
     description = models.TextField()
@@ -9,6 +10,7 @@ class JobPosting(ScopedRecord):
     form_version = relation("operations.FormVersion")
 
 
+# Link a caregiver and opportunity to one application, preventing duplicate job submissions.
 class JobSubmission(ScopedRecord):
     job = relation(JobPosting)
     caregiver = relation("operations.Caregiver")

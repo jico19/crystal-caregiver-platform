@@ -3,6 +3,7 @@
 from .models import BranchContent
 
 
+# Create illustrative defaults while preserving operator edits and publication choices.
 def seed_branch_content(branch):
     name = {"FL": "Florida", "IN": "Indiana", "GA": "Georgia"}[branch.state_code]
     defaults = {

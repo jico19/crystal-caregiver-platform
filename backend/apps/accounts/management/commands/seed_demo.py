@@ -22,9 +22,11 @@ from apps.operations.models import (
 )
 
 
+# Expose development-only synthetic account, branch and illustrative-default seeding.
 class Command(BaseCommand):
     help = "Seed synthetic local demo accounts; never overwrite existing passwords."
 
+    # Create missing demo records atomically while preserving operator edits and existing passwords.
     @cleanup_private_writes
     @transaction.atomic
     def handle(self, *args, **options):
@@ -91,6 +93,7 @@ class Command(BaseCommand):
             )
         self.stdout.write("Demo seed complete. Existing passwords and assignments were preserved.")
 
+    # Generate and print a password only for a newly created local synthetic account.
     def account(self, label):
         email = f"{label}@demo.example"
         user, created = User.objects.get_or_create(

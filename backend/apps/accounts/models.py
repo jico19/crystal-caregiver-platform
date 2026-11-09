@@ -15,6 +15,7 @@ class User(AbstractUser):
         ]
 
 
+# Persist a branch-scoped invitation using a token hash and explicit expiry/acceptance times.
 class Invitation(models.Model):
     public_id = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
     email = models.EmailField()

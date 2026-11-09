@@ -3,10 +3,12 @@ from django.db import models
 from .base import Record, ScopedRecord, actor, relation, unique
 
 
+# Identify the agency that owns its supported state branches.
 class Agency(Record):
     name = models.CharField(max_length=200)
 
 
+# Define one supported state branch per agency, with activity and timezone configuration.
 class StateBranch(Record):
     agency = relation(Agency)
     state_code = models.CharField(max_length=2, choices=[(s, s) for s in ("FL", "IN", "GA")])
@@ -23,6 +25,7 @@ class StateBranch(Record):
         ]
 
 
+# Record business administrator assignments across an agency's branches.
 class AgencyAdmin(Record):
     agency = relation(Agency)
     user = actor()
@@ -32,6 +35,7 @@ class AgencyAdmin(Record):
         constraints = [unique("agency", "user", name="agency_admin_unique")]
 
 
+# Record branch membership and constrain users to one active administrator state.
 class BranchStaff(ScopedRecord):
     user = actor()
     role = models.CharField(
@@ -53,6 +57,7 @@ class BranchStaff(ScopedRecord):
         ]
 
 
+# Share branch-scoped synthetic contact fields and optional account ownership.
 class PersonRecord(ScopedRecord):
     user = actor(null=True, blank=True)
     name = models.CharField(max_length=200)
@@ -67,10 +72,12 @@ class PersonRecord(ScopedRecord):
         ]
 
 
+# Extend branch-owned person data with current demo onboarding status.
 class Caregiver(PersonRecord):
     onboarding_status = models.CharField(max_length=32, default="pending")
 
 
+# Extend branch-owned person data with illustrative admission and service-start fields.
 class Client(PersonRecord):
     admission_status = models.CharField(max_length=32, default="pending")
     service_start_date = models.DateField(null=True, blank=True)

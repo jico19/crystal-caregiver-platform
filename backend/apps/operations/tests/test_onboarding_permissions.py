@@ -9,6 +9,7 @@ from apps.operations.tests.test_onboarding import fixture
 pytestmark = pytest.mark.django_db
 
 
+# Build callers spanning ownership, state, agency, staff and Django-admin-only boundaries.
 def matrix(graph):
     client_only, wrong_state, alien_admin, django_admin = UserFactory.create_batch(4)
     Client.objects.create(branch=graph["branches"][0], user=client_only, name="Synthetic client only")
@@ -20,6 +21,7 @@ def matrix(graph):
     return [None, graph["other"], client_only, graph["staff"], wrong_state, alien_admin, django_admin]
 
 
+# Protect details, downloads and queue aggregates with ownership/branch boundaries.
 def test_every_private_read_and_guessed_uuid_is_scoped(onboarding):
     graph = onboarding
     version = upload_document(graph["owner"], graph["caregiver"].public_id, fixture())
@@ -44,6 +46,7 @@ def test_every_private_read_and_guessed_uuid_is_scoped(onboarding):
                 response.close()
 
 
+# Reject unauthorized management, injected ownership fields and missing CSRF credentials.
 def test_management_permissions_csrf_and_forged_fields(onboarding):
     graph = onboarding
     version = upload_document(graph["owner"], graph["caregiver"].public_id, fixture())
@@ -68,6 +71,7 @@ def test_management_permissions_csrf_and_forged_fields(onboarding):
     assert client.post(upload_path, fixture(), format="multipart").status_code == 403
 
 
+# Reject invalid fixture bytes/metadata without stored file or version writes.
 @pytest.mark.parametrize("mutation,expected", [("category", 400), ("type", 415), ("signature", 415), ("digest", 400), ("empty", 400), ("oversize", 413), ("limit", 400), ("ack", 400), ("dates", 400)])
 def test_rejects_arbitrary_and_malformed_uploads_without_writes(onboarding, mutation, expected):
     graph = onboarding
@@ -86,6 +90,7 @@ def test_rejects_arbitrary_and_malformed_uploads_without_writes(onboarding, muta
     assert DocumentVersion.objects.count() == 0 and StoredFile.objects.count() == before
 
 
+# Remove visibility after branch or administrator membership deactivation.
 def test_inactive_branch_and_assignment_hide_data(onboarding):
     graph = onboarding
     url = f"/api/v1/caregivers/{graph['caregiver'].public_id}/onboarding/"

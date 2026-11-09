@@ -4,6 +4,7 @@ from django.db.models import Q, F
 from .base import ScopedRecord, actor, relation, unique, date_range
 
 
+# Store illustrative authorization references, validity bounds and replacement links.
 class ClientAuthorization(ScopedRecord):
     client = relation("operations.Client")
     reference = models.CharField(max_length=128, blank=True)
@@ -20,6 +21,7 @@ class ClientAuthorization(ScopedRecord):
         ]
 
 
+# Link authorizations to versioned supporting documents without duplicate links.
 class AuthorizationDocument(ScopedRecord):
     authorization = relation(ClientAuthorization)
     document_version = relation("operations.DocumentVersion")
@@ -30,6 +32,7 @@ class AuthorizationDocument(ScopedRecord):
         ]
 
 
+# Record actor and status history for an illustrative client authorization.
 class AuthorizationEvent(ScopedRecord):
     authorization = relation(ClientAuthorization)
     actor = actor()
@@ -39,6 +42,7 @@ class AuthorizationEvent(ScopedRecord):
     occurred_at = models.DateTimeField()
 
 
+# Store versioned illustrative care-plan evidence with effective-date integrity.
 class CarePlan(ScopedRecord):
     client = relation("operations.Client")
     version_number = models.PositiveIntegerField()
@@ -58,6 +62,7 @@ class CarePlan(ScopedRecord):
         ]
 
 
+# Store an illustrative scheduled interval whose end must follow its start.
 class ServiceScheduleEntry(ScopedRecord):
     client = relation("operations.Client")
     starts_at = models.DateTimeField()

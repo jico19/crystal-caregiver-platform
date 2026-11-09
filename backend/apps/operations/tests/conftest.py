@@ -6,6 +6,7 @@ from apps.operations.models import CaregiverApplication
 from apps.operations.services import apply_to_job
 
 
+# Extend the synthetic graph with a published application and illustrative branch requirements.
 @pytest.fixture
 def onboarding(graph):
     job = graph["job"]

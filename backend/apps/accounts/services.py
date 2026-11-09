@@ -17,6 +17,7 @@ from .access import admin_branches
 from .models import Invitation, User
 
 
+# Record account action history without copying request payloads.
 def audit(user, action, resource_id, branch=None):
     AuditEvent.objects.create(
         actor=user if user and user.is_authenticated else None,
@@ -29,6 +30,7 @@ def audit(user, action, resource_id, branch=None):
     )
 
 
+# Normalize email and translate duplicate-account races into a generic validation error.
 def create_user(email, password):
     email = email.strip().lower()
     if User.objects.filter(email__iexact=email).exists():
@@ -46,6 +48,7 @@ def create_user(email, password):
         )
 
 
+# Send a synthetic portal link through the configured local/test mail transport.
 def email_link(email, subject, path):
     send_mail(
         subject,
@@ -55,6 +58,7 @@ def email_link(email, subject, path):
     )
 
 
+# Authorize the invitation, store its hashed token, and schedule a link after commit.
 @transaction.atomic
 def invite(actor, data):
     branch = admin_branches(actor).filter(public_id=data["branch"]).first()
@@ -83,6 +87,7 @@ def invite(actor, data):
     return invitation
 
 
+# Lock and verify the invitation, establish its membership, and record acceptance atomically.
 @transaction.atomic
 def accept_invitation(data, signed_in_user):
     invitation = (
@@ -139,6 +144,7 @@ def accept_invitation(data, signed_in_user):
     return user
 
 
+# Create a link for an active usable account without disclosing account existence to callers.
 def request_reset(email):
     user = User.objects.filter(email__iexact=email, is_active=True).first()
     if user and user.has_usable_password():

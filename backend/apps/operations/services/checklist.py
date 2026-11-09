@@ -6,6 +6,7 @@ from ..models import BranchDocumentRequirement, BranchOnboardingPolicy, Document
 from .common import subject, audit, Conflict, retry_locked
 
 
+# Calculate current illustrative readiness without rewriting historical completion milestones.
 def onboarding_snapshot(caregiver, actor):
     policy = BranchOnboardingPolicy.objects.filter(branch=caregiver.branch).first()
     today = timezone.localdate()
@@ -17,6 +18,7 @@ def onboarding_snapshot(caregiver, actor):
         document = documents.get(requirement.document_type_id)
         versions = sorted(document.documentversion_set.all(), key=lambda v: v.version_number) if document else []
         latest = versions[-1] if versions else None
+        # Pending replacements do not displace approval; expiry never falls back to an older approval.
         approved = [v for v in versions if v.review_status == "approved"]
         effective = approved[-1] if approved else None
         state = latest.review_status if latest else "missing"
@@ -28,6 +30,7 @@ def onboarding_snapshot(caregiver, actor):
             else:
                 state = "valid"
         if requirement.required:
+            # Expiring approvals still count as complete; optional categories do not affect readiness totals.
             counts["total"] += 1
             if state in {"valid", "expiring"}:
                 counts["completed"] += 1
@@ -37,12 +40,14 @@ def onboarding_snapshot(caregiver, actor):
                 counts[state] += 1
         rows.append({"document_type": requirement.document_type.code, "label": requirement.document_type.label, "required": requirement.required, "tracks_expiration": requirement.tracks_expiration, "latest_version": {"public_id": str(latest.public_id), "version_number": latest.version_number, "review_status": latest.review_status} if latest else None, "effective_version": str(effective.public_id) if effective else None, "state": state, "expires_on": effective.expires_on if effective else None})
     approved = CaregiverApplication.objects.filter(caregiver=caregiver, branch=caregiver.branch, status="approved").exists()
+    # Current readiness can change after expiry without rewriting a recorded demo completion.
     ready = approved and counts["completed"] == counts["total"]
     manager = admin_branches(actor).filter(pk=caregiver.branch_id).exists()
     history = [{"public_id": str(event.public_id), "previous_status": event.previous_status, "new_status": event.new_status, "occurred_at": event.occurred_at, "evidence": event.evidence} for event in caregiver.caregiveronboardingevent_set.order_by("occurred_at", "public_id")]
     return {"caregiver": str(caregiver.public_id), "name": caregiver.name, "state_code": caregiver.branch.state_code, "status": caregiver.onboarding_status, "ready_to_complete": ready, "application_approved": approved, "requirements": rows, "counts": counts, "history": history, "allowed_actions": {"upload": caregiver.user_id == actor.pk, "complete": manager and ready and caregiver.onboarding_status == "onboarding", "review": manager}}
 
 
+# Verify readiness/expected status before atomically recording a demo milestone and its evidence.
 @retry_locked
 @transaction.atomic
 def complete_onboarding(actor, caregiver_id, data):

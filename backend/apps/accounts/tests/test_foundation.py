@@ -32,6 +32,7 @@ pytestmark = pytest.mark.django_db
 PASSWORD = "Synthetic-only-Long-Passphrase!42"
 
 
+# Create uniquely identified synthetic users with hashed passwords for access tests.
 class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
@@ -41,6 +42,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     password = factory.PostGenerationMethodCall("set_password", PASSWORD)
 
 
+# Isolate private files, mail and cache while configuring synthetic test-only settings.
 @pytest.fixture(autouse=True)
 def config(settings, tmp_path):
     settings.PRIVATE_FILE_ROOT = tmp_path / "private"
@@ -60,6 +62,7 @@ def config(settings, tmp_path):
     settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
 
+# Build FL/IN/GA records and distinct business roles for ownership and branch-isolation checks.
 @pytest.fixture
 def graph():
     agency = Agency.objects.create(name="Synthetic Foundation Agency")
@@ -111,6 +114,7 @@ def graph():
     )
 
 
+# Build a CSRF-enforcing API client and optionally authenticate its synthetic user.
 def browser(user=None):
     client = APIClient(enforce_csrf_checks=True)
     csrf(client)
@@ -125,11 +129,13 @@ def browser(user=None):
     return client
 
 
+# Bootstrap and attach the current CSRF token to an existing test client.
 def csrf(client):
     response = client.get("/api/v1/auth/csrf/")
     client.credentials(HTTP_X_CSRFTOKEN=response.data["csrfToken"])
 
 
+# Build a unique synthetic anonymous-application payload.
 def application_data():
     return {
         "name": "Synthetic Applicant",
@@ -139,6 +145,7 @@ def application_data():
     }
 
 
+# Protect private reads and unsafe login/application/logout requests against anonymous or missing-CSRF callers.
 def test_anonymous_csrf_and_private_denial(graph):
     client = APIClient(enforce_csrf_checks=True)
     for path in ("caregivers/", "clients/", "applications/", "auth/me/"):
@@ -161,6 +168,7 @@ def test_anonymous_csrf_and_private_denial(graph):
     assert signed.get("/api/v1/auth/me/").status_code == 403
 
 
+# Check directory visibility for owners, state admins, agency admins and ordinary staff.
 @pytest.mark.parametrize("endpoint,key", [("caregivers", "caregivers"), ("clients", "clients")])
 def test_ownership_and_branch_boundaries(graph, endpoint, key):
     owner = browser(graph["owner"])
@@ -181,6 +189,7 @@ def test_ownership_and_branch_boundaries(graph, endpoint, key):
     )
 
 
+# Deny another agency's caregiver even when its UUID is known.
 def test_admin_does_not_cross_agencies(graph):
     agency = Agency.objects.create(name="Other synthetic agency")
     branch = StateBranch.objects.create(
@@ -191,6 +200,7 @@ def test_admin_does_not_cross_agencies(graph):
     assert client.get(f"/api/v1/caregivers/{record.public_id}/").status_code == 404
 
 
+# Keep inactive memberships and Django admin flags from bypassing business access policy.
 def test_inactive_assignments_and_django_flags_do_not_grant_access(graph):
     client = browser(graph["state"])
     BranchStaff.objects.filter(user=graph["state"]).update(active=False)
@@ -202,6 +212,7 @@ def test_inactive_assignments_and_django_flags_do_not_grant_access(graph):
     assert APIClient().login(username=user.email, password=PASSWORD) is False
 
 
+# Verify synthetic submission creates its account/profile/state/audit without granting staff access.
 def test_application_creates_account_profile_status_and_audit(graph):
     client = browser()
     url = f"/api/v1/jobs/{graph['job'].public_id}/apply/"
@@ -229,6 +240,7 @@ def test_application_creates_account_profile_status_and_audit(graph):
     assert JobSubmission.objects.count() == 1
 
 
+# Reject injected ownership/role fields without creating an application.
 @pytest.mark.parametrize("forged", ["role", "owner_id", "branch_id", "agency"])
 def test_application_rejects_forged_fields(graph, forged):
     data = {**application_data(), forged: str(graph["branches"][1].public_id)}
@@ -241,6 +253,7 @@ def test_application_rejects_forged_fields(graph, forged):
     assert CaregiverApplication.objects.count() == 0
 
 
+# Protect existing accounts and roll back partial submission/account writes.
 def test_existing_email_is_not_claimed_and_failed_application_rolls_back(graph):
     data = {**application_data(), "email": graph["owner"].email}
     url = f"/api/v1/jobs/{graph['job'].public_id}/apply/"
@@ -256,6 +269,7 @@ def test_existing_email_is_not_claimed_and_failed_application_rolls_back(graph):
     assert CaregiverApplication.objects.count() == 0
 
 
+# Verify invitation scope, expiry, single use and signed-in proof for existing accounts.
 def test_invitations_scope_expiry_reuse_and_existing_user(
     graph, django_capture_on_commit_callbacks
 ):
@@ -327,6 +341,7 @@ def test_invitations_scope_expiry_reuse_and_existing_user(
     )
 
 
+# Keep reset requests non-enumerating and reject reuse of a successfully consumed token.
 def test_reset_is_generic_and_token_is_single_use(graph):
     client = browser()
     known = client.post(
@@ -346,6 +361,7 @@ def test_reset_is_generic_and_token_is_single_use(graph):
     )
 
 
+# Preserve existing passwords and suppress already-generated credential output on reseeding.
 def test_seeds_are_repeatable_and_preserve_passwords():
     output = io.StringIO()
     call_command("seed_demo", stdout=output)
@@ -357,6 +373,7 @@ def test_seeds_are_repeatable_and_preserve_passwords():
     assert StateBranch.objects.count() == 3 and JobPosting.objects.count() == 6
 
 
+# Reject differently cased duplicates of an existing email at the database layer.
 def test_case_insensitive_email_constraint(graph):
     with pytest.raises(IntegrityError), transaction.atomic():
         UserFactory(email=graph["owner"].email.upper())

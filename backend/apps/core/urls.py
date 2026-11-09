@@ -1,3 +1,5 @@
+# Route the versioned API independently of serializer implementations.
+
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView

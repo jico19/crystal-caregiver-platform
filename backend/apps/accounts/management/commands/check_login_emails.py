@@ -4,9 +4,11 @@ from django.db.models.functions import Lower, Trim
 from apps.accounts.models import User
 
 
+# Expose a read-only preflight for blank/duplicate normalized login emails.
 class Command(BaseCommand):
     help = "Read-only email login preflight; reports IDs only, never rewrites existing accounts."
 
+    # Report remediation needs without rewriting accounts or printing email values.
     def handle(self, *args, **options):
         blank = list(User.objects.filter(email="").values_list("pk", flat=True))
         duplicates = (

@@ -4,6 +4,7 @@ from django.utils import timezone
 from .base import ScopedRecord, relation, actor, unique
 
 
+# Configure one illustrative document-expiry lead window per branch.
 class BranchOnboardingPolicy(ScopedRecord):
     expiry_lead_days = models.PositiveIntegerField(default=30)
 
@@ -14,6 +15,7 @@ class BranchOnboardingPolicy(ScopedRecord):
         ]
 
 
+# Preserve demo milestone history and supporting public evidence identifiers.
 class CaregiverOnboardingEvent(ScopedRecord):
     caregiver = relation("operations.Caregiver")
     reviewer = actor()

@@ -4,6 +4,7 @@ from django.db.models import Q
 from .base import Record, ScopedRecord, actor, relation, unique
 
 
+# Store branch notices with an audience and optional publication/expiry times.
 class Announcement(ScopedRecord):
     audience = models.CharField(max_length=16)
     title = models.CharField(max_length=200)
@@ -13,6 +14,7 @@ class Announcement(ScopedRecord):
     author = actor()
 
 
+# Configure disabled-by-default reminder timing/channels per branch and event.
 class ReminderRule(ScopedRecord):
     event_type = models.CharField(max_length=64)
     channel = models.CharField(max_length=16)
@@ -25,6 +27,7 @@ class ReminderRule(ScopedRecord):
         ]
 
 
+# Store generic recipient-linked content with an idempotent deduplication key.
 class Notification(ScopedRecord):
     recipient_user = actor(null=True, blank=True)
     caregiver = relation("operations.Caregiver", null=True, blank=True)
@@ -50,6 +53,7 @@ class Notification(ScopedRecord):
         ]
 
 
+# Track simulated per-channel delivery scheduling without external provider calls.
 class NotificationDelivery(ScopedRecord):
     notification = relation(Notification)
     channel = models.CharField(max_length=16, choices=[("email", "Email"), ("sms", "SMS")])
@@ -71,6 +75,7 @@ class NotificationDelivery(ScopedRecord):
         ]
 
 
+# Record numbered delivery outcomes using safe error codes instead of sensitive payloads.
 class DeliveryAttempt(ScopedRecord):
     delivery = relation(NotificationDelivery)
     attempt_number = models.PositiveIntegerField()
@@ -87,6 +92,7 @@ class DeliveryAttempt(ScopedRecord):
         ]
 
 
+# Preserve actor, action, public resource identity and safe metadata for audit history.
 class AuditEvent(Record):
     branch = relation("operations.StateBranch", null=True, blank=True)
     actor = actor(null=True, blank=True)

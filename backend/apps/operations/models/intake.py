@@ -3,6 +3,7 @@ from django.db import models
 from .base import ScopedRecord, actor, relation
 
 
+# Preserve original version-bound answers and application review status.
 class CaregiverApplication(ScopedRecord):
     caregiver = relation("operations.Caregiver")
     form_version = relation("operations.FormVersion")
@@ -19,6 +20,7 @@ class CaregiverApplication(ScopedRecord):
         ]
 
 
+# Store illustrative intake answers and their original form/referral references.
 class ClientIntake(ScopedRecord):
     client = relation("operations.Client")
     referral = relation("operations.ClientReferral", null=True, blank=True)
@@ -33,6 +35,7 @@ class ClientIntake(ScopedRecord):
         ]
 
 
+# Share before/after status, reviewer, timestamp and comment fields for history.
 class Review(ScopedRecord):
     previous_status = models.CharField(max_length=32)
     new_status = models.CharField(max_length=32)
@@ -44,9 +47,11 @@ class Review(ScopedRecord):
         abstract = True
 
 
+# Attach status review history to its caregiver application.
 class ApplicationReview(Review):
     application = relation(CaregiverApplication)
 
 
+# Attach status review history to its client intake.
 class IntakeReview(Review):
     intake = relation(ClientIntake)
