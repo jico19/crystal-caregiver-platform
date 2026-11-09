@@ -1,11 +1,12 @@
 # Phase 1 technical design
 
-Status: proposed implementation contract, not implemented. Version 1, 2026-11-09.
+Status: implemented for the SQLite prototype, 2026-11-09. PostgreSQL validation
+is deferred by owner instruction. See [evidence](../phase-1-evidence.md).
 
 Demo workflow — pending agency confirmation.
 
 Companions: [requirements and scenarios](phase-1-requirements.md),
-[ordered tasks](phase-1-tasks.md). All proposed interfaces below are future work.
+[ordered tasks](phase-1-tasks.md). The interfaces below are implemented for the prototype.
 
 ## Existing foundation and model changes
 

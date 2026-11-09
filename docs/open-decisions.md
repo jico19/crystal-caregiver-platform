@@ -53,3 +53,7 @@ production storage/vendor or legal policy is approved here.
   PostgreSQL results from SQLite tests or production readiness.
 - Owner confirmed pip/npm installation commands. A PostgreSQL driver was approved
   but is not installed while SQLite is the chosen database; add it when needed.
+
+- Phase 1 implementation is now verified on SQLite; see phase-1-evidence.md. Earlier
+  spec-only sequencing entries above are historical and superseded by the explicit
+  implementation/SQLite instructions recorded below them. Agency policy remains pending.

@@ -1,6 +1,6 @@
-# Crystal Care ? Phase 0 foundation
+# Crystal Care prototype
 
-Synthetic data only. Demo workflow ? pending agency confirmation.
+Synthetic data only. Demo workflow — pending agency confirmation.
 
 The prototype includes public FL/IN/GA pages, job application/account creation,
 session login/logout, password reset, client/state-admin invitations, scoped
@@ -70,7 +70,8 @@ access until their policy is confirmed. Django admin flags alone grant no portal
 
 Invitations expire in 24 hours, resets in one hour, sessions in eight hours.
 Existing-account invitation acceptance requires signing into that account first.
-The prototype does not send external email/SMS or accept uploaded documents.
+The prototype does not send external email/SMS. Document uploads accept only the
+exact bundled synthetic PDF/PNG/JPEG fixtures; arbitrary documents are rejected.
 
 ## Verification
 
@@ -102,8 +103,8 @@ OpenAPI docs at /api/v1/docs/ require an authenticated session.
 
 ## Remaining gates
 
-PostgreSQL migration/integrity testing, MFA, hosting, official branch content,
-client inquiry persistence, credential uploads/review, care workflows and reporting
+PostgreSQL migration/integrity testing (deferred by owner instruction), MFA,
+hosting, approved agency content, client inquiry persistence, care workflows and reporting
 remain separate work. No PHI, production readiness, HIPAA certification, or agency
 workflow approval is claimed. Development email uses Django's console backend;
 Django warns this configuration needs migration to MAILERS before Django 2028.
@@ -111,3 +112,31 @@ Django warns this configuration needs migration to MAILERS before Django 2028.
 Historical tracked artifacts/secrets require a separate hygiene review. Local
 secrets/data use .env.local and .local instead. Missing historical PRD/build-guide
 references were reconciled against current code, not restored.
+
+## Phase 1 prototype walkthrough
+
+Use SQLite for development/prototype. PostgreSQL migration validation is deferred;
+no PostgreSQL compatibility or production-readiness claim is made. Run additive
+migrations and seed_demo after updating. Reseeding preserves accounts, published
+forms, packets, assignments and configuration edits.
+
+1. Open an **Extended demo caregiver opportunity** in FL/IN/GA. Submit synthetic
+   experience/availability answers. Legacy jobs retain their original form schema.
+2. An assigned administrator opens the application from the portal, starts review
+   and approves or rejects it. A rejection requires a reason; decisions are final.
+3. The caregiver opens their branch profile's onboarding page and selects bundled
+   document fixtures. Required demo categories are license, CPR and CNA/HHA; all
+   11 categories remain available. No arbitrary local files can be selected.
+4. The administrator reviews versions and explicitly completes demo onboarding
+   after application approval and required, unexpired document approvals. This is
+   a demo milestone, not work authorization. Later expiry affects current readiness
+   while preserving completion history.
+5. Owners and authorized administrators download versioned packets and documents
+   through scoped endpoints. See [private file lifecycle](docs/private-files.md).
+
+Playwright uses isolated ports 5174/8001 and test-only throttle settings so repeated
+synthetic sign-ins do not consume the normal development server's limits. Session
+and CSRF behavior is unchanged. Browser tests create synthetic accounts in the
+local SQLite database and use the preserved local demo administrator credentials.
+
+See [Phase 1 verification](docs/phase-1-evidence.md) for results and deferred checks.

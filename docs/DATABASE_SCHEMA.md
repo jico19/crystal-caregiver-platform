@@ -2,7 +2,7 @@
 
 Demo workflow - pending agency confirmation. SQLite prototype; PostgreSQL validation deferred.
 
-Existing model inventory. Models for later phases are not implemented workflows.
+Model inventory. Later-phase model existence does not imply implemented workflows.
 
 - **Agency**: id, public_id, created_at, updated_at, name
 - **StateBranch**: id, public_id, created_at, updated_at, agency, state_code, display_name, timezone, active
@@ -12,6 +12,8 @@ Existing model inventory. Models for later phases are not implemented workflows.
 - **Client**: id, public_id, created_at, updated_at, branch, user, name, email, phone, active, admission_status, service_start_date
 - **JobPosting**: id, public_id, created_at, updated_at, branch, title, description, published, form_version
 - **JobSubmission**: id, public_id, created_at, updated_at, branch, job, caregiver, application
+- **BranchOnboardingPolicy**: id, public_id, created_at, updated_at, branch, expiry_lead_days
+- **CaregiverOnboardingEvent**: id, public_id, created_at, updated_at, branch, caregiver, reviewer, previous_status, new_status, occurred_at, evidence
 - **BranchContent**: id, public_id, created_at, updated_at, branch, content_key, title, body, publication_status
 - **WebsiteInquiry**: id, public_id, created_at, updated_at, branch, name, email, phone, subject, message, submitted_at, status
 - **ReferralSource**: id, public_id, created_at, updated_at, branch, name, source_type, active

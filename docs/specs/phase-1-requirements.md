@@ -1,6 +1,7 @@
 # Phase 1 requirements: caregiver onboarding and documents
 
-Status: specified, not implemented. Version 1, 2026-11-09.
+Status: implemented and verified for the SQLite prototype, 2026-11-09.
+PostgreSQL-only validation is deferred. See [evidence](../phase-1-evidence.md).
 
 Demo workflow — pending agency confirmation.
 
@@ -12,7 +13,7 @@ sections 2, 4 and 6, and [recorded decisions](../open-decisions.md).
 
 This package specifies synthetic caregiver applications, administrator review,
 employment packets, fixture document uploads, checklists and onboarding views.
-It does not implement them or approve agency policy. Phase 0 must close before
+The implemented prototype does not approve agency policy. Phase 0 must close before
 application implementation starts. Owner instruction on 2026-11-09 defers
 PostgreSQL validation until migration work; SQLite is used for the prototype.
 Remaining foundation work must be verified; see [evidence](../phase-0-evidence.md).

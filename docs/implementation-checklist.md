@@ -28,31 +28,31 @@ instruction until migration work and has not passed.
 
 Specifications: [requirements](specs/phase-1-requirements.md),
 [technical design](specs/phase-1-design.md), and
-[implementation tasks](specs/phase-1-tasks.md). Specs are prepared; implementation
-is authorized after the verified SQLite foundation. PostgreSQL validation is deferred.
+[implementation tasks](specs/phase-1-tasks.md). Implemented and verified for the SQLite prototype. See
+[Phase 1 evidence](phase-1-evidence.md). PostgreSQL validation is deferred.
 
-- [ ] Confirm application fields, onboarding steps, required credentials and
+- [x] Confirm application fields, onboarding steps, required credentials and
   review permissions per branch; record unresolved rules before implementation.
-- [ ] Extend the basic application into the agreed synthetic application form;
+- [x] Extend the basic application into the agreed synthetic application form;
   validate required answers and show readable staff application details.
-- [ ] Add employment packet download with versioned, synthetic content.
-- [ ] Implement application review, approve/reject and onboarding transitions
+- [x] Add employment packet download with versioned, synthetic content.
+- [x] Implement application review, approve/reject and onboarding transitions
   using configurable demo rules, atomic history and audit events.
-- [ ] Add per-caregiver onboarding checklists with pending/completed requirements.
-- [ ] Configure the complete document catalog: driver's license, CPR, CNA/HHA,
+- [x] Add per-caregiver onboarding checklists with pending/completed requirements.
+- [x] Configure the complete document catalog: driver's license, CPR, CNA/HHA,
   TB test, physical exam, background check, Social Security card, auto insurance,
   driver's insurance, direct deposit form and other onboarding documents.
   Use synthetic placeholders only; confirm overlapping insurance categories.
-- [ ] Implement synthetic document upload, versioning and authorized download;
+- [x] Implement synthetic document upload, versioning and authorized download;
   enforce server-side type/size limits, random private keys and ownership/branch
   permissions. Never expose public media URLs or collect real documents.
-- [ ] Add staff document review with approval/rejection reasons and audit/history.
-- [ ] Add configurable expiry dates and missing/expiring/expired calculations.
-- [ ] Expand caregiver dashboard with profile details, documents, onboarding
+- [x] Add staff document review with approval/rejection reasons and audit/history.
+- [x] Add configurable expiry dates and missing/expiring/expired calculations.
+- [x] Expand caregiver dashboard with profile details, documents, onboarding
   progress, pending requirements and compliance counts.
-- [ ] Add staff onboarding/compliance views scoped to authorized branches.
-- [ ] Verify the application and document flows on mobile-sized screens.
-- [ ] Add negative endpoint tests for anonymous access, another caregiver,
+- [x] Add staff onboarding/compliance views scoped to authorized branches.
+- [x] Verify the application and document flows on mobile-sized screens.
+- [x] Add negative endpoint tests for anonymous access, another caregiver,
   another branch, forged ownership fields, invalid uploads and missing CSRF.
 
 ## Phase 2 — client intake and authorizations (scope sections 3, 4)
