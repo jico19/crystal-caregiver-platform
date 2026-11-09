@@ -1,0 +1,266 @@
+[
+  {
+    "fixture_id": "drivers_license-pdf",
+    "category": "drivers_license",
+    "filename": "drivers_license.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 37677,
+    "sha256": "26d10892fba477138b9261967a4c3c228b9d3c9c1ebb02740415d03f1403262f"
+  },
+  {
+    "fixture_id": "drivers_license-png",
+    "category": "drivers_license",
+    "filename": "drivers_license.png",
+    "media_type": "image/png",
+    "byte_size": 20002,
+    "sha256": "f839286fc30ffaa373cd505bc834977a0e1d1b9072bacbbd8c63bc41bd7c98f4"
+  },
+  {
+    "fixture_id": "drivers_license-jpg",
+    "category": "drivers_license",
+    "filename": "drivers_license.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 23556,
+    "sha256": "384d1d99bb18ec26b630ad0b10635b4174f01840e79ee0a92041a2e2cfe0572a"
+  },
+  {
+    "fixture_id": "cpr-pdf",
+    "category": "cpr",
+    "filename": "cpr.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 37667,
+    "sha256": "7877301cc4de9cf15f6fac1b811c18dcb6086e2a00fa8d9e30aea402d58bc278"
+  },
+  {
+    "fixture_id": "cpr-png",
+    "category": "cpr",
+    "filename": "cpr.png",
+    "media_type": "image/png",
+    "byte_size": 20668,
+    "sha256": "5a6af6c66feb820051f147e0b5c9470965e37c6bf56a73a3b81f6782cdc38b42"
+  },
+  {
+    "fixture_id": "cpr-jpg",
+    "category": "cpr",
+    "filename": "cpr.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 23564,
+    "sha256": "6c071f0d341d6cabda0a64d74daf057d30bb8247f02ee92d959a755d21522b21"
+  },
+  {
+    "fixture_id": "cna_hha-pdf",
+    "category": "cna_hha",
+    "filename": "cna_hha.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 37661,
+    "sha256": "46d843cd7b8047f8ec5812e35c10f5300cbca384d4dfd59d342afd94c3e84c6a"
+  },
+  {
+    "fixture_id": "cna_hha-png",
+    "category": "cna_hha",
+    "filename": "cna_hha.png",
+    "media_type": "image/png",
+    "byte_size": 21151,
+    "sha256": "2c6032a50415e64fa9386d39c79ad2e0707192603aa1e0c38b2f6ad79cfef2f9"
+  },
+  {
+    "fixture_id": "cna_hha-jpg",
+    "category": "cna_hha",
+    "filename": "cna_hha.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 24592,
+    "sha256": "8298323df0186a0247829d2b24eb50ea806c87927fa31589ad6a9630602876e4"
+  },
+  {
+    "fixture_id": "tb_test-pdf",
+    "category": "tb_test",
+    "filename": "tb_test.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 36774,
+    "sha256": "c4354735716109a0fe5e764790135eadc395b385ad96a121eea619a6d9e7c955"
+  },
+  {
+    "fixture_id": "tb_test-png",
+    "category": "tb_test",
+    "filename": "tb_test.png",
+    "media_type": "image/png",
+    "byte_size": 18881,
+    "sha256": "26a2ca79553b29cfbb4515765ed3173be04228448ae0dd7d4f05e04959864035"
+  },
+  {
+    "fixture_id": "tb_test-jpg",
+    "category": "tb_test",
+    "filename": "tb_test.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 22158,
+    "sha256": "cb3afefd998d072e655b4bde5b8c031e8f21ae1a6889c5e6b833dda4e81ba02c"
+  },
+  {
+    "fixture_id": "physical_exam-pdf",
+    "category": "physical_exam",
+    "filename": "physical_exam.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 38746,
+    "sha256": "199faa723063ca0ed6abd22293342b95deba4590fc80ea7f014ec641e99e4dd6"
+  },
+  {
+    "fixture_id": "physical_exam-png",
+    "category": "physical_exam",
+    "filename": "physical_exam.png",
+    "media_type": "image/png",
+    "byte_size": 20305,
+    "sha256": "8f8488b57508632d043ae011f0699b8614115d549a63e9dc0be0ed5179f571ef"
+  },
+  {
+    "fixture_id": "physical_exam-jpg",
+    "category": "physical_exam",
+    "filename": "physical_exam.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 23263,
+    "sha256": "0643befe62dab99ac8caadedc95a116586b3073bdefea748fad70d6094457eaa"
+  },
+  {
+    "fixture_id": "background_check-pdf",
+    "category": "background_check",
+    "filename": "background_check.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 38571,
+    "sha256": "d6b04fcbc2c4169787ba39d063c2fc2e2f555a281a982f3bdaea365565043b07"
+  },
+  {
+    "fixture_id": "background_check-png",
+    "category": "background_check",
+    "filename": "background_check.png",
+    "media_type": "image/png",
+    "byte_size": 20853,
+    "sha256": "1985393be87162d66a8824b949148a1f53abc454fea229839b08fd5803d06aba"
+  },
+  {
+    "fixture_id": "background_check-jpg",
+    "category": "background_check",
+    "filename": "background_check.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 24097,
+    "sha256": "2b8c8b9853ed466c71fcbe22d898c0d808b79a09de06262eb790fdaa0ecdc803"
+  },
+  {
+    "fixture_id": "social_security_card-pdf",
+    "category": "social_security_card",
+    "filename": "social_security_card.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 38149,
+    "sha256": "7d2e5c9fc917f2310b0d03b2c732443f14f3302c70efef028add113f4b25012a"
+  },
+  {
+    "fixture_id": "social_security_card-png",
+    "category": "social_security_card",
+    "filename": "social_security_card.png",
+    "media_type": "image/png",
+    "byte_size": 21072,
+    "sha256": "6d8377aaef7c4e9bc71f58841b4cf651d42efb6dbfc11ba28adc3d5b2be855e1"
+  },
+  {
+    "fixture_id": "social_security_card-jpg",
+    "category": "social_security_card",
+    "filename": "social_security_card.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 24319,
+    "sha256": "9204a322e289876226000e83362edca593b7a13ff3beaccc50c9da6bb9e7222b"
+  },
+  {
+    "fixture_id": "auto_insurance-pdf",
+    "category": "auto_insurance",
+    "filename": "auto_insurance.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 38597,
+    "sha256": "e40e138d92c457c3ebf52a4a111e3357645248e06591bfe102cb6bc3152a24b7"
+  },
+  {
+    "fixture_id": "auto_insurance-png",
+    "category": "auto_insurance",
+    "filename": "auto_insurance.png",
+    "media_type": "image/png",
+    "byte_size": 20458,
+    "sha256": "493d586cdbdbc9ee237676565b620468fa78ffab031ad1b0c60f7e91cf729e14"
+  },
+  {
+    "fixture_id": "auto_insurance-jpg",
+    "category": "auto_insurance",
+    "filename": "auto_insurance.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 23461,
+    "sha256": "8adc5ec7a41499be09b15918e99647659f32761c889587187b5f3ef63877fe37"
+  },
+  {
+    "fixture_id": "drivers_insurance-pdf",
+    "category": "drivers_insurance",
+    "filename": "drivers_insurance.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 38233,
+    "sha256": "9d23a42f00cef3332b8f9640e5baa155c39c631f1bc99d653800744323f069d2"
+  },
+  {
+    "fixture_id": "drivers_insurance-png",
+    "category": "drivers_insurance",
+    "filename": "drivers_insurance.png",
+    "media_type": "image/png",
+    "byte_size": 20585,
+    "sha256": "79da011d2d9b905cf9b996ccdb66ffbb05d1d2f2649cc24322405b9b846cccba"
+  },
+  {
+    "fixture_id": "drivers_insurance-jpg",
+    "category": "drivers_insurance",
+    "filename": "drivers_insurance.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 23975,
+    "sha256": "e9b934584626aeb44ad5253775b2cb2afa542c02d81401ecdebe3c539792ba82"
+  },
+  {
+    "fixture_id": "direct_deposit-pdf",
+    "category": "direct_deposit",
+    "filename": "direct_deposit.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 37906,
+    "sha256": "fea66364fe85d7af22daf6ffff0d582ab84a6a0de0dd75d8dda5f2ad1bcecba4"
+  },
+  {
+    "fixture_id": "direct_deposit-png",
+    "category": "direct_deposit",
+    "filename": "direct_deposit.png",
+    "media_type": "image/png",
+    "byte_size": 20242,
+    "sha256": "7cb341b42b7315245822d16b413af7192c8c792f324f0970bf991ff95d9de76a"
+  },
+  {
+    "fixture_id": "direct_deposit-jpg",
+    "category": "direct_deposit",
+    "filename": "direct_deposit.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 23426,
+    "sha256": "35d3a7bce7652b40e06087f5c2c6402bb5cf50e0607aea06134ca8365536f9bd"
+  },
+  {
+    "fixture_id": "caregiver_other-pdf",
+    "category": "caregiver_other",
+    "filename": "caregiver_other.pdf",
+    "media_type": "application/pdf",
+    "byte_size": 39722,
+    "sha256": "ecf83c0080e29d2d01a5a7287bc6119b75b1fed610227370412946078815d21a"
+  },
+  {
+    "fixture_id": "caregiver_other-png",
+    "category": "caregiver_other",
+    "filename": "caregiver_other.png",
+    "media_type": "image/png",
+    "byte_size": 22474,
+    "sha256": "4fff49198b5ee0cf1f634a77c1123df4b8fdaac36ea05a49e6cb5663917928d4"
+  },
+  {
+    "fixture_id": "caregiver_other-jpg",
+    "category": "caregiver_other",
+    "filename": "caregiver_other.jpg",
+    "media_type": "image/jpeg",
+    "byte_size": 25832,
+    "sha256": "79a0e61bd9a98ff9ce789de77e6be091d5771caac3217afd925bc2a13176c2fc"
+  }
+]
