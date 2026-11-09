@@ -26,8 +26,8 @@ Frontend (run from frontend/)
   install:    TODO: confirm (npm/pnpm)
   dev:        npm run dev
   test:       npm run test
-  lint:       npm run lint        (Biome + ESLint react rules)
-  format:     npm run format      (biome format --write)
+  lint:       npm run lint        (Oxlint, including React rules)
+  format:     npm run format      (oxfmt .)
   typecheck:  npm run typecheck   (tsc --noEmit)
   e2e:        TODO: pick Playwright, add in Phase 3
 ```
@@ -35,7 +35,7 @@ Frontend (run from frontend/)
 ## Tooling
 
 - Python and Node versions: TODO: confirm and pin (`.python-version`, `.nvmrc`).
-- Formatting is done only by tools: ruff (Python), Biome (TS/TSX/JS/JSON/CSS). Never format by hand.
+- Formatting is done only by tools: ruff (Python), Oxfmt (frontend). Frontend lint uses Oxlint. Never format by hand.
 - If a formatter or lint command is missing or fails to run, stop and report it. Don't skip it.
 
 ## Repo map

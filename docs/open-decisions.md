@@ -9,3 +9,18 @@
 - Retention, logging, incident response, export, deletion policies?
 - BAAs and approved systems for real PHI?
 - Production domains, budget, operations owner, support?
+
+## Phase 0 decisions recorded 2026-11-09
+
+- Branch access: owner confirmed retaining the current demo boundaries. FL/IN/GA
+  remain separate branch access boundaries; state administrators see only their
+  assigned branch, and agency administrators see branches of their assigned agency.
+  This confirms the prototype access behavior, not legal entity structure.
+- Ordinary staff: owner confirmed management access remains disabled until an
+  agency staff permission policy is approved. Existing staff assignments grant no
+  directory management access; do not enable it from public state selection.
+- Frontend tools: owner confirmed Oxfmt and Oxlint. Retain existing dependencies
+  and configurations; reconcile documentation to these tools.
+- PostgreSQL validation: owner confirmed no disposable PostgreSQL database is
+  available. Keep migration/integrity validation on PostgreSQL pending. SQLite
+  evidence cannot close that gate.
