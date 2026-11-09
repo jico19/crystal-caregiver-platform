@@ -1,3 +1,5 @@
+# Create the WSGI application with deployment settings unless explicitly overridden.
+
 import os
 
 from django.core.wsgi import get_wsgi_application

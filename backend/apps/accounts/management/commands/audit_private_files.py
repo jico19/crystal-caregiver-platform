@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from apps.operations.models import StoredFile
-from apps.operations.private_files import private_root
+from apps.operations.services.private_files import private_root
 
 
 # Expose a dry-run orphan-byte count without deleting files.

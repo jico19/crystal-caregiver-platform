@@ -5,6 +5,9 @@ import { defineConfig } from "vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  optimizeDeps: {
+    include: ["react-hook-form", "@hookform/resolvers/zod", "zod"],
+  },
   test: {
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],

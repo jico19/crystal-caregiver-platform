@@ -7,7 +7,7 @@ from django.utils import timezone
 from rest_framework.exceptions import APIException, ValidationError, PermissionDenied
 from apps.accounts.access import admin_branches
 from ..models import BranchDocumentRequirement, Document, DocumentVersion, DocumentReview
-from ..private_files import FIXTURES, write_private
+from .private_files import FIXTURES, write_private
 from .common import subject, audit, Conflict, retry_locked
 
 MAX_BYTES = 5_242_880

@@ -1,4 +1,9 @@
 # Phases (update status here, not in AGENTS.md)
+
+See [pending scope implementation checklist](implementation-checklist.md) for
+feature-level tasks and acceptance gates. Phase checkboxes below remain the
+overall status; existing foundation work must be reconciled before Phase 0 closes.
+
 - [x] 0 Foundation: scope + open-decisions docs, scripts and .env.example, custom User, Agency/Branch/Membership,
       seed command, session/CSRF login/me, role routes, public home + FL/IN/GA switcher, dashboard shells,
       one seeded user per role, tests for unauthorized/escalation/wrong-branch.

@@ -4,9 +4,9 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from apps.accounts import views as auth
-from apps.operations import api
-from apps.operations.public_content import BranchContentList
-from apps.operations import onboarding_api as onboarding
+from apps.operations.views import api
+from apps.operations.views.public_content import BranchContentList
+from apps.operations.views import onboarding_api as onboarding
 
 router = DefaultRouter()
 router.register("jobs", api.JobViewSet)

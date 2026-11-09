@@ -8,7 +8,7 @@ from rest_framework.exceptions import APIException
 # Keep shared sign-in helpers inside the account test package.
 from apps.accounts.tests.test_foundation import browser
 from apps.operations.models import ApplicationReview, AuditEvent, CaregiverOnboardingEvent, BranchDocumentRequirement, BranchOnboardingPolicy, DocumentVersion, DocumentReview, StoredFile
-from apps.operations.private_files import FIXTURES, private_root
+from apps.operations.services.private_files import FIXTURES, private_root
 from apps.operations.services.transitions import transition_application
 from apps.operations.services.documents import upload_document, review_document, MAX_BYTES
 from apps.operations.services.checklist import onboarding_snapshot, complete_onboarding
@@ -150,7 +150,7 @@ def test_completion_audit_failure_rolls_back_milestone(onboarding):
 
 # Preserve published packets/schemas and operator-edited requirements across reseeding.
 def test_seed_preserves_packet_published_schema_and_policy_edits(onboarding):
-    from apps.operations.demo_onboarding import seed_requirements, seed_application_version
+    from apps.operations.demo.onboarding import seed_requirements, seed_application_version
     graph = onboarding
     application = graph["application"]
     original = application.form_version

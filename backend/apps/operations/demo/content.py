@@ -1,6 +1,6 @@
 """Configurable demo copy; these defaults make no agency policy claims."""
 
-from .models import BranchContent
+from ..models import BranchContent
 
 
 # Create illustrative defaults while preserving operator edits and publication choices.

@@ -15,7 +15,7 @@ from django.db import connections
 from rest_framework.exceptions import APIException
 from apps.accounts.models import User
 from apps.operations.models import Agency, StateBranch, BranchStaff, Caregiver, FormTemplate, FormVersion, JobPosting, CaregiverApplication
-from apps.operations.demo_onboarding import seed_requirements
+from apps.operations.demo.onboarding import seed_requirements
 from apps.operations.services import apply_to_job
 from apps.operations.services.documents import upload_document, review_document
 from apps.operations.services.transitions import transition_application

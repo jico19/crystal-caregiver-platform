@@ -8,9 +8,9 @@ from pathlib import Path
 from django.conf import settings
 from django.http import FileResponse
 from rest_framework.exceptions import NotFound
-from .models import StoredFile
+from ..models import StoredFile
 
-FIXTURES = Path(__file__).parent / "fixtures" / "demo"
+FIXTURES = Path(__file__).parent.parent / "fixtures" / "demo"
 _writes = ContextVar("private_file_writes", default=None)
 
 

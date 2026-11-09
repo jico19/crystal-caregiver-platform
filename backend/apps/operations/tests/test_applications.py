@@ -1,7 +1,7 @@
 import pytest
 # Reuse synthetic account fixtures from their dedicated test package.
 from apps.accounts.tests.test_foundation import graph, config, browser, UserFactory
-from apps.operations.application_forms import EXTENDED_SCHEMA
+from apps.operations.services.application_forms import EXTENDED_SCHEMA
 from apps.operations.models import FormVersion, JobPosting, CaregiverApplication, AuditEvent
 from django.utils import timezone
 

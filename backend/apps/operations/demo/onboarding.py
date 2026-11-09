@@ -1,9 +1,9 @@
 """Idempotent illustrative branch defaults; never rewrite published form versions."""
 
 from django.utils import timezone
-from .application_forms import EXTENDED_SCHEMA
-from .models import FormVersion, DocumentType, BranchDocumentRequirement, BranchOnboardingPolicy
-from .private_files import FIXTURES, write_private
+from ..services.application_forms import EXTENDED_SCHEMA
+from ..models import FormVersion, DocumentType, BranchDocumentRequirement, BranchOnboardingPolicy
+from ..services.private_files import FIXTURES, write_private
 
 
 # Reuse a published demo form or create its packet with failed-write cleanup.

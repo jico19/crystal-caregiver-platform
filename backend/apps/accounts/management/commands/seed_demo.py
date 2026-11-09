@@ -6,9 +6,9 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 from apps.accounts.models import User
-from apps.operations.private_files import cleanup_private_writes
-from apps.operations.demo_content import seed_branch_content
-from apps.operations.demo_onboarding import seed_application_version, seed_requirements
+from apps.operations.services.private_files import cleanup_private_writes
+from apps.operations.demo.content import seed_branch_content
+from apps.operations.demo.onboarding import seed_application_version, seed_requirements
 from apps.operations.models import (
     Agency,
     StateBranch,

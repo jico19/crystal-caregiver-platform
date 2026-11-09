@@ -11,12 +11,12 @@ from rest_framework.response import Response
 from apps.accounts.access import admin_branches, scope_people
 from apps.accounts.permissions import IsBusinessAdmin
 from apps.accounts.views import PublicAuthView, identity
-from .models import JobPosting, Caregiver, Client, CaregiverApplication, ApplicationReview
-from .serializers.reviews import TransitionInput
-from .services import apply_to_job
-from .serializers.applications import ApplicationInput, ApplicationSerializer, ApplicationDetailSerializer
-from .serializers.jobs import JobSerializer, JobDetailSerializer
-from .serializers.people import PersonSerializer, ClientSerializer
+from ..models import JobPosting, Caregiver, Client, CaregiverApplication, ApplicationReview
+from ..serializers.reviews import TransitionInput
+from ..services import apply_to_job
+from ..serializers.applications import ApplicationInput, ApplicationSerializer, ApplicationDetailSerializer
+from ..serializers.jobs import JobSerializer, JobDetailSerializer
+from ..serializers.people import PersonSerializer, ClientSerializer
 
 
 # Select opportunities with an active branch and available published form version.
@@ -110,8 +110,8 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=["post"], permission_classes=[IsBusinessAdmin], serializer_class=TransitionInput)
     @extend_schema(request=TransitionInput, responses=ApplicationDetailSerializer)
     def transitions(self, request, public_id=None):
-        from .serializers.reviews import TransitionInput
-        from .services.transitions import transition_application
+        from ..serializers.reviews import TransitionInput
+        from ..services.transitions import transition_application
         data = TransitionInput(data=request.data)
         data.is_valid(raise_exception=True)
         application = transition_application(request.user, public_id, data.validated_data)
@@ -121,7 +121,7 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=["get"])
     def packet(self, request, public_id=None):
         from rest_framework.exceptions import NotFound
-        from .private_files import attachment
+        from ..services.private_files import attachment
         application = self.get_object()
         if not application.form_version.packet_file_id:
             raise NotFound("Demo packet unavailable for this legacy form version.")

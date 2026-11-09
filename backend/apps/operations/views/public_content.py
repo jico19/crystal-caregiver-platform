@@ -2,8 +2,8 @@
 
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
-from .models import BranchContent
-from .serializers.content import BranchContentSerializer
+from ..models import BranchContent
+from ..serializers.content import BranchContentSerializer
 
 
 # Expose published illustrative branch copy through a read-only public endpoint.

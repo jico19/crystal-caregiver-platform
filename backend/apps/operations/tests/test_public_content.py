@@ -1,6 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from apps.operations.demo_content import seed_branch_content
+from apps.operations.demo.content import seed_branch_content
 from apps.operations.models import Agency, StateBranch, BranchContent
 
 pytestmark = pytest.mark.django_db

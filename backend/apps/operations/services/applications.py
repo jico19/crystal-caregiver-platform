@@ -5,7 +5,7 @@ from apps.accounts.services import create_user
 from apps.accounts.models import User
 from ..models import Caregiver, CaregiverApplication, JobSubmission, ApplicationReview, JobPosting
 from .common import audit, retry_locked
-from ..application_forms import application_answers
+from .application_forms import application_answers
 
 
 # Atomically validate availability, create version-bound application data, and record submission history.
