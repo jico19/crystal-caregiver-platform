@@ -1,0 +1,23 @@
+Synthetic local test accounts
+Demo workflow - pending agency confirmation
+Login: http://127.0.0.1:5173
+
+Agency administrator | FL/IN/GA | NEW LOCAL ACCOUNT agency-admin@demo.example  Password: fGd2mDqYYSTsR6sbbSr2Eg
+State administrator | FL | NEW LOCAL ACCOUNT state-admin-fl@demo.example  Password: OFuuj4OdJzzKazeEX3lCZA
+Staff | FL | NEW LOCAL ACCOUNT staff-fl@demo.example  Password: F6bCgGO-VSRDeN1MzzrG9Q
+Caregiver | FL | NEW LOCAL ACCOUNT caregiver-fl-1@demo.example  Password: 67Bxj9pbDD5rA-P5WxFQCA
+Caregiver | FL | NEW LOCAL ACCOUNT caregiver-fl-2@demo.example  Password: cSycdmKTY0WOTDOO5tNpGA
+Client | FL | NEW LOCAL ACCOUNT client-fl-1@demo.example  Password: Nk6OonGNG35zeTi0Y5l0aw
+Client | FL | NEW LOCAL ACCOUNT client-fl-2@demo.example  Password: HOI_KcLjKVuxLEkq-d5Mvg
+State administrator | IN | NEW LOCAL ACCOUNT state-admin-in@demo.example  Password: rqfcGn_dQSJbAXDZsGHb7w
+Staff | IN | NEW LOCAL ACCOUNT staff-in@demo.example  Password: sDi5NnVZ-8rCoH_sQIrF_w
+Caregiver | IN | NEW LOCAL ACCOUNT caregiver-in-1@demo.example  Password: XcfcQB3_Ylfs0iSxQLP22Q
+Caregiver | IN | NEW LOCAL ACCOUNT caregiver-in-2@demo.example  Password: -gc4-D2ol0SLnZivVpeW7w
+Client | IN | NEW LOCAL ACCOUNT client-in-1@demo.example  Password: Anva6uyU3M6gi14S2GvqDA
+Client | IN | NEW LOCAL ACCOUNT client-in-2@demo.example  Password: nAPphkeZ5Rw9xux9ydch2w
+State administrator | GA | NEW LOCAL ACCOUNT state-admin-ga@demo.example  Password: d2OGcvGQYKFHHF54A4Wjag
+Staff | GA | NEW LOCAL ACCOUNT staff-ga@demo.example  Password: 5BzuqF21NDcn6Uzr-afQYA
+Caregiver | GA | NEW LOCAL ACCOUNT caregiver-ga-1@demo.example  Password: s3yIVhy4gkdIaf24IWyd8g
+Caregiver | GA | NEW LOCAL ACCOUNT caregiver-ga-2@demo.example  Password: pBZ0-aLZ8UisFuMfg3lxMQ
+Client | GA | NEW LOCAL ACCOUNT client-ga-1@demo.example  Password: h7r2LsUduONaoPD1QKC_dw
+Client | GA | NEW LOCAL ACCOUNT client-ga-2@demo.example  Password: JTjLM-mpoyWN4lzDum1zIQ
