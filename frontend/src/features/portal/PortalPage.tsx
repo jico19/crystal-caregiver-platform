@@ -29,9 +29,13 @@ export default function PortalPage() {
   if (!role) {
     if (!user.roles.length) {
       return (
-        <section>
-          <h1>Access unavailable</h1>
-          <p>Your account has no active portal assignment. Contact your demo administrator.</p>
+        <section className="px-[max(24px,6vw)] py-16 max-md:py-10">
+          <h1 className="mb-6 font-serif text-[clamp(36px,5vw,72px)] leading-[1.08] tracking-[-1.8px]">
+            Access unavailable
+          </h1>
+          <p className="mb-6 max-w-[62ch]">
+            Your account has no active portal assignment. Contact your demo administrator.
+          </p>
         </section>
       );
     }
@@ -39,9 +43,11 @@ export default function PortalPage() {
   }
   if (!user.roles.includes(role)) {
     return (
-      <section>
-        <h1>Access denied</h1>
-        <p>Your account does not have this portal role.</p>
+      <section className="px-[max(24px,6vw)] py-16 max-md:py-10">
+        <h1 className="mb-6 font-serif text-[clamp(36px,5vw,72px)] leading-[1.08] tracking-[-1.8px]">
+          Access denied
+        </h1>
+        <p className="mb-6 max-w-[62ch]">Your account does not have this portal role.</p>
         <Link to="/portal">Open your portal</Link>
       </section>
     );
@@ -50,29 +56,35 @@ export default function PortalPage() {
   const admin = role === "super-admin" || role === "state-admin";
 
   return (
-    <section>
-      <p className="eyebrow">Your workspace / {user.email}</p>
-      <h1>{titles[role]}</h1>
-      <nav className="portal-nav" aria-label="Your portals">
+    <section className="px-[max(24px,6vw)] py-16 max-md:py-10">
+      <p className="mb-6 text-[13px] text-[#4b6456]">Your workspace / {user.email}</p>
+      <h1 className="mb-6 font-serif text-[clamp(36px,5vw,72px)] leading-[1.08] tracking-[-1.8px]">
+        {titles[role]}
+      </h1>
+      <nav className="mb-6 flex flex-wrap items-center gap-6" aria-label="Your portals">
         {user.roles.map((item) => (
           <Link key={item} to={`/portal/${item}`}>
             {titles[item]}
           </Link>
         ))}
       </nav>
-      <p>
+      <p className="mb-6 max-w-[62ch]">
         Authorized branches:{" "}
         {user.branches.map((branch) => branch.display_name).join(", ") || "None"}
       </p>
       {params.has("submitted") ? (
-        <output className="notice">
+        <output className="border-l-[3px] border-[#577451] bg-[#edf0e9] p-[18px]">
           Application submitted. Your portal account is ready. Agency review is a later demo phase.
         </output>
       ) : null}
       {role === "super-admin" ? (
-        <label className="field">
+        <label className="grid gap-2 text-sm">
           Filter accessible records by state
-          <select value={state} onChange={(event) => setState(event.target.value)}>
+          <select
+            className="w-full rounded border border-[#a6b7a7] bg-white p-3 text-[#263832] focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
+            value={state}
+            onChange={(event) => setState(event.target.value)}
+          >
             <option value="">All authorized states</option>
             {user.branches.map((branch) => (
               <option key={branch.public_id} value={branch.state_code}>
@@ -82,7 +94,7 @@ export default function PortalPage() {
           </select>
         </label>
       ) : null}
-      <div className="portal-grid">
+      <div className="mt-10 grid grid-cols-2 gap-6 max-md:grid-cols-1">
         {admin || role === "caregiver" ? (
           <RecordList
             key={`caregivers-${state}`}
@@ -104,13 +116,17 @@ export default function PortalPage() {
           <InvitationForm session={user} />
         ) : (
           <Panel>
-            <h2>{role === "caregiver" ? "Onboarding" : "Your care information"}</h2>
-            <p>
+            <h2 className="mb-6 font-serif text-[clamp(27px,3vw,38px)] leading-[1.2] tracking-[-0.6px]">
+              {role === "caregiver" ? "Onboarding" : "Your care information"}
+            </h2>
+            <p className="mb-6 max-w-[62ch]">
               {role === "caregiver"
                 ? "Document submission, agency review, and training are planned for later phases."
                 : "Intake, authorizations, care plans, and schedules are planned for later phases."}
             </p>
-            <p>No sensitive documents are accepted in this foundation.</p>
+            <p className="mb-6 max-w-[62ch]">
+              No sensitive documents are accepted in this foundation.
+            </p>
           </Panel>
         )}
       </div>

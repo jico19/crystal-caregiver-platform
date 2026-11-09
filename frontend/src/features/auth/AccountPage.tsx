@@ -67,29 +67,46 @@ export default function AccountPage({ mode }: { mode: Mode }) {
   });
 
   return (
-    <section className="form-page">
-      <p className="eyebrow">Crystal Care / Account access</p>
-      <h1>{titles[mode]}</h1>
+    <section className="min-h-[70vh] max-w-[750px]">
+      <p className="mb-6 text-[13px] text-[#4b6456]">Crystal Care / Account access</p>
+      <h1 className="mb-6 font-serif text-[44px] leading-[1.08] tracking-[-1.8px] max-md:text-4xl">
+        {titles[mode]}
+      </h1>
       {mode === "invite" ? (
-        <p>
+        <p className="mb-6 max-w-[62ch]">
           Already have an account? <Link to="/login">Sign in</Link>, then reopen this invitation to
           link it safely.
         </p>
       ) : null}
-      <form onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
+      <form
+        className="my-8 grid gap-[22px]"
+        onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+      >
         {mode === "login" || mode === "reset" ? (
           <Field label="Email" error={form.formState.errors.email}>
-            <input type="email" autoComplete="email" required {...form.register("email")} />
+            <input
+              className="w-full rounded border border-[#a6b7a7] bg-white p-3 text-[#263832] focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
+              type="email"
+              autoComplete="email"
+              required
+              {...form.register("email")}
+            />
           </Field>
         ) : null}
         {mode === "invite" ? (
           <Field label="Synthetic name" error={form.formState.errors.name}>
-            <input required autoComplete="name" {...form.register("name")} />
+            <input
+              className="w-full rounded border border-[#a6b7a7] bg-white p-3 text-[#263832] focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
+              required
+              autoComplete="name"
+              {...form.register("name")}
+            />
           </Field>
         ) : null}
         {mode !== "reset" ? (
           <Field label="Password" error={form.formState.errors.password}>
             <input
+              className="w-full rounded border border-[#a6b7a7] bg-white p-3 text-[#263832] focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
               type="password"
               required
               autoComplete={mode === "login" ? "current-password" : "new-password"}
@@ -98,8 +115,15 @@ export default function AccountPage({ mode }: { mode: Mode }) {
           </Field>
         ) : null}
         <Failure error={mutation.error} />
-        {mutation.data?.detail ? <output className="notice">{mutation.data.detail}</output> : null}
-        <button disabled={mutation.isPending}>
+        {mutation.data?.detail ? (
+          <output className="border-l-[3px] border-[#577451] bg-[#edf0e9] p-[18px]">
+            {mutation.data.detail}
+          </output>
+        ) : null}
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-[#27543f] bg-[#27543f] px-[22px] py-3 font-semibold text-white transition-[transform,background] duration-150 hover:-translate-y-0.5 hover:bg-[#183f2c] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
+          disabled={mutation.isPending}
+        >
           {mutation.isPending
             ? "Submitting…"
             : mode === "login"
@@ -111,7 +135,7 @@ export default function AccountPage({ mode }: { mode: Mode }) {
                   : "Accept invitation"}
         </button>
       </form>
-      <p>
+      <p className="mb-6 max-w-[62ch]">
         {mode === "login" ? (
           <Link to="/forgot-password">Forgot your password?</Link>
         ) : (
@@ -119,7 +143,7 @@ export default function AccountPage({ mode }: { mode: Mode }) {
         )}
       </p>
       {mode === "login" ? (
-        <p>
+        <p className="mb-6 max-w-[62ch]">
           New caregivers register by <Link to="/states/FL">applying to a public job posting</Link>.
         </p>
       ) : null}

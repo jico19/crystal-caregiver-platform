@@ -25,7 +25,14 @@ function mount(element: React.ReactNode, path = "/") {
         <Routes>
           <Route path="/portal/:role" element={element} />
           <Route path="/" element={element} />
-          <Route path="/login" element={<h1>Login destination</h1>} />
+          <Route
+            path="/login"
+            element={
+              <h1 className="mb-6 font-serif text-[clamp(36px,5vw,72px)] leading-[1.08] tracking-[-1.8px]">
+                Login destination
+              </h1>
+            }
+          />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
