@@ -41,7 +41,8 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 @pytest.fixture(autouse=True)
-def config(settings):
+def config(settings, tmp_path):
+    settings.PRIVATE_FILE_ROOT = tmp_path / "private"
     from django.core.cache import cache
 
     cache.clear()
@@ -245,7 +246,7 @@ def test_existing_email_is_not_claimed_and_failed_application_rolls_back(graph):
     assert browser().post(url, data, format="json").status_code == 400
     data = application_data()
     with patch(
-        "apps.operations.services.JobSubmission.objects.create",
+        "apps.operations.services.applications.JobSubmission.objects.create",
         side_effect=RuntimeError("rollback"),
     ):
         with pytest.raises(RuntimeError):
@@ -352,7 +353,7 @@ def test_seeds_are_repeatable_and_preserve_passwords():
     call_command("seed_demo", stdout=output)
     assert list(User.objects.order_by("pk").values_list("password", flat=True)) == passwords
     assert "Password:" not in output.getvalue()
-    assert StateBranch.objects.count() == 3 and JobPosting.objects.count() == 3
+    assert StateBranch.objects.count() == 3 and JobPosting.objects.count() == 6
 
 
 def test_case_insensitive_email_constraint(graph):

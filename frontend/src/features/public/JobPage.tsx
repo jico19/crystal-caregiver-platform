@@ -1,22 +1,16 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { applicationSchema, type ApplicationValues } from "./schemas";
+import { ExtendedAnswers } from "./components/ExtendedAnswers";
 import { api, queryClient } from "../../api/client";
 import type { Job, Session } from "../../api/types";
 import { useSession } from "../auth/session";
 import { Failure } from "../../components/Failure";
 import { Field } from "../../components/Field";
 import { Loading } from "../../components/Loading";
-
-const schema = z.object({
-  name: z.string().min(1, "Enter a synthetic name.").max(200),
-  email: z.email("Enter a valid email."),
-  password: z.string(),
-  demo_acknowledged: z.boolean().refine(Boolean, "Acknowledge synthetic data only."),
-});
-type Values = z.infer<typeof schema>;
 
 export default function JobPage() {
   const { id } = useParams();
@@ -26,24 +20,33 @@ export default function JobPage() {
     queryKey: ["job", id],
     queryFn: async () => (await api.get<Job>(`jobs/${id}/`)).data,
   });
-  const form = useForm<Values>({
-    resolver: zodResolver(schema),
-    defaultValues: { name: "", email: "", password: "", demo_acknowledged: false },
+  const form = useForm<ApplicationValues>({
+    resolver: zodResolver(
+      applicationSchema(!!job.data?.application_form?.field_schema.fields.includes("experience")),
+    ),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      experience: "",
+      availability: [],
+      demo_acknowledged: false,
+    },
   });
+  useEffect(() => {
+    if (session.data?.email) form.setValue("email", session.data.email);
+  }, [session.data?.email, form]);
   const submit = useMutation({
-    mutationFn: async (values: Values) =>
-      (
-        await api.post<{ user: Session }>(
-          `jobs/${id}/apply/`,
-          session.data
-            ? {
-                name: values.name,
-                email: session.data.email,
-                demo_acknowledged: values.demo_acknowledged,
-              }
-            : values,
-        )
-      ).data,
+    mutationFn: async (values: ApplicationValues) => {
+      const { experience, availability, password, ...base } = values;
+      const extended = job.data?.application_form?.field_schema.fields.includes("experience");
+      const payload = {
+        ...base,
+        ...(extended ? { experience, availability } : {}),
+        ...(session.data ? { email: session.data.email } : { password }),
+      };
+      return (await api.post<{ user: Session }>(`jobs/${id}/apply/`, payload)).data;
+    },
     onSuccess: (data) => {
       queryClient.clear();
       queryClient.setQueryData(["session"], data.user);
@@ -91,6 +94,12 @@ export default function JobPage() {
               {...form.register("password")}
             />
           </Field>
+        ) : null}
+        {job.data?.application_form?.field_schema.fields.includes("experience") ? (
+          <ExtendedAnswers
+            form={form}
+            choices={job.data.application_form.field_schema.choices ?? {}}
+          />
         ) : null}
         <Field label="Demo data acknowledgement" error={form.formState.errors.demo_acknowledged}>
           <span className="flex items-start gap-3 font-normal">

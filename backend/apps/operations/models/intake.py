@@ -11,6 +11,9 @@ class CaregiverApplication(ScopedRecord):
     submitted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(ScopedRecord.Meta):
+        constraints = ScopedRecord.Meta.constraints + [
+            models.CheckConstraint(condition=models.Q(status__in=["draft", "submitted", "under_review", "approved", "rejected"]), name="application_valid_status"),
+        ]
         indexes = ScopedRecord.Meta.indexes + [
             models.Index(fields=["branch", "status", "created_at"], name="application_work_queue")
         ]

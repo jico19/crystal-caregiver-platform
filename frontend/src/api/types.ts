@@ -1,3 +1,4 @@
+import type { PublishedForm } from "../features/onboarding/types";
 export type Branch = {
   public_id: string;
   state_code: string;
@@ -20,6 +21,7 @@ export type Page<T> = {
 };
 
 export type Job = {
+  application_form?: PublishedForm;
   public_id: string;
   title: string;
   description: string;

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../api/client";
@@ -36,7 +37,13 @@ export function RecordList({
           className="flex justify-between gap-3 border-t border-border py-4"
           key={person.public_id}
         >
-          <span className="min-w-0">{person.name}</span>
+          <span className="min-w-0">
+            {endpoint === "caregivers/" ? (
+              <Link to={`/caregivers/${person.public_id}/onboarding`}>{person.name}</Link>
+            ) : (
+              person.name
+            )}
+          </span>
           <span className="shrink-0">{person.state_code}</span>
         </div>
       ))}

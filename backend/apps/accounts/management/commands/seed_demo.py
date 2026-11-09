@@ -6,7 +6,9 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 from apps.accounts.models import User
+from apps.operations.private_files import cleanup_private_writes
 from apps.operations.demo_content import seed_branch_content
+from apps.operations.demo_onboarding import seed_application_version, seed_requirements
 from apps.operations.models import (
     Agency,
     StateBranch,
@@ -23,6 +25,7 @@ from apps.operations.models import (
 class Command(BaseCommand):
     help = "Seed synthetic local demo accounts; never overwrite existing passwords."
 
+    @cleanup_private_writes
     @transaction.atomic
     def handle(self, *args, **options):
         if not settings.DEBUG:
@@ -79,6 +82,12 @@ class Command(BaseCommand):
                     "published": True,
                     "form_version": version,
                 },
+            )
+            version = seed_application_version(branch, template)
+            seed_requirements(branch)
+            JobPosting.objects.get_or_create(
+                branch=branch, title=f"Extended demo caregiver opportunity - {state}",
+                defaults={"description": "Versioned synthetic application. Demo workflow - pending agency confirmation.", "published": True, "form_version": version},
             )
         self.stdout.write("Demo seed complete. Existing passwords and assignments were preserved.")
 

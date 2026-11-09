@@ -15,6 +15,18 @@ test.beforeEach(async ({ page }) => {
       : path.endsWith("jobs/synthetic-job/")
         ? job
         : { count: 1, results: [job], next: null, previous: null };
+    if (path.endsWith("staff/onboarding/")) {
+      await route.fulfill({
+        json: {
+          count: 0,
+          results: [],
+          next: null,
+          previous: null,
+          counts: { total: 0, completed: 0, missing: 0, expired: 0, expiring: 0 },
+        },
+      });
+      return;
+    }
     if (path.endsWith("clients/")) {
       await route.fulfill({ json: { count: 0, results: [], next: null, previous: null } });
       return;

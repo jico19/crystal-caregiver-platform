@@ -7,6 +7,7 @@ import { Panel } from "../../components/Panel";
 import { useSession } from "../auth/session";
 import { Applications } from "./Applications";
 import { InvitationForm } from "./InvitationForm";
+import { OnboardingQueue } from "../onboarding/components/OnboardingQueue";
 import { RecordList } from "./RecordList";
 
 const titles: Record<Role, string> = {
@@ -88,6 +89,7 @@ export default function PortalPage() {
           </select>
         </label>
       ) : null}
+      {admin ? <OnboardingQueue key={state} state={state} /> : null}
       <div className="mt-10 grid grid-cols-2 gap-6 max-md:grid-cols-1">
         {admin || role === "caregiver" ? (
           <RecordList
@@ -105,7 +107,9 @@ export default function PortalPage() {
             state={state}
           />
         ) : null}
-        {role === "caregiver" ? <Applications /> : null}
+        {admin || role === "caregiver" ? (
+          <Applications key={state} state={state} admin={admin} />
+        ) : null}
         {admin ? (
           <InvitationForm session={user} />
         ) : (

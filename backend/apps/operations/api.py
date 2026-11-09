@@ -1,7 +1,7 @@
 from django.contrib.auth import login
 from drf_spectacular.utils import extend_schema
 from apps.accounts.contracts import ApplicationOutput
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, serializers, viewsets
@@ -11,8 +11,10 @@ from rest_framework.response import Response
 from apps.accounts.access import admin_branches, scope_people, IsBusinessAdmin
 from apps.accounts.serializers import ApplicationInput
 from apps.accounts.views import PublicAuthView, identity
-from .models import JobPosting, Caregiver, Client, CaregiverApplication
+from .models import JobPosting, Caregiver, Client, CaregiverApplication, ApplicationReview
+from .review_inputs import TransitionInput
 from .services import apply_to_job
+from .application_serializers import FormVersionSerializer, ApplicationDetailSerializer
 
 
 class JobSerializer(serializers.ModelSerializer):
@@ -21,6 +23,13 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobPosting
         fields = ["public_id", "title", "description", "state_code"]
+
+
+class JobDetailSerializer(JobSerializer):
+    application_form = FormVersionSerializer(source="form_version")
+
+    class Meta(JobSerializer.Meta):
+        fields = JobSerializer.Meta.fields + ["application_form"]
 
 
 def published_jobs():
@@ -42,6 +51,9 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = "public_id"
     filterset_fields = ["branch__state_code"]
     queryset = published_jobs()
+
+    def get_serializer_class(self):
+        return JobDetailSerializer if self.action == "retrieve" else JobSerializer
 
 
 class ApplyView(PublicAuthView):
@@ -118,6 +130,28 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ["branch__state_code", "status"]
     queryset = CaregiverApplication.objects.none()
 
+    @action(detail=True, methods=["post"], permission_classes=[IsBusinessAdmin], serializer_class=TransitionInput)
+    @extend_schema(request=TransitionInput, responses=ApplicationDetailSerializer)
+    def transitions(self, request, public_id=None):
+        from .review_inputs import TransitionInput
+        from .services.transitions import transition_application
+        data = TransitionInput(data=request.data)
+        data.is_valid(raise_exception=True)
+        application = transition_application(request.user, public_id, data.validated_data)
+        return Response(ApplicationDetailSerializer(application).data)
+
+    @action(detail=True, methods=["get"])
+    def packet(self, request, public_id=None):
+        from rest_framework.exceptions import NotFound
+        from .private_files import attachment
+        application = self.get_object()
+        if not application.form_version.packet_file_id:
+            raise NotFound("Demo packet unavailable for this legacy form version.")
+        return attachment(application.form_version.packet_file)
+
+    def get_serializer_class(self):
+        return ApplicationDetailSerializer if self.action == "retrieve" else ApplicationSerializer
+
     def get_queryset(self):
         user = self.request.user
         return (
@@ -125,6 +159,7 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
             .filter(
                 Q(branch__in=admin_branches(user)) | Q(caregiver__user=user, caregiver__active=True)
             )
-            .select_related("branch")
+            .select_related("branch", "caregiver", "form_version")
+            .prefetch_related(Prefetch("applicationreview_set", queryset=ApplicationReview.objects.order_by("reviewed_at", "public_id")))
             .order_by("-submitted_at", "public_id")
         )

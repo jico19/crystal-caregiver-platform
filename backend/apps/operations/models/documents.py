@@ -46,7 +46,10 @@ class Document(ScopedRecord):
     client = relation("operations.Client", null=True, blank=True)
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [one_subject("document_one_subject")]
+        constraints = ScopedRecord.Meta.constraints + [
+            one_subject("document_one_subject"),
+            models.UniqueConstraint(fields=["caregiver", "document_type"], condition=Q(caregiver__isnull=False), name="caregiver_document_category"),
+        ]
 
 
 class DocumentVersion(ScopedRecord):
@@ -83,6 +86,7 @@ class DocumentReview(ScopedRecord):
 
     class Meta(ScopedRecord.Meta):
         constraints = ScopedRecord.Meta.constraints + [
+            unique("document_version", name="one_document_review"),
             models.CheckConstraint(
                 condition=Q(decision__in=["approved", "rejected"]), name="document_review_decision"
             )

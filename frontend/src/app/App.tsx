@@ -4,6 +4,8 @@ import { Loading } from "../components/Loading";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { Header } from "./Header";
 
+const OnboardingPage = lazy(() => import("../features/onboarding/OnboardingPage"));
+const ApplicationPage = lazy(() => import("../features/onboarding/ApplicationPage"));
 const PublicPage = lazy(() => import("../features/public/PublicPage"));
 const JobPage = lazy(() => import("../features/public/JobPage"));
 const PortalPage = lazy(() => import("../features/portal/PortalPage"));
@@ -26,6 +28,8 @@ export default function App() {
             <Route path="/forgot-password" element={<AccountPage mode="reset" />} />
             <Route path="/reset-password" element={<AccountPage mode="confirm" />} />
             <Route path="/accept-invitation" element={<AccountPage mode="invite" />} />
+            <Route path="/caregivers/:id/onboarding" element={<OnboardingPage />} />
+            <Route path="/applications/:id" element={<ApplicationPage />} />
             <Route path="/portal" element={<PortalPage />} />
             <Route path="/portal/:role" element={<PortalPage />} />
             <Route

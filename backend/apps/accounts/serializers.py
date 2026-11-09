@@ -29,6 +29,8 @@ class PasswordInput(StrictSerializer):
 
 
 class ApplicationInput(PasswordInput):
+    experience = serializers.CharField(required=False)
+    availability = serializers.ListField(child=serializers.CharField(), required=False)
     name = serializers.CharField(max_length=200)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, required=False, trim_whitespace=False)

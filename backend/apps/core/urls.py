@@ -4,6 +4,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from apps.accounts import views as auth
 from apps.operations import api
 from apps.operations.public_content import BranchContentList
+from apps.operations import onboarding_api as onboarding
 
 router = DefaultRouter()
 router.register("jobs", api.JobViewSet)
@@ -12,6 +13,13 @@ router.register("clients", api.ClientViewSet)
 router.register("applications", api.ApplicationViewSet)
 
 urlpatterns = [
+    path("caregivers/<uuid:public_id>/onboarding/", onboarding.OnboardingView.as_view()),
+    path("caregivers/<uuid:public_id>/onboarding/complete/", onboarding.CompleteOnboarding.as_view()),
+    path("caregivers/<uuid:public_id>/documents/", onboarding.CaregiverDocuments.as_view()),
+    path("documents/<uuid:public_id>/", onboarding.DocumentDetail.as_view()),
+    path("document-versions/<uuid:public_id>/download/", onboarding.VersionDownload.as_view()),
+    path("document-versions/<uuid:public_id>/reviews/", onboarding.VersionReview.as_view()),
+    path("staff/onboarding/", onboarding.OnboardingQueue.as_view()),
     path("branch-content/", BranchContentList.as_view()),
     path("", include(router.urls)),
     path("jobs/<uuid:public_id>/apply/", api.ApplyView.as_view()),
