@@ -1,27 +1,30 @@
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "vite";
+import { fileURLToPath, URL } from 'node:url'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  optimizeDeps: {
-    include: ["react-hook-form", "@hookform/resolvers/zod", "zod"],
-  },
-  test: {
-    environment: "jsdom",
-    setupFiles: ["./src/test-setup.ts"],
-    exclude: ["e2e/**", "node_modules/**"],
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
   },
   server: {
-    host: "127.0.0.1",
     port: 5173,
-    strictPort: true,
     proxy: {
-      "/api": {
-        target: "http://127.0.0.1:8000",
-        changeOrigin: false,
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
+      '/media': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
       },
     },
   },
-});
+})

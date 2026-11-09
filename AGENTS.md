@@ -1,153 +1,61 @@
-# AGENTS.md
+# AGENTS.md — Caregiver Platform
 
-Multi-state (FL/IN/GA) home-care agency platform prototype.
-Stack: Django + DRF backend, React + Vite + TypeScript frontend, Tailwind.
-Synthetic data only. Never add real PHI, SSNs, IDs, bank details, or real documents.
+Multi-state (FL/IN/GA) home-care platform: caregiver onboarding, client intake, compliance, training, and admin ops. Monorepo with a Django backend, a Vite/React frontend, and a contract/spec doc set. No git repo, no CI.
 
-Status: demo workflows are illustrative, not the agency's approved process.
-Label them "Demo workflow — pending agency confirmation".
+## Layout
+
+- `backend/` — Django 6.1 + DRF 3.18 + SimpleJWT (Python). Apps live under `backend/apps/*`; settings split across `config/settings/{base,development,production}.py`. Virtualenv at `backend/venv/`.
+- `frontend/` — React 19 + Vite + Tailwind CSS v4 + React Router v7 + TanStack Query v5 + Radix UI. Plain JavaScript/JSX (no TypeScript).
+- `docs/` — `PRD.md`, `SAD.md`, `API_CONTRACTS.md`, `DATABASE_SCHEMA_AND_DATA_DICTIONARY.md`, `SECURITY_REQUIREMENTS.md`, `design.md`. Source of truth for schemas/endpoints; trust these over frontend code when they conflict.
 
 ## Commands
 
-Verify each exists before using it. If one is missing, add it under TODO and ask me; don't invent it.
+Backend (from `backend/`, activate venv first):
 
-```text
-Backend (run from backend/)
-  install:    python -m pip install -r requirements-dev.txt
-  dev:        python manage.py runserver
-  test:       pytest
-  lint:       not configured (removed by owner request)
-  format:     not configured (removed by owner request)
-  migrate:    python manage.py makemigrations && python manage.py migrate
-  seed:       python manage.py seed_demo
-  deploy chk: python manage.py check --deploy --settings=config.settings.production
+- Activate: `backend\venv\Scripts\activate`, then all `manage.py` commands below (they default to `config.settings.development`).
+- Dev server: `python manage.py runserver` (serves `:8000`; Vite proxies `/api` to it).
+- Migrate: `python manage.py migrate`.
+- First-time seed: `python manage.py seed_initial_data` — states/roles/doc-types/courses/marketing + default admin `admin@caregiverplatform.com` / `AdminPassword123!`.
+- Sample users for every role/state: `python seed_users.py`. This is a **plain script**, not a management command, and it **resets every user's password to `password123`**.
+- Tests: `pytest` with `pytest-django` and `--reuse-db` (`pytest.ini`). Run scoped app tests only for your task to avoid overhead (e.g. `pytest apps/compliance/tests.py`, `pytest apps/caregivers/tests.py`, `pytest apps/authentication/tests.py`) or targeted tests with `pytest -k <test_name>`. Run full suite with `pytest`. Base fixtures live in `apps/core/test_utils.py` (`BasePlatformTestCase`).
 
-Frontend (run from frontend/)
-  install:    npm ci
-  dev:        npm run dev
-  test:       npm run test
-  lint:       npm run lint        (Oxlint, including React rules)
-  format:     npm run format      (oxfmt .)
-  typecheck:  npm run typecheck   (tsc --noEmit)
-  e2e:        npm run test:e2e (Playwright)
-```
+Frontend (from `frontend/`):
 
-## Tooling
+- `npm run dev` (port 5173, proxies `/api` → `http://127.0.0.1:8000`), `npm run build`, `npm run preview`.
+- `npm run lint` is **oxlint** — there is no ESLint or Prettier config.
+- No frontend test runner is configured.
 
-- Whenever touching frontend code, read and apply both the `tailwind-design-system`
-  and `vercel-react-best-practices` skills.
-- Runtime pins: `.python-version` (Python 3.14.4), `frontend/.nvmrc` (Node 24).
-- Frontend formatting uses Oxfmt and lint uses Oxlint. Never format frontend code by hand.
-- Backend formatting and lint tooling were removed by owner request; no replacement is configured.
-- If a formatter or lint command is missing or fails to run, stop and report it. Don't skip it.
-- Run only checks and tests relevant to the change. Do not run every test suite by default. For code organization, file moves, or comments, prefer import checks, test discovery, and structural or API-contract checks; run existing focused tests only where behavior could be affected. Do not add tests that only assert file placement or repeat the implementation. Run a full suite only when the change has broad impact, focused checks reveal a wider issue, or the owner explicitly requests it.
+## Architecture notes
 
-## Repo map
+- DB switches on `backend/.env`: SQLite by default (`backend/db.sqlite3`); PostgreSQL 16+ auto-selected when `DB_ENGINE=postgresql` and `DB_PASSWORD` is set.
+- Custom user model: `AUTH_USER_MODEL = "authentication.User"`. Roles and states are FKs (`user.role.name`, `user.state`).
+- All API routes use trailing slashes under `/api/v1/...` (`config/urls.py`). The frontend auth layer calls `/auth/me/` with a cached `/auth/me` fallback — preserve both.
+- JWT via SimpleJWT (access 60 min, refresh 7 d, rotate+blacklist). Token lives in `localStorage['caregiver_access_token']`, refresh in `'refresh'`.
+- Frontend API callers use `frontend/src/shared/services/api.js` — a fetch wrapper (axios is in package.json but unused). It injects an `X-Agency-State` header from `localStorage['selected_state']` on every request; that header is in the backend CORS allow-list.
+- Documents handled via built-in Django media storage (`backend/media/`, proxied via Vite `/media`) with HMAC signed tokens for direct upload/download; AWS S3 optional via `USE_S3=true`. Certificates/PDFs generated via reportlab.
 
-```text
-backend/config/     settings/{base,dev,prod}.py, urls, wsgi/asgi
-backend/apps/       one Django app per domain
-frontend/src/       app/, api/, components/, features/, pages/
-docs/               specs, workflows, open decisions, owner gates
-```
+## RBAC & state scoping (non-negotiable)
 
-- Create a Django app only when the current slice needs it.
-- Inspect the repo first: read README, `docs/phases.md`, and existing code in the area you'll touch. If the repo is empty, start at Phase 0.
+- Backend permission classes: `backend/apps/core/permissions.py` (`IsSuperAdmin`, `IsStateScopedAdmin`, `IsCaregiver`, `IsClient`). `IsStateScopedAdmin` raises 403 for administrators with `state_id IS NULL`, and object checks enforce `obj.state_id == request.user.state_id`. Reuse these; never write ad-hoc `role == ...` checks.
+- Frontend: check roles only through helpers in `src/shared/lib/roles.js` (`isAdmin`, `isSuperAdmin`, `homePathFor`). A bare `role === 'administrator'` silently drops `super_admin` into the wrong portal.
+- State administrators are locked to their assigned state — no state switcher. Public landing pages are `/florida`, `/indiana`, `/georgia`.
+- Status enums live in `src/shared/constants/*.js` and must match `docs/DATABASE_SCHEMA_AND_DATA_DICTIONARY.md`; keep them in sync when adding states.
 
-## File structure (enforced by lint)
+## Gotchas
 
-General:
-- Every new file must go strictly in the folder for its domain, feature, and responsibility. Follow the repo map and existing structure; do not place files in unrelated folders.
-- All test files must live in dedicated test folders: backend tests in the owning app's `tests/` folder, frontend unit/component tests in the owning feature's `tests/` folder, and end-to-end tests in the existing `frontend/e2e/` folder. Do not mix test files with production code.
+- `frontend/CONTEXT.md` (auto-loaded into sessions) describes the backend as FastAPI + Supabase/GoTrue. That is **stale** — the backend is Django DRF + SimpleJWT. Also ignore `roles.js` comments referencing `supabase/migrations`. Trust `docs/` and the actual code on conflict.
+- Not a git repo and no root `.gitignore`: `backend/db.sqlite3`, `backend/venv/`, and `frontend/node_modules/` all sit in the tree. Don't delete or regenerate the DB casually.
+- `seed_initial_data` is idempotent; `seed_users.py` is not (resets passwords).
+- Frontend sometimes calls endpoints that don't exist in backend `urls.py` yet. Verify a route against `config/urls.py` + `apps/*/urls.py` and `docs/API_CONTRACTS.md` before debugging against a phantom API.
 
-Frontend:
-- One React component per file. File name = component name (`CaregiverCard.tsx` exports `CaregiverCard`).
-- Hooks live in their own file named `useX.ts`. Zod schemas and API types live in `schemas.ts` / `types.ts` beside the feature.
-- Code is organized by feature: `features/<name>/{components,hooks,api}`. Shared UI goes in `components/` only after a second feature uses it.
-- A component file over ~150 lines gets split: extract subcomponents into their own files.
-- Lint must enforce `react/no-multi-comp` (ignoreStateless: false) and `max-lines` (150). Fix violations by splitting files, never by disabling the rule.
+## Use built-in skills when the situation fits
 
-Backend:
-- One domain per app. Business rules live in `services.py` (split into a `services/` package past ~300 lines).
-- Keep views, serializers, and services separate. All backend serializers, including request inputs and response/schema contracts, must live in the owning app's dedicated `serializers/` folder, split into modules by responsibility. Do not use app-root `serializers.py`, `*_serializers.py`, or serializer definitions inside views. Views handle HTTP requests and responses, serializers handle input validation and data representation, and services handle business rules and orchestration. Put each responsibility in its proper layer; do not mix them in one file.
-- Views and serializers stay thin. Split `views.py` and any module under `serializers/` once it passes ~300 lines; keep each extracted module focused on one responsibility.
-- Permissions go in `permissions.py`, filters in `filters.py`, tests in `tests/test_<topic>.py`.
-
-## Project conventions
-
-- Add a clear comment or docstring for each new or changed code snippet explaining what it does and what it is for. Keep explanations accurate when the code changes.
-- Custom `User` extends `AbstractUser`, and `AUTH_USER_MODEL` is set before the first migration.
-- Business rules and state transitions live in domain services. Views call services; models hold integrity only.
-- Every serializer lists `fields` explicitly (no `__all__`) and has separate read/write serializers when they differ.
-- Every list and detail view scopes `get_queryset()` by user and branch first, then applies `select_related`/`prefetch_related`.
-- Status changes write a history row and an `AuditEvent` inside `transaction.atomic()`.
-- Public IDs are UUIDs. Integrity rules are DB constraints, not only validators.
-- Auth: Django sessions + HttpOnly cookie + CSRF. Instead of JWT or localStorage tokens, use the CSRF bootstrap endpoint and Axios `X-CSRFToken`.
-- API under `/api/v1/`, paginated, `django-filter` for filters.
-- Frontend server data uses TanStack Query + the shared Axios client. Forms use React Hook Form + Zod.
-- Demo notifications go to `NotificationOutbox` only. Reminder jobs are idempotent per subject/event/window.
-- State-specific document and training rules are config data, marked illustrative.
-
-## Security invariants (each must have a test)
-
-1. Anonymous users get 401/403 on every private endpoint.
-2. A user can access only their own records. Caregiver A and Client A can't read B's records or files.
-3. Staff see only their membership branches, including via guessed UUIDs, exports, reports, and aggregates.
-4. Client-supplied `role`, `owner_id`, `branch_id`, or `user_id` is ignored or rejected, never trusted.
-5. Unsafe methods require a valid CSRF token. No `csrf_exempt`, no wildcard credentialed CORS.
-6. Uploads: allowed types and max size enforced server-side; random storage keys; downloads only through an authorized endpoint; no public media URLs.
-7. Staff/admin accounts are invited by an admin. Visitors can't self-register as staff.
-8. No secrets in source. Use env vars and a `.env.example` with no live values.
-9. Logs, emails, and test output contain no sensitive payloads. Notifications are generic and link to the portal.
-10. No real SMS, email, or e-signature calls from demo or test code.
-
-Frontend guards are UX only. The backend enforces everything.
-
-Don't claim HIPAA compliance, legal e-sign validity, or production readiness.
-
-## In scope now vs deferred
-
-- Now: items 1–10 above, session auth, branch scoping, audit events, seeded demo data.
-- Deferred (see `docs/owner-gates.md`): MFA, malware scanning, vendor/BAA review, backups, object storage, Sentry.
-
-## Boundaries
-
-Always:
-- Work in vertical slices: model → service → API → React screen → tests.
-- Make small commits on a feature branch with clear messages.
-- Add negative permission tests with every new endpoint.
-
-Ask first:
-- A business rule not in `docs/`; record it in `docs/open-decisions.md` and use the simplest configurable demo behavior.
-- New dependencies, destructive or irreversible migrations, auth or session changes, and changing the formatter or lint config.
-
-Never (instead → do this):
-- Edit an applied migration → add a new migration.
-- Invent legal, Medicaid, licensure, or HR requirements → make it configurable and mark it illustrative.
-- Force-push, rewrite shared history, or commit to `main` → use a feature branch.
-- Mark work done with failing security tests → report the failure.
-
-## Definition of done
-
-Relevant checks must pass; report passed / failed / skipped honestly and explain the scope selected. The commands below are available checks, not a requirement to run every suite for every change:
-
-```text
-backend:  pytest <affected test files or directories>
-frontend: npm run format:check && npm run lint && npm run typecheck
-          npm run test -- <affected test files>
-```
-
-Run frontend checks when frontend code is affected. Documentation-only changes need document and diff checks, not application tests. New endpoints must have permission and branch-isolation tests; no file may break the file-structure rules.
-
-## Current focus
-
-See `docs/phases.md`. Do one phase at a time.
-
-## Docs (read when relevant)
-
-- `docs/domain-model.md`: before adding or changing models or roles
-- `docs/workflows.md`: before implementing status transitions
-- `docs/api-conventions.md`: before adding endpoints
-- `docs/phases.md`: at task start
-- `docs/open-decisions.md`: when you hit an unknown business rule
-- `docs/owner-gates.md`: human-only items; don't act on these
+- `tdd` / `surgical-patch` — fixing a backend bug: add/extend `apps/<app_name>/tests.py` cases first, run scoped `pytest apps/<app_name>/tests.py`, then patch.
+- `shadcn` / `emil-design-eng` / `ui-taste` — building or polishing UI. The repo already ships shadcn-style primitives under `@/components/ui/` and shared components in `src/shared/components/common/`; reuse those instead of adding new dependencies.
+- `web-design-guidelines` — before/after UI work; `docs/design.md` enforces strict anti-slop and contrast rules.
+- `diagnosing-bugs` / `investigate-first` — for hard or ambiguous failure hunts before editing code.
+- `safe-refactor` — for behavior-preserving cross-file restructures.
+- `verify-and-stop` — to prove work meets acceptance criteria without expanding scope.
+- `improve` / `improve-codebase-architecture` — for audits or handoff plans for other agents to implement.
+- `caveman*` — only when the user explicitly asks for compressed/terse output.
+- `supabase` / `supabase-postgres-best-practices` — only if a task actually touches Supabase. The backend is plain Django/Postgres, so default to standard Django migrations and ORM.

@@ -1,0 +1,6 @@
+from django.apps import AppConfig
+
+class CaregiversConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'apps.caregivers'
+    verbose_name = 'Caregiver Domain'
