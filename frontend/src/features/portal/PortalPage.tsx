@@ -3,6 +3,7 @@ import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import type { Role } from "../../api/types";
 import { Failure } from "../../components/Failure";
 import { Loading } from "../../components/Loading";
+import { Panel } from "../../components/Panel";
 import { useSession } from "../auth/session";
 import { Applications } from "./Applications";
 import { InvitationForm } from "./InvitationForm";
@@ -102,7 +103,7 @@ export default function PortalPage() {
         {admin ? (
           <InvitationForm session={user} />
         ) : (
-          <div className="panel">
+          <Panel>
             <h2>{role === "caregiver" ? "Onboarding" : "Your care information"}</h2>
             <p>
               {role === "caregiver"
@@ -110,7 +111,7 @@ export default function PortalPage() {
                 : "Intake, authorizations, care plans, and schedules are planned for later phases."}
             </p>
             <p>No sensitive documents are accepted in this foundation.</p>
-          </div>
+          </Panel>
         )}
       </div>
     </section>

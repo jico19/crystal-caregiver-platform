@@ -6,6 +6,7 @@ import { api } from "../../api/client";
 import type { Session } from "../../api/types";
 import { Failure } from "../../components/Failure";
 import { Field } from "../../components/Forms";
+import { Panel } from "../../components/Panel";
 
 const invitationSchema = z.object({
   email: z.email(),
@@ -29,7 +30,7 @@ export function InvitationForm({ session }: { session: Session }) {
   });
 
   return (
-    <div className="panel">
+    <Panel>
       <h2>Invite a portal user</h2>
       <p>Invitations are recorded in the local demo email transport. No external email is sent.</p>
       <form onSubmit={form.handleSubmit((data) => send.mutate(data))}>
@@ -59,6 +60,6 @@ export function InvitationForm({ session }: { session: Session }) {
         ) : null}
         <button disabled={send.isPending}>Create demo invitation</button>
       </form>
-    </div>
+    </Panel>
   );
 }

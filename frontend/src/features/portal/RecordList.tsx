@@ -4,6 +4,7 @@ import { api } from "../../api/client";
 import type { Page, Person } from "../../api/types";
 import { Failure } from "../../components/Failure";
 import { Loading } from "../../components/Loading";
+import { Panel } from "../../components/Panel";
 
 export function RecordList({
   endpoint,
@@ -26,7 +27,7 @@ export function RecordList({
   });
 
   return (
-    <div className="panel">
+    <Panel>
       <h2>{title}</h2>
       {records.isPending ? <Loading /> : null}
       <Failure error={records.error} />
@@ -48,6 +49,6 @@ export function RecordList({
           </button>
         </nav>
       ) : null}
-    </div>
+    </Panel>
   );
 }

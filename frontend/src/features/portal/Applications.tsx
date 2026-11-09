@@ -4,6 +4,7 @@ import { api } from "../../api/client";
 import type { Application, Page } from "../../api/types";
 import { Failure } from "../../components/Failure";
 import { Loading } from "../../components/Loading";
+import { Panel } from "../../components/Panel";
 
 export function Applications() {
   const applications = useQuery({
@@ -12,7 +13,7 @@ export function Applications() {
   });
 
   return (
-    <div className="panel">
+    <Panel>
       <h2>Your applications</h2>
       {applications.isPending ? <Loading /> : null}
       <Failure error={applications.error} />
@@ -28,6 +29,6 @@ export function Applications() {
           <Link to="/states/FL">See caregiver opportunities</Link>.
         </p>
       ) : null}
-    </div>
+    </Panel>
   );
 }
