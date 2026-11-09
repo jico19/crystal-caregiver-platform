@@ -9,7 +9,7 @@ from django.apps import apps
 from django.db import IntegrityError, models, transaction
 from django.utils import timezone
 
-from . import models as domain
+from .. import models as domain
 
 pytestmark = pytest.mark.django_db
 sequence = count(1)
