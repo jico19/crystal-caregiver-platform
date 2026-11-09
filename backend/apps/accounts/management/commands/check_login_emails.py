@@ -5,11 +5,20 @@ from apps.accounts.models import User
 
 
 class Command(BaseCommand):
-    help = 'Read-only email login preflight; reports IDs only, never rewrites existing accounts.'
+    help = "Read-only email login preflight; reports IDs only, never rewrites existing accounts."
 
     def handle(self, *args, **options):
-        blank = list(User.objects.filter(email='').values_list('pk', flat=True))
-        duplicates = User.objects.exclude(email='').annotate(normalized=Lower(Trim('email'))).values('normalized').annotate(total=Count('pk')).filter(total__gt=1).count()
+        blank = list(User.objects.filter(email="").values_list("pk", flat=True))
+        duplicates = (
+            User.objects.exclude(email="")
+            .annotate(normalized=Lower(Trim("email")))
+            .values("normalized")
+            .annotate(total=Count("pk"))
+            .filter(total__gt=1)
+            .count()
+        )
         if blank or duplicates:
-            raise CommandError(f'Email remediation required: blank email user IDs={blank}; duplicate normalized groups={duplicates}. Assign verified synthetic emails explicitly before email login/migration.')
-        self.stdout.write('Email login preflight passed. No accounts changed.')
+            raise CommandError(
+                f"Email remediation required: blank email user IDs={blank}; duplicate normalized groups={duplicates}. Assign verified synthetic emails explicitly before email login/migration."
+            )
+        self.stdout.write("Email login preflight passed. No accounts changed.")

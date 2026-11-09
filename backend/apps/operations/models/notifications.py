@@ -20,7 +20,9 @@ class ReminderRule(ScopedRecord):
     enabled = models.BooleanField(default=False)
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [unique("branch", "event_type", "channel", name="reminder_rule_unique")]
+        constraints = ScopedRecord.Meta.constraints + [
+            unique("branch", "event_type", "channel", name="reminder_rule_unique")
+        ]
 
 
 class Notification(ScopedRecord):
@@ -35,8 +37,16 @@ class Notification(ScopedRecord):
 
     class Meta(ScopedRecord.Meta):
         constraints = ScopedRecord.Meta.constraints + [
-            models.CheckConstraint(condition=Q(recipient_user__isnull=False) | Q(caregiver__isnull=False) | Q(client__isnull=False), name="notification_recipient"),
-            models.CheckConstraint(condition=Q(caregiver__isnull=True) | Q(client__isnull=True), name="notification_single_person"),
+            models.CheckConstraint(
+                condition=Q(recipient_user__isnull=False)
+                | Q(caregiver__isnull=False)
+                | Q(client__isnull=False),
+                name="notification_recipient",
+            ),
+            models.CheckConstraint(
+                condition=Q(caregiver__isnull=True) | Q(client__isnull=True),
+                name="notification_single_person",
+            ),
         ]
 
 
@@ -50,8 +60,15 @@ class NotificationDelivery(ScopedRecord):
     provider_reference = models.CharField(max_length=255, blank=True)
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [unique("notification", "channel", name="notification_delivery_unique"), models.CheckConstraint(condition=Q(channel__in=["email", "sms"]), name="delivery_channel")]
-        indexes = ScopedRecord.Meta.indexes + [models.Index(fields=["status", "scheduled_at"], name="delivery_pending_schedule")]
+        constraints = ScopedRecord.Meta.constraints + [
+            unique("notification", "channel", name="notification_delivery_unique"),
+            models.CheckConstraint(
+                condition=Q(channel__in=["email", "sms"]), name="delivery_channel"
+            ),
+        ]
+        indexes = ScopedRecord.Meta.indexes + [
+            models.Index(fields=["status", "scheduled_at"], name="delivery_pending_schedule")
+        ]
 
 
 class DeliveryAttempt(ScopedRecord):
@@ -62,7 +79,12 @@ class DeliveryAttempt(ScopedRecord):
     safe_error_code = models.CharField(max_length=100, blank=True)
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [unique("delivery", "attempt_number", name="delivery_attempt_unique"), models.CheckConstraint(condition=Q(attempt_number__gt=0), name="attempt_number_positive")]
+        constraints = ScopedRecord.Meta.constraints + [
+            unique("delivery", "attempt_number", name="delivery_attempt_unique"),
+            models.CheckConstraint(
+                condition=Q(attempt_number__gt=0), name="attempt_number_positive"
+            ),
+        ]
 
 
 class AuditEvent(Record):

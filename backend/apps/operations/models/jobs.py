@@ -15,4 +15,6 @@ class JobSubmission(ScopedRecord):
     application = models.OneToOneField("operations.CaregiverApplication", on_delete=models.PROTECT)
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [unique("job", "caregiver", name="one_application_per_job")]
+        constraints = ScopedRecord.Meta.constraints + [
+            unique("job", "caregiver", name="one_application_per_job")
+        ]

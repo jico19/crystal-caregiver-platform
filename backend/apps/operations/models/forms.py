@@ -21,7 +21,10 @@ class FormVersion(ScopedRecord):
     published_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [unique("template", "version_number", name="form_version_unique"), models.CheckConstraint(condition=Q(version_number__gt=0), name="form_version_positive")]
+        constraints = ScopedRecord.Meta.constraints + [
+            unique("template", "version_number", name="form_version_unique"),
+            models.CheckConstraint(condition=Q(version_number__gt=0), name="form_version_positive"),
+        ]
 
 
 class SignatureRequest(ScopedRecord):
@@ -37,8 +40,14 @@ class SignatureRequest(ScopedRecord):
     class Meta(ScopedRecord.Meta):
         constraints = ScopedRecord.Meta.constraints + [
             one_subject("signature_one_subject"),
-            models.CheckConstraint(condition=Q(application__isnull=True) | Q(caregiver__isnull=False), name="signature_application_subject"),
-            models.CheckConstraint(condition=Q(intake__isnull=True) | Q(client__isnull=False), name="signature_intake_subject"),
+            models.CheckConstraint(
+                condition=Q(application__isnull=True) | Q(caregiver__isnull=False),
+                name="signature_application_subject",
+            ),
+            models.CheckConstraint(
+                condition=Q(intake__isnull=True) | Q(client__isnull=False),
+                name="signature_intake_subject",
+            ),
         ]
 
 

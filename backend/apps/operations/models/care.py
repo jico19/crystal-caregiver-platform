@@ -14,7 +14,10 @@ class ClientAuthorization(ScopedRecord):
     supersedes = relation("self", null=True, blank=True)
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [date_range("valid_from", "valid_until", "authorization_dates"), models.CheckConstraint(condition=~Q(id=F("supersedes")), name="authorization_not_self")]
+        constraints = ScopedRecord.Meta.constraints + [
+            date_range("valid_from", "valid_until", "authorization_dates"),
+            models.CheckConstraint(condition=~Q(id=F("supersedes")), name="authorization_not_self"),
+        ]
 
 
 class AuthorizationDocument(ScopedRecord):
@@ -22,7 +25,9 @@ class AuthorizationDocument(ScopedRecord):
     document_version = relation("operations.DocumentVersion")
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [unique("authorization", "document_version", name="authorization_document_unique")]
+        constraints = ScopedRecord.Meta.constraints + [
+            unique("authorization", "document_version", name="authorization_document_unique")
+        ]
 
 
 class AuthorizationEvent(ScopedRecord):
@@ -44,7 +49,13 @@ class CarePlan(ScopedRecord):
     recorded_by = actor()
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [unique("client", "version_number", name="care_plan_version_unique"), date_range("effective_from", "effective_until", "care_plan_dates"), models.CheckConstraint(condition=Q(version_number__gt=0), name="care_plan_version_positive")]
+        constraints = ScopedRecord.Meta.constraints + [
+            unique("client", "version_number", name="care_plan_version_unique"),
+            date_range("effective_from", "effective_until", "care_plan_dates"),
+            models.CheckConstraint(
+                condition=Q(version_number__gt=0), name="care_plan_version_positive"
+            ),
+        ]
 
 
 class ServiceScheduleEntry(ScopedRecord):
@@ -57,4 +68,8 @@ class ServiceScheduleEntry(ScopedRecord):
     recorded_by = actor()
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [models.CheckConstraint(condition=Q(ends_at__gt=F("starts_at")), name="schedule_positive_duration")]
+        constraints = ScopedRecord.Meta.constraints + [
+            models.CheckConstraint(
+                condition=Q(ends_at__gt=F("starts_at")), name="schedule_positive_duration"
+            )
+        ]

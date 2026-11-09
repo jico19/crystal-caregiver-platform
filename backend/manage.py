@@ -1,4 +1,5 @@
 """Django management entry point; defaults to local development settings."""
+
 import os
 import sys
 

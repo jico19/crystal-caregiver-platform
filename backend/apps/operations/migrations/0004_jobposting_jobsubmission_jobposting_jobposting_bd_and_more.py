@@ -6,63 +6,109 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('operations', '0003_document_catalog'),
+        ("operations", "0003_document_catalog"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='JobPosting',
+            name="JobPosting",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('public_id', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField()),
-                ('published', models.BooleanField(default=False)),
-                ('branch', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='operations.statebranch')),
-                ('form_version', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='operations.formversion')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("public_id", models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField()),
+                ("published", models.BooleanField(default=False)),
+                (
+                    "branch",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, to="operations.statebranch"
+                    ),
+                ),
+                (
+                    "form_version",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, to="operations.formversion"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='JobSubmission',
+            name="JobSubmission",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('public_id', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('application', models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, to='operations.caregiverapplication')),
-                ('branch', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='operations.statebranch')),
-                ('caregiver', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='operations.caregiver')),
-                ('job', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='operations.jobposting')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("public_id", models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "application",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="operations.caregiverapplication",
+                    ),
+                ),
+                (
+                    "branch",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, to="operations.statebranch"
+                    ),
+                ),
+                (
+                    "caregiver",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, to="operations.caregiver"
+                    ),
+                ),
+                (
+                    "job",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, to="operations.jobposting"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddIndex(
-            model_name='jobposting',
-            index=models.Index(fields=['branch', 'created_at'], name='jobposting_bd'),
+            model_name="jobposting",
+            index=models.Index(fields=["branch", "created_at"], name="jobposting_bd"),
         ),
         migrations.AddConstraint(
-            model_name='jobposting',
-            constraint=models.UniqueConstraint(fields=('branch', 'id'), name='jobposting_branch_id'),
+            model_name="jobposting",
+            constraint=models.UniqueConstraint(
+                fields=("branch", "id"), name="jobposting_branch_id"
+            ),
         ),
         migrations.AddIndex(
-            model_name='jobsubmission',
-            index=models.Index(fields=['branch', 'created_at'], name='jobsubmission_bd'),
+            model_name="jobsubmission",
+            index=models.Index(fields=["branch", "created_at"], name="jobsubmission_bd"),
         ),
         migrations.AddConstraint(
-            model_name='jobsubmission',
-            constraint=models.UniqueConstraint(fields=('branch', 'id'), name='jobsubmission_branch_id'),
+            model_name="jobsubmission",
+            constraint=models.UniqueConstraint(
+                fields=("branch", "id"), name="jobsubmission_branch_id"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='jobsubmission',
-            constraint=models.UniqueConstraint(fields=('job', 'caregiver'), name='one_application_per_job'),
+            model_name="jobsubmission",
+            constraint=models.UniqueConstraint(
+                fields=("job", "caregiver"), name="one_application_per_job"
+            ),
         ),
     ]

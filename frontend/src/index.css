@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 :root {
   font-family: Arial, Helvetica, sans-serif;
@@ -41,7 +41,9 @@ button,
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition: transform .15s, background .15s;
+  transition:
+    transform 0.15s,
+    background 0.15s;
 }
 
 button:hover,
@@ -57,7 +59,7 @@ button:active,
 }
 
 button:disabled {
-  opacity: .6;
+  opacity: 0.6;
   cursor: wait;
 }
 
@@ -80,7 +82,7 @@ footer {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 24px max(24px,6vw);
+  padding: 24px max(24px, 6vw);
   border-bottom: 1px solid #d8dfd6;
 }
 
@@ -90,14 +92,18 @@ header {
 }
 
 .brand {
-  font: 600 25px Georgia,serif;
+  font:
+    600 25px Georgia,
+    serif;
   text-decoration: none;
-  letter-spacing: -.8px;
+  letter-spacing: -0.8px;
 }
 
 .brand span {
   display: block;
-  font: 12px Arial,sans-serif;
+  font:
+    12px Arial,
+    sans-serif;
   letter-spacing: 1px;
   margin-top: 5px;
 }
@@ -114,7 +120,7 @@ header nav a {
 }
 
 main > section {
-  padding: 64px max(24px,6vw);
+  padding: 64px max(24px, 6vw);
   max-width: 1600px;
   margin: auto;
 }
@@ -127,14 +133,18 @@ p {
 }
 
 h1 {
-  font: 400 clamp(36px,5vw,72px)/1.08 Georgia,serif;
+  font:
+    400 clamp(36px, 5vw, 72px)/1.08 Georgia,
+    serif;
   letter-spacing: -1.8px;
   margin-bottom: 24px;
 }
 
 h2 {
-  font: 400 clamp(27px,3vw,38px)/1.2 Georgia,serif;
-  letter-spacing: -.6px;
+  font:
+    400 clamp(27px, 3vw, 38px)/1.2 Georgia,
+    serif;
+  letter-spacing: -0.6px;
   margin-bottom: 24px;
 }
 
@@ -229,7 +239,7 @@ p {
 }
 
 .form-page {
-  max-width: 750px!important;
+  max-width: 750px !important;
   min-height: 70vh;
 }
 
@@ -253,7 +263,7 @@ form {
   font-weight: 600;
 }
 
-input:not([type=checkbox]),
+input:not([type="checkbox"]),
 select {
   width: 100%;
   border: 1px solid #a6b7a7;
@@ -264,7 +274,7 @@ select {
   color: #263832;
 }
 
-input[type=checkbox] {
+input[type="checkbox"] {
   width: 20px;
   height: 20px;
   accent-color: #27543f;
@@ -274,7 +284,7 @@ input[type=checkbox] {
   display: flex;
   align-items: start;
   gap: 12px;
-  font-weight: 400!important;
+  font-weight: 400 !important;
 }
 
 .error {
@@ -298,7 +308,7 @@ input[type=checkbox] {
 
 .portal-grid {
   display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
   margin-top: 40px;
 }
@@ -428,7 +438,6 @@ footer {
   .demo-banner {
     font-size: 12px;
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -436,5 +445,4 @@ footer {
     transition: none !important;
     scroll-behavior: auto !important;
   }
-
 }

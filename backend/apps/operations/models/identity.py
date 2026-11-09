@@ -17,7 +17,9 @@ class StateBranch(Record):
     class Meta:
         constraints = [
             unique("agency", "state_code", name="agency_state_unique"),
-            models.CheckConstraint(condition=models.Q(state_code__in=["FL", "IN", "GA"]), name="supported_state"),
+            models.CheckConstraint(
+                condition=models.Q(state_code__in=["FL", "IN", "GA"]), name="supported_state"
+            ),
         ]
 
 
@@ -32,14 +34,22 @@ class AgencyAdmin(Record):
 
 class BranchStaff(ScopedRecord):
     user = actor()
-    role = models.CharField(max_length=24, choices=[("administrator", "Administrator"), ("staff", "Staff")])
+    role = models.CharField(
+        max_length=24, choices=[("administrator", "Administrator"), ("staff", "Staff")]
+    )
     active = models.BooleanField(default=True)
 
     class Meta(ScopedRecord.Meta):
         constraints = ScopedRecord.Meta.constraints + [
             unique("branch", "user", name="branch_staff_unique"),
-            models.UniqueConstraint(fields=["user"], condition=models.Q(role="administrator", active=True), name="one_active_admin_state"),
-            models.CheckConstraint(condition=models.Q(role__in=["administrator", "staff"]), name="branch_staff_role"),
+            models.UniqueConstraint(
+                fields=["user"],
+                condition=models.Q(role="administrator", active=True),
+                name="one_active_admin_state",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(role__in=["administrator", "staff"]), name="branch_staff_role"
+            ),
         ]
 
 
@@ -52,7 +62,9 @@ class PersonRecord(ScopedRecord):
 
     class Meta(ScopedRecord.Meta):
         abstract = True
-        constraints = ScopedRecord.Meta.constraints + [unique("branch", "user", name="%(class)s_branch_user")]
+        constraints = ScopedRecord.Meta.constraints + [
+            unique("branch", "user", name="%(class)s_branch_user")
+        ]
 
 
 class Caregiver(PersonRecord):

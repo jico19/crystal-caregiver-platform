@@ -14,13 +14,17 @@ class StoredFile(ScopedRecord):
     validation_status = models.CharField(max_length=24, default="pending")
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [models.CheckConstraint(condition=Q(byte_size__gt=0), name="file_nonempty")]
+        constraints = ScopedRecord.Meta.constraints + [
+            models.CheckConstraint(condition=Q(byte_size__gt=0), name="file_nonempty")
+        ]
 
 
 class DocumentType(Record):
     code = models.SlugField(max_length=80, unique=True)
     label = models.CharField(max_length=200)
-    audience = models.CharField(max_length=16, choices=[("caregiver", "Caregiver"), ("client", "Client")])
+    audience = models.CharField(
+        max_length=16, choices=[("caregiver", "Caregiver"), ("client", "Client")]
+    )
     active = models.BooleanField(default=True)
 
 
@@ -31,7 +35,9 @@ class BranchDocumentRequirement(ScopedRecord):
     active = models.BooleanField(default=True)
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [unique("branch", "document_type", name="branch_document_type")]
+        constraints = ScopedRecord.Meta.constraints + [
+            unique("branch", "document_type", name="branch_document_type")
+        ]
 
 
 class Document(ScopedRecord):
@@ -55,18 +61,29 @@ class DocumentVersion(ScopedRecord):
     class Meta(ScopedRecord.Meta):
         constraints = ScopedRecord.Meta.constraints + [
             unique("document", "version_number", name="document_version_unique"),
-            models.CheckConstraint(condition=Q(version_number__gt=0), name="document_version_positive"),
+            models.CheckConstraint(
+                condition=Q(version_number__gt=0), name="document_version_positive"
+            ),
             date_range("issued_on", "expires_on", "document_dates"),
-            models.CheckConstraint(condition=Q(review_status__in=["pending", "approved", "rejected"]), name="document_review_status"),
+            models.CheckConstraint(
+                condition=Q(review_status__in=["pending", "approved", "rejected"]),
+                name="document_review_status",
+            ),
         ]
 
 
 class DocumentReview(ScopedRecord):
     document_version = relation(DocumentVersion)
     reviewer = actor()
-    decision = models.CharField(max_length=16, choices=[("approved", "Approved"), ("rejected", "Rejected")])
+    decision = models.CharField(
+        max_length=16, choices=[("approved", "Approved"), ("rejected", "Rejected")]
+    )
     comment = models.TextField(blank=True)
     reviewed_at = models.DateTimeField()
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [models.CheckConstraint(condition=Q(decision__in=["approved", "rejected"]), name="document_review_decision")]
+        constraints = ScopedRecord.Meta.constraints + [
+            models.CheckConstraint(
+                condition=Q(decision__in=["approved", "rejected"]), name="document_review_decision"
+            )
+        ]

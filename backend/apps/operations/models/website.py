@@ -10,7 +10,9 @@ class BranchContent(ScopedRecord):
     publication_status = models.CharField(max_length=24, default="draft")
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [unique("branch", "content_key", name="branch_content_key")]
+        constraints = ScopedRecord.Meta.constraints + [
+            unique("branch", "content_key", name="branch_content_key")
+        ]
 
 
 class WebsiteInquiry(ScopedRecord):
@@ -38,4 +40,6 @@ class ClientReferral(ScopedRecord):
     status = models.CharField(max_length=32, default="submitted")
 
     class Meta(ScopedRecord.Meta):
-        indexes = ScopedRecord.Meta.indexes + [models.Index(fields=["branch", "source", "received_at"], name="referral_source_report")]
+        indexes = ScopedRecord.Meta.indexes + [
+            models.Index(fields=["branch", "source", "received_at"], name="referral_source_report")
+        ]

@@ -17,7 +17,12 @@ class TrainingCourseVersion(Record):
     published_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        constraints = [unique("course", "version_number", name="course_version_unique"), models.CheckConstraint(condition=Q(version_number__gt=0), name="course_version_positive")]
+        constraints = [
+            unique("course", "version_number", name="course_version_unique"),
+            models.CheckConstraint(
+                condition=Q(version_number__gt=0), name="course_version_positive"
+            ),
+        ]
 
 
 class TrainingAssignment(ScopedRecord):
@@ -32,7 +37,12 @@ class TrainingAssignment(ScopedRecord):
     completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(ScopedRecord.Meta):
-        constraints = ScopedRecord.Meta.constraints + [models.CheckConstraint(condition=Q(progress_percent__lte=100), name="training_progress_range"), date_range("started_at", "completed_at", "training_completion_dates")]
+        constraints = ScopedRecord.Meta.constraints + [
+            models.CheckConstraint(
+                condition=Q(progress_percent__lte=100), name="training_progress_range"
+            ),
+            date_range("started_at", "completed_at", "training_completion_dates"),
+        ]
 
 
 class TrainingCertificate(ScopedRecord):

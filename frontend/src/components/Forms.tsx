@@ -1,15 +1,15 @@
-import type { ReactNode } from 'react'
-import type { FieldError } from 'react-hook-form'
-import { errorMessage } from '../api/client'
+import type { ReactNode } from "react";
+import type { FieldError } from "react-hook-form";
+import { errorMessage } from "../api/client";
 
 export function Field({
   label,
   children,
   error,
 }: {
-  label: string
-  children: ReactNode
-  error?: FieldError
+  label: string;
+  children: ReactNode;
+  error?: FieldError;
 }) {
   return (
     <label className="field">
@@ -17,7 +17,7 @@ export function Field({
       {children}
       {error ? <span className="error">{error.message}</span> : null}
     </label>
-  )
+  );
 }
 
 export function Failure({ error }: { error: unknown }) {
@@ -25,9 +25,9 @@ export function Failure({ error }: { error: unknown }) {
     <p className="error notice" role="alert">
       {errorMessage(error)}
     </p>
-  ) : null
+  ) : null;
 }
 
 export function Loading() {
-  return <output>Loading…</output>
+  return <output>Loading…</output>;
 }

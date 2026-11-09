@@ -16,7 +16,13 @@ from rest_framework.views import APIView
 from apps.operations.models import StateBranch, AgencyAdmin, BranchStaff, Caregiver, Client
 from .access import admin_branches, IsBusinessAdmin
 from .models import User
-from .serializers import LoginInput, InvitationInput, AcceptInput, ResetRequestInput, ResetConfirmInput
+from .serializers import (
+    LoginInput,
+    InvitationInput,
+    AcceptInput,
+    ResetRequestInput,
+    ResetConfirmInput,
+)
 from .services import audit, invite, accept_invitation, request_reset
 
 
@@ -24,16 +30,22 @@ def identity(user):
     roles = []
     if AgencyAdmin.objects.filter(user=user, active=True).exists():
         roles.append("super-admin")
-    if BranchStaff.objects.filter(user=user, active=True, role="administrator", branch__active=True).exists():
+    if BranchStaff.objects.filter(
+        user=user, active=True, role="administrator", branch__active=True
+    ).exists():
         roles.append("state-admin")
     for model, role in [(Caregiver, "caregiver"), (Client, "client")]:
         if model.objects.filter(user=user, active=True, branch__active=True).exists():
             roles.append(role)
     own = StateBranch.objects.filter(active=True).filter(
-        Q(caregiver__user=user, caregiver__active=True)
-        | Q(client__user=user, client__active=True))
+        Q(caregiver__user=user, caregiver__active=True) | Q(client__user=user, client__active=True)
+    )
     branches = (admin_branches(user) | own).distinct().order_by("state_code")
-    return {"email": user.email, "roles": roles, "branches": BranchSerializer(branches, many=True).data}
+    return {
+        "email": user.email,
+        "roles": roles,
+        "branches": BranchSerializer(branches, many=True).data,
+    }
 
 
 class BranchSerializer(serializers.ModelSerializer):
@@ -120,7 +132,11 @@ class ResetRequestView(PublicAuthView):
     @extend_schema(responses=DetailOutput)
     def post(self, request):
         request_reset(self.input(request, ResetRequestInput)["email"])
-        return Response({"detail": "If an account matches, a reset link has been recorded in the demo email transport."})
+        return Response(
+            {
+                "detail": "If an account matches, a reset link has been recorded in the demo email transport."
+            }
+        )
 
 
 class ResetConfirmView(PublicAuthView):
@@ -131,7 +147,7 @@ class ResetConfirmView(PublicAuthView):
         data = self.input(request, ResetConfirmInput)
         try:
             user = User.objects.get(pk=urlsafe_base64_decode(data["uid"]).decode(), is_active=True)
-        except (User.DoesNotExist, ValueError, UnicodeError, OverflowError):
+        except User.DoesNotExist, ValueError, UnicodeError, OverflowError:
             raise ValidationError("Reset link is invalid or expired.")
         if not default_token_generator.check_token(user, data["token"]):
             raise ValidationError("Reset link is invalid or expired.")

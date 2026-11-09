@@ -1,4 +1,5 @@
 """Shared record conventions. Business workflows belong in domain services."""
+
 import uuid
 
 from django.conf import settings
@@ -20,16 +21,21 @@ def unique(*fields, name):
 
 def date_range(start, end, name):
     return models.CheckConstraint(
-        condition=Q(**{f"{start}__isnull": True}) | Q(**{f"{end}__isnull": True})
-        | Q(**{f"{end}__gte": F(start)}), name=name,
+        condition=Q(**{f"{start}__isnull": True})
+        | Q(**{f"{end}__isnull": True})
+        | Q(**{f"{end}__gte": F(start)}),
+        name=name,
     )
 
 
 def one_subject(name):
-    return models.CheckConstraint(condition=(
-        Q(caregiver__isnull=False, client__isnull=True)
-        | Q(caregiver__isnull=True, client__isnull=False)
-    ), name=name)
+    return models.CheckConstraint(
+        condition=(
+            Q(caregiver__isnull=False, client__isnull=True)
+            | Q(caregiver__isnull=True, client__isnull=False)
+        ),
+        name=name,
+    )
 
 
 class Record(models.Model):

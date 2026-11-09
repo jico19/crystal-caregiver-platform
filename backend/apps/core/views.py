@@ -5,7 +5,9 @@ from rest_framework import serializers
 from drf_spectacular.utils import extend_schema, inline_serializer
 
 
-@extend_schema(responses=inline_serializer(name="HealthOutput", fields={"status": serializers.CharField()}))
+@extend_schema(
+    responses=inline_serializer(name="HealthOutput", fields={"status": serializers.CharField()})
+)
 @api_view(["GET"])
 @authentication_classes([])
 @permission_classes([AllowAny])

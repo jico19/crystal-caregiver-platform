@@ -1,26 +1,26 @@
-import { useQuery } from '@tanstack/react-query'
-import { Link, NavLink, useParams } from 'react-router-dom'
-import { api } from '../../api/client'
-import type { Job, Page } from '../../api/types'
-import { Failure, Loading } from '../../components/Forms'
+import { useQuery } from "@tanstack/react-query";
+import { Link, NavLink, useParams } from "react-router-dom";
+import { api } from "../../api/client";
+import type { Job, Page } from "../../api/types";
+import { Failure, Loading } from "../../components/Forms";
 
 const states: Record<string, string> = {
-  FL: 'Florida',
-  IN: 'Indiana',
-  GA: 'Georgia',
-}
+  FL: "Florida",
+  IN: "Indiana",
+  GA: "Georgia",
+};
 
 export default function PublicPage() {
-  const { state = 'FL' } = useParams()
+  const { state = "FL" } = useParams();
   const jobs = useQuery({
-    queryKey: ['jobs', state],
+    queryKey: ["jobs", state],
     queryFn: async () =>
       (
-        await api.get<Page<Job>>('jobs/', {
+        await api.get<Page<Job>>("jobs/", {
           params: { branch__state_code: state },
         })
       ).data,
-  })
+  });
 
   if (!states[state]) {
     return (
@@ -28,7 +28,7 @@ export default function PublicPage() {
         <h1>State not found</h1>
         <Link to="/">Return home</Link>
       </section>
-    )
+    );
   }
 
   return (
@@ -42,8 +42,8 @@ export default function PublicPage() {
             close to home.
           </h1>
           <p className="lead">
-            A unified home-care agency prototype for families, caregivers, and the teams
-            who support them.
+            A unified home-care agency prototype for families, caregivers, and the teams who support
+            them.
           </p>
           <nav className="state-nav" aria-label="Public state selection">
             {Object.entries(states).map(([code, name]) => (
@@ -52,7 +52,9 @@ export default function PublicPage() {
               </NavLink>
             ))}
           </nav>
-          <a className="button" href="#jobs">See caregiver opportunities</a>
+          <a className="button" href="#jobs">
+            See caregiver opportunities
+          </a>
         </div>
         <div className="branch-panel">
           <p className="eyebrow">Your public branch</p>
@@ -78,7 +80,7 @@ export default function PublicPage() {
         </div>
         {jobs.isPending ? <Loading /> : null}
         <Failure error={jobs.error} />
-        {jobs.data?.results.map(job => (
+        {jobs.data?.results.map((job) => (
           <article className="job-row" key={job.public_id}>
             <div>
               <h3>{job.title}</h3>
@@ -89,10 +91,8 @@ export default function PublicPage() {
             </Link>
           </article>
         ))}
-        {jobs.data?.count === 0 ? (
-          <p>No demo postings are published for this branch.</p>
-        ) : null}
+        {jobs.data?.count === 0 ? <p>No demo postings are published for this branch.</p> : null}
       </section>
     </>
-  )
+  );
 }

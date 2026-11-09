@@ -31,7 +31,8 @@ def test_default_api_denies_anonymous_requests():
 
 def test_custom_user_persists_with_hashed_password(db, django_user_model):
     user = django_user_model.objects.create_user(
-        username="synthetic-user", password="synthetic-test-password",
+        username="synthetic-user",
+        password="synthetic-test-password",
     )
     user.refresh_from_db()
     assert django_user_model._meta.label == "accounts.User"

@@ -11,7 +11,9 @@ class CaregiverApplication(ScopedRecord):
     submitted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(ScopedRecord.Meta):
-        indexes = ScopedRecord.Meta.indexes + [models.Index(fields=["branch", "status", "created_at"], name="application_work_queue")]
+        indexes = ScopedRecord.Meta.indexes + [
+            models.Index(fields=["branch", "status", "created_at"], name="application_work_queue")
+        ]
 
 
 class ClientIntake(ScopedRecord):
@@ -23,7 +25,9 @@ class ClientIntake(ScopedRecord):
     submitted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(ScopedRecord.Meta):
-        indexes = ScopedRecord.Meta.indexes + [models.Index(fields=["branch", "status", "created_at"], name="intake_work_queue")]
+        indexes = ScopedRecord.Meta.indexes + [
+            models.Index(fields=["branch", "status", "created_at"], name="intake_work_queue")
+        ]
 
 
 class Review(ScopedRecord):

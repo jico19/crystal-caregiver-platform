@@ -3,21 +3,56 @@
 Use historical migration models only. PostgreSQL uses composite foreign keys;
 SQLite uses equivalent relationship triggers for local development.
 """
+
 from django.db import migrations
 
 
 APPEND_ONLY = {
-    "applicationreview", "intakereview", "documentreview", "authorizationevent",
-    "signatureevent", "deliveryattempt", "auditevent", "trainingcertificate",
-    "formversion", "trainingcourseversion", "careplan",
+    "applicationreview",
+    "intakereview",
+    "documentreview",
+    "authorizationevent",
+    "signatureevent",
+    "deliveryattempt",
+    "auditevent",
+    "trainingcertificate",
+    "formversion",
+    "trainingcourseversion",
+    "careplan",
 }
 FROZEN_FIELDS = {
     "document": ("document_type_id",),
-    "documentversion": ("document_id", "version_number", "file_id", "issued_on", "expires_on", "submitted_at"),
+    "documentversion": (
+        "document_id",
+        "version_number",
+        "file_id",
+        "issued_on",
+        "expires_on",
+        "submitted_at",
+    ),
     "storedfile": ("private_storage_key", "sha256", "byte_size", "content_type", "original_name"),
-    "signaturerequest": ("form_version_id", "caregiver_id", "client_id", "application_id", "intake_id", "rendered_file_id", "requested_signer_id"),
-    "caregiverapplication": ("caregiver_id", "form_version_id", "submitted_answers", "submitted_at"),
-    "clientintake": ("client_id", "referral_id", "form_version_id", "submitted_answers", "submitted_at"),
+    "signaturerequest": (
+        "form_version_id",
+        "caregiver_id",
+        "client_id",
+        "application_id",
+        "intake_id",
+        "rendered_file_id",
+        "requested_signer_id",
+    ),
+    "caregiverapplication": (
+        "caregiver_id",
+        "form_version_id",
+        "submitted_answers",
+        "submitted_at",
+    ),
+    "clientintake": (
+        "client_id",
+        "referral_id",
+        "form_version_id",
+        "submitted_answers",
+        "submitted_at",
+    ),
     "statebranch": ("agency_id", "state_code"),
     "clientreferral": ("source_id", "source_name_snapshot", "received_at"),
 }
@@ -54,8 +89,13 @@ def scoped_links(model):
     columns = {f.name for f in model._meta.fields}
     if "branch" not in columns:
         return []
-    return [f for f in model._meta.fields if f.is_relation and f.name != "branch"
-            and "branch" in {p.name for p in f.related_model._meta.fields}]
+    return [
+        f
+        for f in model._meta.fields
+        if f.is_relation
+        and f.name != "branch"
+        and "branch" in {p.name for p in f.related_model._meta.fields}
+    ]
 
 
 def trigger(editor, table, name, event, condition, reverse=False):
@@ -72,7 +112,9 @@ def trigger(editor, table, name, event, condition, reverse=False):
             BEGIN IF ({condition}) THEN
                 RAISE EXCEPTION 'Agency record integrity violation' USING ERRCODE = '23514';
             END IF; RETURN NEW; END; $$""")
-        editor.execute(f"CREATE TRIGGER {q(name)} BEFORE {event} ON {q(table)} FOR EACH ROW EXECUTE FUNCTION {q(name)}()")
+        editor.execute(
+            f"CREATE TRIGGER {q(name)} BEFORE {event} ON {q(table)} FOR EACH ROW EXECUTE FUNCTION {q(name)}()"
+        )
     else:
         editor.execute(f"""CREATE TRIGGER {q(name)} BEFORE {event} ON {q(table)}
             FOR EACH ROW WHEN ({condition}) BEGIN
@@ -95,8 +137,12 @@ def configure(apps, editor, reverse=False):
                 if reverse:
                     editor.execute(f"ALTER TABLE {q(table)} DROP CONSTRAINT IF EXISTS {q(name)}")
                 else:
-                    editor.execute(f"ALTER TABLE {q(table)} ADD CONSTRAINT {q(name)} FOREIGN KEY (branch_id, {q(field.column)}) REFERENCES {q(parent)} (branch_id, id)")
-            checks.append(f"NEW.{field.column} IS NOT NULL AND NOT EXISTS (SELECT 1 FROM {q(parent)} p WHERE p.id = NEW.{field.column} AND p.branch_id = NEW.branch_id)")
+                    editor.execute(
+                        f"ALTER TABLE {q(table)} ADD CONSTRAINT {q(name)} FOREIGN KEY (branch_id, {q(field.column)}) REFERENCES {q(parent)} (branch_id, id)"
+                    )
+            checks.append(
+                f"NEW.{field.column} IS NOT NULL AND NOT EXISTS (SELECT 1 FROM {q(parent)} p WHERE p.id = NEW.{field.column} AND p.branch_id = NEW.branch_id)"
+            )
         if checks:
             condition = " OR ".join(f"({c})" for c in checks)
             for event in ("INSERT", "UPDATE"):
@@ -109,7 +155,9 @@ def configure(apps, editor, reverse=False):
         if label in APPEND_ONLY:
             frozen = list(fields)
         if frozen:
-            condition = " OR ".join(f"NEW.{q(c)} IS DISTINCT FROM OLD.{q(c)}" for c in sorted(set(frozen)))
+            condition = " OR ".join(
+                f"NEW.{q(c)} IS DISTINCT FROM OLD.{q(c)}" for c in sorted(set(frozen))
+            )
             if label in {"caregiverapplication", "clientintake"}:
                 condition = f"NEW.branch_id IS DISTINCT FROM OLD.branch_id OR (OLD.submitted_at IS NOT NULL AND ({condition}))"
             trigger(editor, table, f"{label}_immutable", "UPDATE", condition, reverse)

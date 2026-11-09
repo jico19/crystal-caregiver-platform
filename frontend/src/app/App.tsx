@@ -1,20 +1,20 @@
-import { Component, lazy, Suspense, type ReactNode } from 'react'
-import { Link, Route, Routes, useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
-import { api, queryClient } from '../api/client'
-import { useSession } from '../features/auth/session'
-import { Failure, Loading } from '../components/Forms'
+import { Component, lazy, Suspense, type ReactNode } from "react";
+import { Link, Route, Routes, useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { api, queryClient } from "../api/client";
+import { useSession } from "../features/auth/session";
+import { Failure, Loading } from "../components/Forms";
 
-const PublicPage = lazy(() => import('../features/public/PublicPage'))
-const JobPage = lazy(() => import('../features/public/JobPage'))
-const PortalPage = lazy(() => import('../features/portal/PortalPage'))
-const AccountPage = lazy(() => import('../features/auth/AccountPage'))
+const PublicPage = lazy(() => import("../features/public/PublicPage"));
+const JobPage = lazy(() => import("../features/public/JobPage"));
+const PortalPage = lazy(() => import("../features/portal/PortalPage"));
+const AccountPage = lazy(() => import("../features/auth/AccountPage"));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false }
+  state = { failed: false };
 
   static getDerivedStateFromError() {
-    return { failed: true }
+    return { failed: true };
   }
 
   render() {
@@ -25,26 +25,28 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean
       </main>
     ) : (
       this.props.children
-    )
+    );
   }
 }
 
 function Header() {
-  const session = useSession()
-  const navigate = useNavigate()
+  const session = useSession();
+  const navigate = useNavigate();
   const logout = useMutation({
-    mutationFn: () => api.post('auth/logout/'),
+    mutationFn: () => api.post("auth/logout/"),
     onSuccess: () => {
-      queryClient.clear()
-      queryClient.setQueryData(['session'], null)
-      navigate('/login')
+      queryClient.clear();
+      queryClient.setQueryData(["session"], null);
+      navigate("/login");
     },
-  })
+  });
 
   return (
     <>
       <header>
-        <a className="skip" href="#main">Skip to content</a>
+        <a className="skip" href="#main">
+          Skip to content
+        </a>
         <Link className="brand" to="/">
           Crystal Care
           <span>Multi-state home care</span>
@@ -69,7 +71,7 @@ function Header() {
       </header>
       <Failure error={logout.error} />
     </>
-  )
+  );
 }
 
 export default function App() {
@@ -108,5 +110,5 @@ export default function App() {
         <span>Illustrative prototype. No real applications or care records.</span>
       </footer>
     </ErrorBoundary>
-  )
+  );
 }
