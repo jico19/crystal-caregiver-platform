@@ -55,6 +55,10 @@ docs/               specs, workflows, open decisions, owner gates
 
 ## File structure (enforced by lint)
 
+General:
+- Every new file must go strictly in the folder for its domain, feature, and responsibility. Follow the repo map and existing structure; do not place files in unrelated folders.
+- All test files must live in dedicated test folders: backend tests in the owning app's `tests/` folder, frontend unit/component tests in the owning feature's `tests/` folder, and end-to-end tests in the existing `frontend/e2e/` folder. Do not mix test files with production code.
+
 Frontend:
 - One React component per file. File name = component name (`CaregiverCard.tsx` exports `CaregiverCard`).
 - Hooks live in their own file named `useX.ts`. Zod schemas and API types live in `schemas.ts` / `types.ts` beside the feature.
@@ -64,11 +68,13 @@ Frontend:
 
 Backend:
 - One domain per app. Business rules live in `services.py` (split into a `services/` package past ~300 lines).
+- Keep views, serializers, and services separate in their own modules or packages. Views handle HTTP requests and responses, serializers handle input validation and data representation, and services handle business rules and orchestration. Put each responsibility in its proper layer; do not mix them in one file.
 - Views and serializers stay thin; use separate files once `views.py` or `serializers.py` passes ~300 lines.
 - Permissions go in `permissions.py`, filters in `filters.py`, tests in `tests/test_<topic>.py`.
 
 ## Project conventions
 
+- Add a clear comment or docstring for each new or changed code snippet explaining what it does and what it is for. Keep explanations accurate when the code changes.
 - Custom `User` extends `AbstractUser`, and `AUTH_USER_MODEL` is set before the first migration.
 - Business rules and state transitions live in domain services. Views call services; models hold integrity only.
 - Every serializer lists `fields` explicitly (no `__all__`) and has separate read/write serializers when they differ.
