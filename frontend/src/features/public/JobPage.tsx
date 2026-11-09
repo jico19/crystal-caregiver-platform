@@ -6,7 +6,9 @@ import { z } from "zod";
 import { api, queryClient } from "../../api/client";
 import type { Job, Session } from "../../api/types";
 import { useSession } from "../auth/session";
-import { Field, Failure, Loading } from "../../components/Forms";
+import { Failure } from "../../components/Failure";
+import { Field } from "../../components/Forms";
+import { Loading } from "../../components/Loading";
 
 const schema = z.object({
   name: z.string().min(1, "Enter a synthetic name.").max(200),

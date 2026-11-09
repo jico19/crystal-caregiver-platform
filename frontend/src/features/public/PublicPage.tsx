@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, NavLink, useParams } from "react-router-dom";
 import { api } from "../../api/client";
 import type { Job, Page } from "../../api/types";
-import { Failure, Loading } from "../../components/Forms";
+import { Failure } from "../../components/Failure";
+import { Loading } from "../../components/Loading";
 
 const states: Record<string, string> = {
   FL: "Florida",

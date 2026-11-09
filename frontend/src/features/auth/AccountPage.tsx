@@ -4,7 +4,8 @@ import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api, queryClient } from "../../api/client";
-import { Field, Failure } from "../../components/Forms";
+import { Failure } from "../../components/Failure";
+import { Field } from "../../components/Forms";
 import type { Session } from "../../api/types";
 
 const schema = z.object({
