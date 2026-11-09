@@ -1,8 +1,11 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "oxc"],
+  "plugins": ["react", "oxc", "jsx-a11y"],
   "rules": {
     "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "jsx-a11y/label-has-associated-control": "error",
+    "jsx-a11y/alt-text": "error",
     "react/only-export-components": ["warn", { "allowConstantExport": true }]
   }
 }

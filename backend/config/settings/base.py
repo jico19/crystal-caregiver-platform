@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_filters",
+    "drf_spectacular",
     "apps.accounts.apps.AccountsConfig",
     "apps.core.apps.CoreConfig",
     "apps.operations",
@@ -61,6 +63,12 @@ DATABASES = {"default": {
     "NAME": BASE_DIR / ".local" / "db.sqlite3",
 }}
 AUTH_USER_MODEL = "accounts.User"
+AUTHENTICATION_BACKENDS = ["apps.accounts.backends.EmailBackend"]
+FRONTEND_ORIGIN = os.environ.get("FRONTEND_ORIGIN", "http://127.0.0.1:5173").rstrip("/")
+DEFAULT_FROM_EMAIL = "portal@demo.example"
+PASSWORD_RESET_TIMEOUT = 3600
+SESSION_COOKIE_AGE = 28800
+CSRF_FAILURE_VIEW = "apps.core.api.csrf_failure"
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"django.contrib.auth.password_validation.{validator}"}
     for validator in (
@@ -84,4 +92,10 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.AnonRateThrottle", "rest_framework.throttling.UserRateThrottle", "rest_framework.throttling.ScopedRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {"anon": "120/hour", "user": "1000/hour", "auth": "30/hour"},
+    "EXCEPTION_HANDLER": "apps.core.api.api_exception_handler",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+SPECTACULAR_SETTINGS = {"TITLE": "Synthetic Caregiver Demo API", "VERSION": "1.0.0", "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAuthenticated"]}

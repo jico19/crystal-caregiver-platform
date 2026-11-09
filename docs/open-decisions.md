@@ -1,0 +1,11 @@
+# Open decisions (question | assumption | owner | status)
+- Are FL/IN/GA one legal entity, separate entities, or brands? Who crosses state lines?
+- Official caregiver application, vetting, onboarding and approval steps per state?
+- Required credentials per role/branch, validity periods, verifiers?
+- Who creates client records, consents for clients, sees care info?
+- Actual intake, admission, referral, authorization, discharge flows?
+- Training provider, certificate rules, annual requirements?
+- Approved e-sign, email, SMS, storage, scheduling vendors?
+- Retention, logging, incident response, export, deletion policies?
+- BAAs and approved systems for real PHI?
+- Production domains, budget, operations owner, support?

@@ -1,55 +1,48 @@
-# Caregiver Platform — Local Development
+# Crystal Care ? Phase 0 foundation
 
-See [Database schema](docs/DATABASE_SCHEMA.md) for the implemented persistence
-foundation, constraints, verification commands, and remaining workflow work.
+Synthetic data only. Demo workflow ? pending agency confirmation.
 
-Fresh development foundation for the FL/IN/GA caregiver platform. The current
-frontend is a React/JavaScript Vite starter; the backend provides Django/DRF,
-a custom user model, 39 domain tables, and a public health endpoint. Agency workflows and account
-APIs are not implemented by this setup. Use synthetic data only.
+The prototype includes public FL/IN/GA pages, job application/account creation,
+session login/logout, password reset, client/state-admin invitations, scoped
+record APIs, and protected portal shells. See [scope](docs/prototype-scope.md),
+[API/architecture](docs/architecture.md), [open decisions](docs/open-decisions.md),
+[security gates](docs/security-checklist.md), and [schema](docs/DATABASE_SCHEMA.md).
 
-## Prerequisites
+## Local setup (PowerShell)
 
-Verified locally with Python 3.14.4, Node 24.15.0, and npm 11.12.1 on Windows.
-Run the following PowerShell commands from the repository root unless noted.
-Do not restore deleted application files or overwrite `AGENTS.md` to set up.
-
-## Backend setup
-
-Create the virtual environment if `backend/venv` does not already exist:
+Prerequisites: Python 3.14 and Node 24/npm. From the repository root:
 
 ```powershell
 python -m venv backend/venv
-```
-
-Install dependencies and create local configuration:
-
-```powershell
-.\backend\venv\Scripts\python.exe -m pip install -r backend/requirements-dev.txt
+./backend/venv/Scripts/python.exe -m pip install -r backend/requirements-dev.txt
 Copy-Item backend/.env.example backend/.env.local
-.\backend\venv\Scripts\python.exe -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+./backend/venv/Scripts/python.exe -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-Copy the generated secret into `DJANGO_SECRET_KEY` in `backend/.env.local`. Keep
-the secret local. Skip copying the example when `.env.local` already exists.
-Existing process environment variables take precedence over `.env.local`.
+Skip copying if .env.local exists. Put the generated secret into DJANGO_SECRET_KEY
+in that ignored local file. Never overwrite existing local configuration.
 
 ```powershell
 cd backend
-.\venv\Scripts\python.exe manage.py migrate
-.\venv\Scripts\python.exe manage.py check
-.\venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+./venv/Scripts/python.exe manage.py check_login_emails
+./venv/Scripts/python.exe manage.py migrate
+./venv/Scripts/python.exe manage.py seed_demo | Tee-Object -FilePath .local/demo-accounts.txt
+./venv/Scripts/python.exe manage.py runserver 127.0.0.1:8000
 ```
 
-These commands use `config.settings.development` and SQLite at
-`backend/.local/db.sqlite3`. Activation is
-optional when using the explicit interpreter path. No demo users or credentials
-are seeded. An optional local administrator can be created with
-`.\venv\Scripts\python.exe manage.py createsuperuser`.
+The preflight reports legacy blank/duplicate emails without changing accounts.
+Resolve those explicitly using synthetic verified addresses before email login or
+applying the email uniqueness migration. Empty legacy emails are preserved but
+cannot sign in to the portal. Database schema changes use additive migrations.
 
-## Frontend setup
+**Keep the first seed output privately.** It contains generated demo passwords for
+new accounts only. On subsequent seeds omit Tee-Object, or use a different output
+file; reruns never print or reset existing passwords. This workspace already has
+first-run credentials in ignored backend/.local/demo-accounts.txt. Never commit it.
+The browser administrator test uses that file. For a lost demo password use Django's
+explicit changepassword command, and update the private test credential record.
 
-In another terminal, from the repository root:
+In another terminal from the root:
 
 ```powershell
 cd frontend
@@ -57,68 +50,64 @@ npm.cmd ci
 npm.cmd run dev
 ```
 
-Open <http://127.0.0.1:5173>. Vite uses port 5173 strictly and proxies `/api` to
-<http://127.0.0.1:8000>. Use relative `/api/v1/.../` URLs with trailing slashes.
-No CORS bypass is needed. Future browser authentication must use session cookies
-and CSRF protection; login and CSRF bootstrap endpoints are deferred.
+Open http://127.0.0.1:5173. Vite proxies /api to Django on port 8000; no CORS bypass.
+Use this hostname consistently for cookies. Production preview has no API proxy.
+
+## Demo accounts and walkthrough
+
+Use generated passwords from the first seed output. Accounts include
+agency-admin@demo.example, state-admin-fl@demo.example (also in/ga),
+caregiver-fl-1@demo.example and client-fl-1@demo.example (two per state).
+Visitors do not need an account. Staff-role assignments receive no management
+access until their policy is confirmed. Django admin flags alone grant no portal rights.
+
+1. Select a public state, open a demo job and submit synthetic name/email/password.
+2. The caregiver portal shows submitted application status; sign out and sign in.
+3. Sign in as Florida state-admin: only Florida directory records are visible.
+4. Sign in as agency-admin: filter records across authorized FL/IN/GA branches.
+5. Create a client invitation, open its link from the backend console, and accept.
+6. Use forgot-password; open the local console reset link and choose a new password.
+
+Invitations expire in 24 hours, resets in one hour, sessions in eight hours.
+Existing-account invitation acceptance requires signing into that account first.
+The prototype does not send external email/SMS or accept uploaded documents.
 
 ## Verification
 
-From `backend/`:
+From backend/:
 
 ```powershell
-.\venv\Scripts\python.exe -m pytest apps/core/tests.py
-.\venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+./venv/Scripts/python.exe -m pytest --create-db -q
+./venv/Scripts/python.exe manage.py check
+./venv/Scripts/python.exe manage.py makemigrations --check --dry-run
+./venv/Scripts/python.exe manage.py spectacular --file .local/openapi.yaml --validate --fail-on-warn
+./venv/Scripts/python.exe -m pip check
 ```
 
-From `frontend/`:
+From frontend/:
 
 ```powershell
 npm.cmd run lint
+npm.cmd run typecheck
+npm.cmd test
 npm.cmd run build
+npx.cmd playwright install chromium
+npm.cmd run test:e2e
 ```
 
-With both servers running, these should return `{"status":"ok"}`:
+Browser tests start local servers when needed, require seeded jobs and first-run
+credentials, and create unique synthetic applicant accounts in the local database.
+They do not reset existing data. Screenshots are in ignored frontend/test-results/.
+OpenAPI docs at /api/v1/docs/ require an authenticated session.
 
-```powershell
-Invoke-RestMethod http://127.0.0.1:8000/api/v1/health/
-Invoke-RestMethod http://127.0.0.1:5173/api/v1/health/
-```
+## Remaining gates
 
-The health endpoint checks process liveness, not database readiness. Backend
-tests use pytest/pytest-django. The frontend has no test script yet; use Vitest
-when frontend behavior tests are added. `npm.cmd run preview` previews the
-production UI build only; the development API proxy is not a deployment setup.
+PostgreSQL migration/integrity testing, MFA, hosting, official branch content,
+client inquiry persistence, credential uploads/review, care workflows and reporting
+remain separate work. No PHI, production readiness, HIPAA certification, or agency
+workflow approval is claimed. Development email uses Django's console backend;
+Django warns this configuration needs migration to MAILERS before Django 2028.
 
-## Configuration and boundaries
-
-- `.env.local`, SQLite files, private media, virtual environments, dependencies, and
-  build outputs are ignored. Ignore rules do not untrack previously committed
-  files; existing tracked artifacts require a separate cleanup decision. Local
-  configuration uses `.env.local` and `.local/db.sqlite3` because the historical
-  `.env` and `db.sqlite3` paths are already tracked in Git.
-- Email uses Django's console backend. SMS and other external integrations are
-  absent. Do not use real contacts or sensitive documents in development.
-- API access requires authenticated sessions by default. Only health is public;
-  role, ownership, and branch authorization remain future implementation work.
-- Production settings require a separate secret, `DJANGO_ALLOWED_HOSTS`, and
-  PostgreSQL variables `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, and optional
-  `DB_PORT`. Deployment also needs a PostgreSQL driver, trusted TLS certificates,
-  HTTPS hosting, private storage, and operational/security review. No production
-  services or readiness are established by this local setup.
-- The root `Scope of work.md` remains the product baseline. The previously
-  referenced `docs/AGENT_BUILD_GUIDE.md` and `docs/PRD.md` are absent in this
-  working tree; this setup does not recreate or reinterpret those documents.
-
-## Setup handoff
-
-This foundation supports Scope of Work section 1 (unified website/API) and
-section 6 (security infrastructure); it does not deliver those sections in full.
-Verified locally: Django system checks, applied migrations, no pending model
-changes, four backend tests, dependency consistency, frontend lint/build, and
-HTTP 200 responses for the frontend and direct/proxied health requests.
-Pytest reports one Django deprecation warning for `EMAIL_BACKEND`; console email
-remains a local transport, with migration to `MAILERS` needed before Django 2028.
-Agency processes, official content, and provider decisions remain pending.
-Deployment, role/state isolation, authentication flows, and full acceptance
-require later work and separate evidence.
+Historical tracked artifacts/secrets require a separate hygiene review. Local
+secrets/data use .env.local and .local instead. Missing historical PRD/build-guide
+references were reconciled against current code, not restored.

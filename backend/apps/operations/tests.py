@@ -62,6 +62,8 @@ def sample(model, branch, **overrides):
     if model == domain.AuthorizationDocument and "document_version" not in overrides:
         document = sample(domain.Document, branch, caregiver=None, client=data["authorization"].client)
         data["document_version"] = sample(domain.DocumentVersion, branch, document=document)
+    if model == domain.JobSubmission and "application" not in overrides:
+        data["application"] = sample(domain.CaregiverApplication, branch, caregiver=data["caregiver"])
     data.update(overrides)
     return model.objects.create(**data)
 

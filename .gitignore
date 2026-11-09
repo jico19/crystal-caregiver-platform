@@ -21,6 +21,8 @@ htmlcov/
 node_modules/
 dist/
 coverage/
+frontend/test-results/
+frontend/playwright-report/
 *.log
 .DS_Store
 .idea/
