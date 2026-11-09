@@ -10,10 +10,11 @@ Demo workflow — pending agency confirmation.
 - Node runtime is 24.15.0; `frontend/.nvmrc` selects major version 24.
 - README documents pip with `requirements-dev.txt` and npm with `npm ci`.
   AGENTS.md still lists installation commands as awaiting confirmation.
-- Backend Ruff is available in `backend/venv/Scripts/ruff.exe`.
+- Backend formatter/lint dependency, configuration and required commands were
+  removed at the owner's request on 2026-11-09. No replacement is configured.
 - Frontend scripts exist for formatting, lint, typecheck, tests and Playwright.
   Formatting uses Oxfmt and lint uses Oxlint. The owner confirmed both tools;
-  AGENTS.md now matches them. No dependency or tool configuration was changed.
+  AGENTS.md matches these frontend tools.
 - The deploy-check command in AGENTS.md names `config.settings.prod`, which
   does not exist. The existing module is `config.settings.production`.
 - `backend/pytest.ini` selects `config.settings.development`, but
@@ -22,21 +23,18 @@ Demo workflow — pending agency confirmation.
 
 ## Verification results
 
-- Passed: backend `ruff format --check .` (55 files).
-- Failed: backend `ruff check .` (438 existing errors). Findings include
-  docstrings, import ordering, Django rules and security rules flagging assertions
-  in tests. No rules have been weakened or disabled.
-- Failed: frontend `npm.cmd run format:check`; Oxfmt reports
-  `src/app/App.tsx`. This file already had an uncommitted user edit at task start;
-  it has not been changed by this reconciliation.
-- Skipped: remaining frontend lint, test, typecheck, browser and PostgreSQL checks.
-  AGENTS.md requires stopping on formatter or lint failure.
+- Backend formatter/lint checks are no longer configured or required, following
+  the owner's tooling removal request. This does not establish code quality or
+  resolve the findings from the retired static checks.
+- Passed: backend pytest, 86 tests on SQLite, during frontend verification.
+- Passed: frontend `npm.cmd run format:check`, `npm.cmd run lint`,
+  `npm.cmd run typecheck`, `npm.cmd run test` (5 tests), `npm.cmd run build`,
+  and `npm.cmd run test:e2e` (13 tests), in commit `40f3c6b`.
+- Unverified: PostgreSQL migration/integrity checks. A running local PostgreSQL 18
+  service was discovered later; a disposable test target has not been verified.
 
 ## TODO — decisions needed to resume
 
-- Resolve the existing backend lint failure before further implementation.
-- Tool-format the existing App.tsx edit with the confirmed Oxfmt tool to clear
-  the frontend format gate when implementation resumes.
 - Confirm pip/npm as the installation commands before replacing their TODOs.
 - Reconcile settings module names in documentation and pytest configuration.
 
@@ -45,8 +43,8 @@ Demo workflow — pending agency confirmation.
 - README links to missing `prototype-scope.md`, `architecture.md`,
   `security-checklist.md` and `DATABASE_SCHEMA.md`; create these from code.
 - Validate migrations and integrity constraints on PostgreSQL; current shared
-  settings default to SQLite. Owner confirmed no disposable PostgreSQL database
-  is available, so this required gate remains pending.
+  settings default to SQLite. A disposable PostgreSQL test target remains
+  unverified, so this required gate remains pending.
 - Owner confirmed retaining demo branch boundaries and disabled ordinary staff
   management access; recorded in `docs/open-decisions.md`. Legal structure and
   future staff permissions remain unanswered.

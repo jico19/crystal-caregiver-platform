@@ -43,9 +43,9 @@ commands inspected, results and outstanding decisions.
   leave ordinary staff management access disabled.
 - [ ] Finish command reconciliation: confirm pip/npm installation commands,
   correct stale settings module references and remove the stale seed-command TODO.
-- [ ] Clear verification blockers: backend Ruff lint reports 438 existing errors;
-  frontend format check reports the existing `src/app/App.tsx` edit.
-  Backend format check passed (55 files); remaining checks were skipped.
+- [x] Reconcile verification tooling: backend formatting/lint tooling was removed
+  by owner request. Frontend format, lint, typecheck, unit and browser checks passed
+  in commit `40f3c6b`; see the updated verification evidence.
 - [ ] Provide a disposable PostgreSQL database and run migration/integrity checks.
   Owner confirmed none is currently available; this gate remains pending.
 - [ ] Create the missing README-linked scope, architecture, security checklist
@@ -177,7 +177,7 @@ do not activate vendors or accept real data as part of demo implementation.
   server queries scoped before filtering, aggregation or export.
 - [ ] Keep synthetic data and the demo workflow label visible; follow file-size
   and component/service organization rules.
-- [ ] Verify command availability, then pass backend format check, lint and pytest;
+- [ ] Verify command availability, then pass backend pytest;
   frontend format check, lint, typecheck and tests. Report passed/failed/skipped
   honestly; stop and report missing or failing formatter/lint commands.
 - [ ] Update this checklist and overall phase evidence; do not close a phase with

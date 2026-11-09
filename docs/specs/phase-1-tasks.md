@@ -13,7 +13,7 @@ from model existence alone. Deliver model → service → API → React screen �
 ### T0 — prerequisite gate
 
 - [ ] Close Phase 0 and record evidence in the overall phase tracker. Resolve the
-  recorded Ruff errors, frontend formatting and command discrepancies; finish
+  frontend verification and command discrepancies; finish
   foundation content/docs and security checks. Do not change tooling/dependencies
   without the repository-required approval.
 - [ ] Obtain a disposable PostgreSQL test environment and verify existing
@@ -117,8 +117,6 @@ project directories with the available virtual environment/npm executable:
 
 ```text
 backend:
-  ruff format --check .
-  ruff check .
   pytest
 frontend:
   npm run format:check
@@ -131,6 +129,10 @@ frontend:
 Stop/report missing or failing formatter/lint commands per AGENTS.md. Do not weaken
 rules or call a slice done with failing security checks. No formatter/lint changes,
 dependencies, auth changes or destructive migrations are authorized by this spec.
+
+The owner subsequently removed backend formatter/lint tooling. Backend verification
+uses pytest; frontend formatting/lint checks remain required. No replacement backend
+formatter or linter is configured.
 
 For each slice record commit, requirements/scenarios exercised, exact commands and
 environment (SQLite/PostgreSQL), passed/failed/skipped results and evidence paths.

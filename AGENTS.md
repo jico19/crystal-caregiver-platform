@@ -16,8 +16,8 @@ Backend (run from backend/)
   install:    TODO: confirm (pip/uv/poetry)
   dev:        python manage.py runserver
   test:       pytest
-  lint:       ruff check .
-  format:     ruff format .
+  lint:       not configured (removed by owner request)
+  format:     not configured (removed by owner request)
   migrate:    python manage.py makemigrations && python manage.py migrate
   seed:       python manage.py seed_demo   (TODO: create in Phase 0)
   deploy chk: python manage.py check --deploy --settings=config.settings.prod
@@ -37,7 +37,8 @@ Frontend (run from frontend/)
 - Whenever touching frontend code, read and apply both the `tailwind-design-system`
   and `vercel-react-best-practices` skills.
 - Python and Node versions: TODO: confirm and pin (`.python-version`, `.nvmrc`).
-- Formatting is done only by tools: ruff (Python), Oxfmt (frontend). Frontend lint uses Oxlint. Never format by hand.
+- Frontend formatting uses Oxfmt and lint uses Oxlint. Never format frontend code by hand.
+- Backend formatting and lint tooling were removed by owner request; no replacement is configured.
 - If a formatter or lint command is missing or fails to run, stop and report it. Don't skip it.
 
 ## Repo map
@@ -124,7 +125,7 @@ Never (instead → do this):
 All must pass, then report passed / failed / skipped honestly:
 
 ```text
-backend:  ruff format --check . && ruff check . && pytest
+backend:  pytest
 frontend: npm run format:check && npm run lint && npm run typecheck && npm run test
 ```
 
