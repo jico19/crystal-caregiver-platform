@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "jsx-a11y", "react-perf", "oxc"],
+  "rules": {
+    "jsx-a11y/label-has-associated-control": "error",
+    "jsx-a11y/alt-text": "error",
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ],
+    "react/no-multi-comp": [
+      "error",
+      {
+        "ignoreStateless": false
+      }
+    ],
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "max-lines": [
+      "error",
+      {
+        "skipBlankLines": true,
+        "skipComments": true,
+        "max": 150
+      }
+    ],
+    "typescript/no-explicit-any": "error"
+  }
+}
