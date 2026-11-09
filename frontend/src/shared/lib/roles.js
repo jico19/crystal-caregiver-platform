@@ -2,8 +2,7 @@
 //
 // `super_admin` is an administrative role: it has all-state access, whereas
 // `administrator` is limited to users.state_id. See
-// backend/app/core/dependencies.py and
-// supabase/migrations/20260924101900_super_admin_state_scoping.sql.
+// backend/apps/core/permissions.py and backend/apps/core/mixins.py.
 //
 // Always compare roles through these helpers. A bare
 // `role === 'administrator'` does not match a super_admin and silently drops

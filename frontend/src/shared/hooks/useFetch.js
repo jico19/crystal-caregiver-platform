@@ -11,11 +11,12 @@ import { api } from '../services/api';
  * @param {boolean} [options.enabled] Gate the fetch (e.g. `!!token`)
  * @param {number} [options.staleTime] Override the global staleTime for this query
  * @param {*} [options.defaultData] Placeholder used while the first fetch is in flight
+ * @param {function} [options.fetcher] Service loader receiving { params, token, signal }
  * @returns {{ data, isLoading, isFetching, isSuccess, error, refetch }}
  */
 export default function useFetch(url, options = {}) {
   const { user, token } = useAuth();
-  const { params = {}, enabled = true, staleTime, defaultData = null } = options;
+  const { params = {}, enabled = true, staleTime, defaultData = null, fetcher } = options;
 
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -30,7 +31,9 @@ export default function useFetch(url, options = {}) {
 
   const queryOptions = {
     queryKey: [url, params, user?.id ?? 'anon'],
-    queryFn: ({ signal }) => api.get(fullUrl, token || undefined, signal),
+    queryFn: ({ signal }) => fetcher
+      ? fetcher({ params, token: token || undefined, signal })
+      : api.get(fullUrl, token || undefined, signal),
     enabled: enabled && isAuthReady,
     placeholderData: defaultData,
   };

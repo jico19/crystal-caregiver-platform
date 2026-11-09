@@ -1,0 +1,800 @@
+backend/apps/admin_portal/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/admin_portal/urls.py:52:80: E501 line too long (87 > 79 characters)
+backend/apps/admin_portal/urls.py:53:80: E501 line too long (107 > 79 characters)
+backend/apps/admin_portal/urls.py:54:80: E501 line too long (127 > 79 characters)
+backend/apps/admin_portal/urls.py:55:80: E501 line too long (128 > 79 characters)
+backend/apps/admin_portal/urls.py:56:80: E501 line too long (135 > 79 characters)
+backend/apps/admin_portal/urls.py:57:80: E501 line too long (130 > 79 characters)
+backend/apps/admin_portal/urls.py:58:80: E501 line too long (133 > 79 characters)
+backend/apps/admin_portal/urls.py:62:80: E501 line too long (99 > 79 characters)
+backend/apps/admin_portal/urls.py:63:80: E501 line too long (115 > 79 characters)
+backend/apps/admin_portal/urls.py:66:80: E501 line too long (105 > 79 characters)
+backend/apps/admin_portal/urls.py:67:80: E501 line too long (113 > 79 characters)
+backend/apps/admin_portal/urls.py:68:80: E501 line too long (120 > 79 characters)
+backend/apps/admin_portal/urls.py:71:80: E501 line too long (85 > 79 characters)
+backend/apps/admin_portal/urls.py:72:80: E501 line too long (105 > 79 characters)
+backend/apps/admin_portal/urls.py:73:80: E501 line too long (107 > 79 characters)
+backend/apps/admin_portal/urls.py:76:80: E501 line too long (84 > 79 characters)
+backend/apps/admin_portal/urls.py:77:80: E501 line too long (114 > 79 characters)
+backend/apps/admin_portal/urls.py:78:80: E501 line too long (120 > 79 characters)
+backend/apps/admin_portal/urls.py:81:80: E501 line too long (95 > 79 characters)
+backend/apps/admin_portal/urls.py:84:80: E501 line too long (116 > 79 characters)
+backend/apps/admin_portal/urls.py:85:80: E501 line too long (108 > 79 characters)
+backend/apps/admin_portal/urls.py:88:80: E501 line too long (83 > 79 characters)
+backend/apps/admin_portal/urls.py:89:80: E501 line too long (91 > 79 characters)
+backend/apps/admin_portal/urls.py:90:80: E501 line too long (92 > 79 characters)
+backend/apps/admin_portal/urls.py:91:80: E501 line too long (110 > 79 characters)
+backend/apps/admin_portal/urls.py:92:80: E501 line too long (109 > 79 characters)
+backend/apps/admin_portal/urls.py:93:80: E501 line too long (102 > 79 characters)
+backend/apps/admin_portal/urls.py:94:80: E501 line too long (110 > 79 characters)
+backend/apps/admin_portal/urls.py:96:80: E501 line too long (98 > 79 characters)
+backend/apps/admin_portal/urls.py:97:80: E501 line too long (92 > 79 characters)
+backend/apps/admin_portal/urls.py:98:80: E501 line too long (95 > 79 characters)
+backend/apps/admin_portal/urls.py:99:80: E501 line too long (91 > 79 characters)
+backend/apps/authentication/admin.py:14:80: E501 line too long (144 > 79 characters)
+backend/apps/authentication/admin.py:5:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/admin.py:7:80: E501 line too long (100 > 79 characters)
+backend/apps/authentication/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/authentication.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/authentication.py:7:73: W505 doc line too long (81 > 72 characters)
+backend/apps/authentication/authentication.py:7:80: E501 line too long (81 > 79 characters)
+backend/apps/authentication/models.py:110:80: E501 line too long (85 > 79 characters)
+backend/apps/authentication/models.py:13:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/models.py:14:80: E501 line too long (87 > 79 characters)
+backend/apps/authentication/models.py:18:1: W293 blank line contains whitespace
+backend/apps/authentication/models.py:45:80: E501 line too long (96 > 79 characters)
+backend/apps/authentication/models.py:47:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/models.py:56:80: E501 line too long (82 > 79 characters)
+backend/apps/authentication/models.py:64:80: E501 line too long (86 > 79 characters)
+backend/apps/authentication/models.py:98:80: E501 line too long (80 > 79 characters)
+backend/apps/authentication/serializers.py:35:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/serializers.py:37:80: E501 line too long (91 > 79 characters)
+backend/apps/authentication/serializers.py:44:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/serializers.py:52:80: E501 line too long (83 > 79 characters)
+backend/apps/authentication/serializers.py:53:80: E501 line too long (99 > 79 characters)
+backend/apps/authentication/serializers.py:58:80: E501 line too long (100 > 79 characters)
+backend/apps/authentication/serializers.py:77:80: E501 line too long (93 > 79 characters)
+backend/apps/authentication/serializers.py:8:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/serializers.py:9:73: W505 doc line too long (84 > 72 characters)
+backend/apps/authentication/serializers.py:9:80: E501 line too long (84 > 79 characters)
+backend/apps/authentication/tests.py:28:80: E501 line too long (80 > 79 characters)
+backend/apps/authentication/tests.py:37:80: E501 line too long (81 > 79 characters)
+backend/apps/authentication/tests.py:45:80: E501 line too long (81 > 79 characters)
+backend/apps/authentication/tests.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/tests.py:65:80: E501 line too long (84 > 79 characters)
+backend/apps/authentication/tests.py:69:80: E501 line too long (92 > 79 characters)
+backend/apps/authentication/tests.py:70:80: E501 line too long (80 > 79 characters)
+backend/apps/authentication/urls.py:11:80: E501 line too long (82 > 79 characters)
+backend/apps/authentication/views.py:13:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/views.py:14:73: W505 doc line too long (78 > 72 characters)
+backend/apps/authentication/views.py:18:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/views.py:19:73: W505 doc line too long (80 > 72 characters)
+backend/apps/authentication/views.py:19:80: E501 line too long (80 > 79 characters)
+backend/apps/authentication/views.py:24:5: E303 too many blank lines (2)
+backend/apps/authentication/views.py:33:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/views.py:4:80: E501 line too long (80 > 79 characters)
+backend/apps/authentication/views.py:57:1: E302 expected 2 blank lines, found 1
+backend/apps/authentication/views.py:58:73: W505 doc line too long (75 > 72 characters)
+backend/apps/authorizations/admin.py:11:80: E501 line too long (101 > 79 characters)
+backend/apps/authorizations/admin.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/authorizations/admin.py:8:80: E501 line too long (86 > 79 characters)
+backend/apps/authorizations/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/authorizations/models.py:27:80: E501 line too long (95 > 79 characters)
+backend/apps/authorizations/models.py:28:80: E501 line too long (93 > 79 characters)
+backend/apps/authorizations/models.py:38:80: E501 line too long (92 > 79 characters)
+backend/apps/authorizations/models.py:39:80: E501 line too long (87 > 79 characters)
+backend/apps/authorizations/models.py:42:80: E501 line too long (97 > 79 characters)
+backend/apps/authorizations/models.py:45:80: E501 line too long (87 > 79 characters)
+backend/apps/authorizations/models.py:46:80: E501 line too long (85 > 79 characters)
+backend/apps/authorizations/models.py:66:80: E501 line too long (83 > 79 characters)
+backend/apps/authorizations/models.py:73:80: E501 line too long (96 > 79 characters)
+backend/apps/authorizations/models.py:8:1: E302 expected 2 blank lines, found 1
+backend/apps/authorizations/serializers.py:14:80: E501 line too long (83 > 79 characters)
+backend/apps/authorizations/serializers.py:15:80: E501 line too long (80 > 79 characters)
+backend/apps/authorizations/serializers.py:16:80: E501 line too long (88 > 79 characters)
+backend/apps/authorizations/serializers.py:23:1: E302 expected 2 blank lines, found 1
+backend/apps/authorizations/serializers.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/authorizations/tests.py:39:80: E501 line too long (119 > 79 characters)
+backend/apps/authorizations/tests.py:48:80: E501 line too long (117 > 79 characters)
+backend/apps/authorizations/tests.py:53:80: E501 line too long (119 > 79 characters)
+backend/apps/authorizations/tests.py:7:1: E302 expected 2 blank lines, found 1
+backend/apps/authorizations/urls.py:10:80: E501 line too long (97 > 79 characters)
+backend/apps/authorizations/urls.py:11:80: E501 line too long (104 > 79 characters)
+backend/apps/authorizations/urls.py:9:80: E501 line too long (86 > 79 characters)
+backend/apps/authorizations/views.py:13:1: E302 expected 2 blank lines, found 1
+backend/apps/authorizations/views.py:13:80: E501 line too long (93 > 79 characters)
+backend/apps/authorizations/views.py:14:73: W505 doc line too long (77 > 72 characters)
+backend/apps/authorizations/views.py:17:80: E501 line too long (93 > 79 characters)
+backend/apps/authorizations/views.py:24:1: W293 blank line contains whitespace
+backend/apps/authorizations/views.py:25:80: E501 line too long (100 > 79 characters)
+backend/apps/authorizations/views.py:26:80: E501 line too long (118 > 79 characters)
+backend/apps/authorizations/views.py:35:1: E302 expected 2 blank lines, found 1
+backend/apps/authorizations/views.py:35:80: E501 line too long (100 > 79 characters)
+backend/apps/authorizations/views.py:36:73: W505 doc line too long (88 > 72 characters)
+backend/apps/authorizations/views.py:36:80: E501 line too long (88 > 79 characters)
+backend/apps/authorizations/views.py:42:1: E302 expected 2 blank lines, found 1
+backend/apps/authorizations/views.py:48:80: E501 line too long (96 > 79 characters)
+backend/apps/authorizations/views.py:49:80: E501 line too long (129 > 79 characters)
+backend/apps/authorizations/views.py:53:80: E501 line too long (119 > 79 characters)
+backend/apps/care/admin.py:10:80: E501 line too long (102 > 79 characters)
+backend/apps/care/admin.py:15:1: E302 expected 2 blank lines, found 1
+backend/apps/care/admin.py:17:80: E501 line too long (119 > 79 characters)
+backend/apps/care/admin.py:21:1: E302 expected 2 blank lines, found 1
+backend/apps/care/admin.py:23:80: E501 line too long (83 > 79 characters)
+backend/apps/care/admin.py:25:80: E501 line too long (112 > 79 characters)
+backend/apps/care/admin.py:2:80: E501 line too long (87 > 79 characters)
+backend/apps/care/admin.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/care/admin.py:8:1: E302 expected 2 blank lines, found 1
+backend/apps/care/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/care/models.py:104:80: E501 line too long (89 > 79 characters)
+backend/apps/care/models.py:109:80: E501 line too long (88 > 79 characters)
+backend/apps/care/models.py:110:80: E501 line too long (87 > 79 characters)
+backend/apps/care/models.py:114:80: E501 line too long (86 > 79 characters)
+backend/apps/care/models.py:116:1: E302 expected 2 blank lines, found 1
+backend/apps/care/models.py:134:80: E501 line too long (83 > 79 characters)
+backend/apps/care/models.py:147:80: E501 line too long (90 > 79 characters)
+backend/apps/care/models.py:151:80: E501 line too long (87 > 79 characters)
+backend/apps/care/models.py:22:80: E501 line too long (89 > 79 characters)
+backend/apps/care/models.py:30:80: E501 line too long (86 > 79 characters)
+backend/apps/care/models.py:49:1: E302 expected 2 blank lines, found 1
+backend/apps/care/models.py:68:1: E302 expected 2 blank lines, found 1
+backend/apps/care/models.py:98:80: E501 line too long (93 > 79 characters)
+backend/apps/care/models.py:9:1: E302 expected 2 blank lines, found 1
+backend/apps/care/serializers.py:11:1: E302 expected 2 blank lines, found 1
+backend/apps/care/serializers.py:16:1: E302 expected 2 blank lines, found 1
+backend/apps/care/serializers.py:21:1: E302 expected 2 blank lines, found 1
+backend/apps/care/serializers.py:23:80: E501 line too long (97 > 79 characters)
+backend/apps/care/serializers.py:2:80: E501 line too long (87 > 79 characters)
+backend/apps/care/serializers.py:30:80: E501 line too long (83 > 79 characters)
+backend/apps/care/serializers.py:32:80: E501 line too long (87 > 79 characters)
+backend/apps/care/serializers.py:45:1: E302 expected 2 blank lines, found 1
+backend/apps/care/serializers.py:50:80: E501 line too long (80 > 79 characters)
+backend/apps/care/serializers.py:54:1: E302 expected 2 blank lines, found 1
+backend/apps/care/serializers.py:6:1: E302 expected 2 blank lines, found 1
+backend/apps/care/tests.py:105:80: E501 line too long (111 > 79 characters)
+backend/apps/care/tests.py:108:73: W505 doc line too long (73 > 72 characters)
+backend/apps/care/tests.py:109:80: E501 line too long (98 > 79 characters)
+backend/apps/care/tests.py:128:80: E501 line too long (86 > 79 characters)
+backend/apps/care/tests.py:132:80: E501 line too long (81 > 79 characters)
+backend/apps/care/tests.py:148:80: E501 line too long (81 > 79 characters)
+backend/apps/care/tests.py:168:80: E501 line too long (81 > 79 characters)
+backend/apps/care/tests.py:169:80: E501 line too long (80 > 79 characters)
+backend/apps/care/tests.py:181:80: E501 line too long (105 > 79 characters)
+backend/apps/care/tests.py:189:80: E501 line too long (108 > 79 characters)
+backend/apps/care/tests.py:202:80: E501 line too long (101 > 79 characters)
+backend/apps/care/tests.py:205:1: W391 blank line at end of file
+backend/apps/care/tests.py:45:80: E501 line too long (80 > 79 characters)
+backend/apps/care/tests.py:61:80: E501 line too long (94 > 79 characters)
+backend/apps/care/tests.py:67:80: E501 line too long (84 > 79 characters)
+backend/apps/care/tests.py:76:80: E501 line too long (101 > 79 characters)
+backend/apps/care/tests.py:77:80: E501 line too long (100 > 79 characters)
+backend/apps/care/tests.py:78:80: E501 line too long (103 > 79 characters)
+backend/apps/care/tests.py:8:1: E302 expected 2 blank lines, found 1
+backend/apps/care/urls.py:10:80: E501 line too long (113 > 79 characters)
+backend/apps/care/urls.py:11:80: E501 line too long (83 > 79 characters)
+backend/apps/care/urls.py:12:80: E501 line too long (124 > 79 characters)
+backend/apps/care/urls.py:13:80: E501 line too long (88 > 79 characters)
+backend/apps/care/urls.py:14:80: E501 line too long (143 > 79 characters)
+backend/apps/care/urls.py:15:80: E501 line too long (107 > 79 characters)
+backend/apps/care/urls.py:16:80: E501 line too long (119 > 79 characters)
+backend/apps/care/urls.py:17:80: E501 line too long (87 > 79 characters)
+backend/apps/care/urls.py:18:80: E501 line too long (145 > 79 characters)
+backend/apps/care/urls.py:19:80: E501 line too long (107 > 79 characters)
+backend/apps/care/views.py:101:80: E501 line too long (85 > 79 characters)
+backend/apps/care/views.py:105:80: E501 line too long (108 > 79 characters)
+backend/apps/care/views.py:107:1: E302 expected 2 blank lines, found 1
+backend/apps/care/views.py:108:73: W505 doc line too long (73 > 72 characters)
+backend/apps/care/views.py:10:80: E501 line too long (87 > 79 characters)
+backend/apps/care/views.py:112:80: E501 line too long (112 > 79 characters)
+backend/apps/care/views.py:113:80: E501 line too long (100 > 79 characters)
+backend/apps/care/views.py:114:80: E501 line too long (87 > 79 characters)
+backend/apps/care/views.py:119:1: E302 expected 2 blank lines, found 1
+backend/apps/care/views.py:120:73: W505 doc line too long (133 > 72 characters)
+backend/apps/care/views.py:120:80: E501 line too long (133 > 79 characters)
+backend/apps/care/views.py:125:80: E501 line too long (98 > 79 characters)
+backend/apps/care/views.py:126:80: E501 line too long (122 > 79 characters)
+backend/apps/care/views.py:132:80: E501 line too long (106 > 79 characters)
+backend/apps/care/views.py:141:80: E501 line too long (98 > 79 characters)
+backend/apps/care/views.py:142:80: E501 line too long (122 > 79 characters)
+backend/apps/care/views.py:145:80: E501 line too long (136 > 79 characters)
+backend/apps/care/views.py:154:1: W293 blank line contains whitespace
+backend/apps/care/views.py:161:80: E501 line too long (99 > 79 characters)
+backend/apps/care/views.py:165:80: E501 line too long (104 > 79 characters)
+backend/apps/care/views.py:171:80: E501 line too long (81 > 79 characters)
+backend/apps/care/views.py:17:1: E302 expected 2 blank lines, found 1
+backend/apps/care/views.py:181:80: E501 line too long (109 > 79 characters)
+backend/apps/care/views.py:190:80: E501 line too long (109 > 79 characters)
+backend/apps/care/views.py:191:80: E501 line too long (122 > 79 characters)
+backend/apps/care/views.py:195:80: E501 line too long (89 > 79 characters)
+backend/apps/care/views.py:23:80: E501 line too long (98 > 79 characters)
+backend/apps/care/views.py:24:80: E501 line too long (122 > 79 characters)
+backend/apps/care/views.py:26:80: E501 line too long (92 > 79 characters)
+backend/apps/care/views.py:29:80: E501 line too long (96 > 79 characters)
+backend/apps/care/views.py:33:80: E501 line too long (98 > 79 characters)
+backend/apps/care/views.py:34:80: E501 line too long (122 > 79 characters)
+backend/apps/care/views.py:43:80: E501 line too long (81 > 79 characters)
+backend/apps/care/views.py:74:80: E501 line too long (81 > 79 characters)
+backend/apps/care/views.py:76:1: E302 expected 2 blank lines, found 1
+backend/apps/care/views.py:82:80: E501 line too long (98 > 79 characters)
+backend/apps/care/views.py:83:80: E501 line too long (122 > 79 characters)
+backend/apps/care/views.py:85:80: E501 line too long (93 > 79 characters)
+backend/apps/care/views.py:86:80: E501 line too long (88 > 79 characters)
+backend/apps/care/views.py:90:80: E501 line too long (98 > 79 characters)
+backend/apps/care/views.py:91:80: E501 line too long (122 > 79 characters)
+backend/apps/caregivers/admin.py:10:1: E302 expected 2 blank lines, found 1
+backend/apps/caregivers/admin.py:12:80: E501 line too long (99 > 79 characters)
+backend/apps/caregivers/admin.py:14:80: E501 line too long (100 > 79 characters)
+backend/apps/caregivers/admin.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/caregivers/admin.py:6:80: E501 line too long (98 > 79 characters)
+backend/apps/caregivers/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/caregivers/models.py:15:80: E501 line too long (89 > 79 characters)
+backend/apps/caregivers/models.py:27:80: E501 line too long (86 > 79 characters)
+backend/apps/caregivers/models.py:34:1: E302 expected 2 blank lines, found 1
+backend/apps/caregivers/models.py:45:80: E501 line too long (99 > 79 characters)
+backend/apps/caregivers/models.py:46:80: E501 line too long (101 > 79 characters)
+backend/apps/caregivers/models.py:47:80: E501 line too long (89 > 79 characters)
+backend/apps/caregivers/models.py:68:80: E501 line too long (85 > 79 characters)
+backend/apps/caregivers/models.py:74:80: E501 line too long (104 > 79 characters)
+backend/apps/caregivers/models.py:7:1: E302 expected 2 blank lines, found 1
+backend/apps/caregivers/urls.py:12:80: E501 line too long (110 > 79 characters)
+backend/apps/caregivers/urls.py:15:80: E501 line too long (83 > 79 characters)
+backend/apps/caregivers/urls.py:17:80: E501 line too long (92 > 79 characters)
+backend/apps/caregivers/urls.py:18:80: E501 line too long (98 > 79 characters)
+backend/apps/caregivers/urls.py:19:80: E501 line too long (105 > 79 characters)
+backend/apps/caregivers/urls.py:20:80: E501 line too long (110 > 79 characters)
+backend/apps/caregivers/urls.py:21:80: E501 line too long (98 > 79 characters)
+backend/apps/caregivers/urls.py:22:80: E501 line too long (124 > 79 characters)
+backend/apps/caregivers/urls.py:23:80: E501 line too long (122 > 79 characters)
+backend/apps/caregivers/urls.py:24:80: E501 line too long (99 > 79 characters)
+backend/apps/caregivers/urls.py:25:80: E501 line too long (117 > 79 characters)
+backend/apps/caregivers/urls.py:26:80: E501 line too long (116 > 79 characters)
+backend/apps/clients/admin.py:10:1: E302 expected 2 blank lines, found 1
+backend/apps/clients/admin.py:12:80: E501 line too long (113 > 79 characters)
+backend/apps/clients/admin.py:16:1: E302 expected 2 blank lines, found 1
+backend/apps/clients/admin.py:18:80: E501 line too long (109 > 79 characters)
+backend/apps/clients/admin.py:21:80: E501 line too long (168 > 79 characters)
+backend/apps/clients/admin.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/clients/admin.py:6:80: E501 line too long (118 > 79 characters)
+backend/apps/clients/admin.py:8:80: E501 line too long (88 > 79 characters)
+backend/apps/clients/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/clients/models.py:107:80: E501 line too long (89 > 79 characters)
+backend/apps/clients/models.py:121:80: E501 line too long (95 > 79 characters)
+backend/apps/clients/models.py:23:80: E501 line too long (86 > 79 characters)
+backend/apps/clients/models.py:30:80: E501 line too long (87 > 79 characters)
+backend/apps/clients/models.py:50:80: E501 line too long (85 > 79 characters)
+backend/apps/clients/models.py:57:1: E302 expected 2 blank lines, found 1
+backend/apps/clients/models.py:66:80: E501 line too long (88 > 79 characters)
+backend/apps/clients/models.py:73:80: E501 line too long (83 > 79 characters)
+backend/apps/clients/models.py:7:1: E302 expected 2 blank lines, found 1
+backend/apps/clients/models.py:93:80: E501 line too long (87 > 79 characters)
+backend/apps/clients/models.py:99:1: E302 expected 2 blank lines, found 1
+backend/apps/clients/urls.py:11:80: E501 line too long (110 > 79 characters)
+backend/apps/clients/urls.py:18:80: E501 line too long (93 > 79 characters)
+backend/apps/clients/urls.py:19:80: E501 line too long (107 > 79 characters)
+backend/apps/clients/urls.py:20:80: E501 line too long (96 > 79 characters)
+backend/apps/clients/urls.py:21:80: E501 line too long (87 > 79 characters)
+backend/apps/clients/urls.py:22:80: E501 line too long (80 > 79 characters)
+backend/apps/clients/urls.py:24:80: E501 line too long (98 > 79 characters)
+backend/apps/clients/urls.py:25:80: E501 line too long (96 > 79 characters)
+backend/apps/clients/urls.py:26:80: E501 line too long (114 > 79 characters)
+backend/apps/clients/urls.py:27:80: E501 line too long (113 > 79 characters)
+backend/apps/compliance/admin.py:11:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/admin.py:17:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/admin.py:19:80: E501 line too long (93 > 79 characters)
+backend/apps/compliance/admin.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/admin.py:6:80: E501 line too long (100 > 79 characters)
+backend/apps/compliance/admin.py:9:80: E501 line too long (173 > 79 characters)
+backend/apps/compliance/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/audit.py:10:80: E501 line too long (97 > 79 characters)
+backend/apps/compliance/audit.py:11:80: E501 line too long (91 > 79 characters)
+backend/apps/compliance/audit.py:12:80: E501 line too long (85 > 79 characters)
+backend/apps/compliance/audit.py:14:80: E501 line too long (97 > 79 characters)
+backend/apps/compliance/audit.py:16:80: E501 line too long (93 > 79 characters)
+backend/apps/compliance/audit.py:17:80: E501 line too long (85 > 79 characters)
+backend/apps/compliance/audit.py:22:80: E501 line too long (86 > 79 characters)
+backend/apps/compliance/audit.py:24:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/audit.py:25:73: W505 doc line too long (90 > 72 characters)
+backend/apps/compliance/audit.py:25:80: E501 line too long (90 > 79 characters)
+backend/apps/compliance/audit.py:39:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/audit.py:53:73: W505 doc line too long (95 > 72 characters)
+backend/apps/compliance/audit.py:53:80: E501 line too long (95 > 79 characters)
+backend/apps/compliance/audit.py:70:80: E501 line too long (86 > 79 characters)
+backend/apps/compliance/audit.py:71:80: E501 line too long (86 > 79 characters)
+backend/apps/compliance/audit.py:83:80: E501 line too long (81 > 79 characters)
+backend/apps/compliance/audit.py:87:80: E501 line too long (98 > 79 characters)
+backend/apps/compliance/audit.py:8:73: W505 doc line too long (80 > 72 characters)
+backend/apps/compliance/audit.py:8:80: E501 line too long (80 > 79 characters)
+backend/apps/compliance/models.py:37:80: E501 line too long (87 > 79 characters)
+backend/apps/compliance/models.py:43:80: E501 line too long (89 > 79 characters)
+backend/apps/compliance/models.py:45:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/models.py:63:80: E501 line too long (85 > 79 characters)
+backend/apps/compliance/models.py:70:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/models.py:7:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/models.py:88:80: E501 line too long (87 > 79 characters)
+backend/apps/compliance/models.py:8:73: W505 doc line too long (77 > 72 characters)
+backend/apps/compliance/models.py:99:80: E501 line too long (91 > 79 characters)
+backend/apps/compliance/serializers.py:17:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/serializers.py:20:80: E501 line too long (86 > 79 characters)
+backend/apps/compliance/serializers.py:22:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/serializers.py:27:80: E501 line too long (102 > 79 characters)
+backend/apps/compliance/serializers.py:29:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/serializers.py:32:80: E501 line too long (86 > 79 characters)
+backend/apps/compliance/serializers.py:36:80: E501 line too long (89 > 79 characters)
+backend/apps/compliance/serializers.py:49:80: E501 line too long (83 > 79 characters)
+backend/apps/compliance/serializers.py:5:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/serializers.py:7:80: E501 line too long (82 > 79 characters)
+backend/apps/compliance/tests.py:101:73: W505 doc line too long (73 > 72 characters)
+backend/apps/compliance/tests.py:111:80: E501 line too long (80 > 79 characters)
+backend/apps/compliance/tests.py:118:80: E501 line too long (120 > 79 characters)
+backend/apps/compliance/tests.py:120:80: E501 line too long (115 > 79 characters)
+backend/apps/compliance/tests.py:140:73: W505 doc line too long (85 > 72 characters)
+backend/apps/compliance/tests.py:140:80: E501 line too long (85 > 79 characters)
+backend/apps/compliance/tests.py:151:73: W505 doc line too long (76 > 72 characters)
+backend/apps/compliance/tests.py:38:80: E501 line too long (88 > 79 characters)
+backend/apps/compliance/tests.py:46:80: E501 line too long (81 > 79 characters)
+backend/apps/compliance/tests.py:47:80: E501 line too long (80 > 79 characters)
+backend/apps/compliance/tests.py:49:80: E501 line too long (82 > 79 characters)
+backend/apps/compliance/tests.py:5:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/tests.py:64:80: E501 line too long (93 > 79 characters)
+backend/apps/compliance/tests.py:71:80: E501 line too long (105 > 79 characters)
+backend/apps/compliance/tests.py:77:80: E501 line too long (104 > 79 characters)
+backend/apps/compliance/tests.py:82:80: E501 line too long (81 > 79 characters)
+backend/apps/compliance/tests.py:88:80: E501 line too long (81 > 79 characters)
+backend/apps/compliance/tests.py:96:80: E501 line too long (82 > 79 characters)
+backend/apps/compliance/tests.py:97:80: E501 line too long (108 > 79 characters)
+backend/apps/compliance/tests.py:98:80: E501 line too long (80 > 79 characters)
+backend/apps/compliance/tests.py:99:80: E501 line too long (82 > 79 characters)
+backend/apps/compliance/urls.py:10:80: E501 line too long (88 > 79 characters)
+backend/apps/compliance/urls.py:11:80: E501 line too long (96 > 79 characters)
+backend/apps/compliance/urls.py:12:80: E501 line too long (86 > 79 characters)
+backend/apps/compliance/urls.py:13:80: E501 line too long (103 > 79 characters)
+backend/apps/compliance/urls.py:14:80: E501 line too long (86 > 79 characters)
+backend/apps/compliance/views.py:101:80: E501 line too long (82 > 79 characters)
+backend/apps/compliance/views.py:102:80: E501 line too long (100 > 79 characters)
+backend/apps/compliance/views.py:109:80: E501 line too long (128 > 79 characters)
+backend/apps/compliance/views.py:112:80: E501 line too long (83 > 79 characters)
+backend/apps/compliance/views.py:123:80: E501 line too long (128 > 79 characters)
+backend/apps/compliance/views.py:17:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/views.py:29:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/views.py:30:73: W505 doc line too long (82 > 72 characters)
+backend/apps/compliance/views.py:30:80: E501 line too long (82 > 79 characters)
+backend/apps/compliance/views.py:34:80: E501 line too long (92 > 79 characters)
+backend/apps/compliance/views.py:37:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/views.py:47:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/views.py:48:73: W505 doc line too long (95 > 72 characters)
+backend/apps/compliance/views.py:48:80: E501 line too long (95 > 79 characters)
+backend/apps/compliance/views.py:52:80: E501 line too long (94 > 79 characters)
+backend/apps/compliance/views.py:53:80: E501 line too long (81 > 79 characters)
+backend/apps/compliance/views.py:55:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/views.py:73:1: E302 expected 2 blank lines, found 1
+backend/apps/compliance/views.py:79:80: E501 line too long (103 > 79 characters)
+backend/apps/compliance/views.py:94:80: E501 line too long (103 > 79 characters)
+backend/apps/compliance/views.py:96:1: E302 expected 2 blank lines, found 1
+backend/apps/core/admin.py:10:1: E302 expected 2 blank lines, found 1
+backend/apps/core/admin.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/core/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/core/exceptions.py:34:80: E501 line too long (95 > 79 characters)
+backend/apps/core/exceptions.py:6:1: E302 expected 2 blank lines, found 1
+backend/apps/core/exceptions.py:8:73: W505 doc line too long (73 > 72 characters)
+backend/apps/core/management/commands/seed_initial_data.py:106:80: E501 line too long (116 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:10:1: E302 expected 2 blank lines, found 1
+backend/apps/core/management/commands/seed_initial_data.py:11:80: E501 line too long (128 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:149:80: E501 line too long (97 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:24:80: E501 line too long (98 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:30:80: E501 line too long (90 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:31:80: E501 line too long (92 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:32:80: E501 line too long (89 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:33:80: E501 line too long (82 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:45:80: E501 line too long (94 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:46:80: E501 line too long (90 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:47:80: E501 line too long (103 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:48:80: E501 line too long (91 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:49:80: E501 line too long (90 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:50:80: E501 line too long (98 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:56:80: E501 line too long (103 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:62:80: E501 line too long (111 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:72:80: E501 line too long (105 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:73:80: E501 line too long (112 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:74:80: E501 line too long (114 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:75:80: E501 line too long (105 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:80:80: E501 line too long (121 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:90:80: E501 line too long (139 > 79 characters)
+backend/apps/core/management/commands/seed_initial_data.py:97:80: E501 line too long (110 > 79 characters)
+backend/apps/core/middleware.py:10:1: E302 expected 2 blank lines, found 1
+backend/apps/core/middleware.py:19:1: E302 expected 2 blank lines, found 1
+backend/apps/core/middleware.py:20:73: W505 doc line too long (94 > 72 characters)
+backend/apps/core/middleware.py:20:80: E501 line too long (94 > 79 characters)
+backend/apps/core/middleware.py:6:1: E302 expected 2 blank lines, found 1
+backend/apps/core/middleware.py:7:73: W505 doc line too long (77 > 72 characters)
+backend/apps/core/mixins.py:14:1: W293 blank line contains whitespace
+backend/apps/core/mixins.py:19:1: W293 blank line contains whitespace
+backend/apps/core/mixins.py:20:80: E501 line too long (84 > 79 characters)
+backend/apps/core/mixins.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/core/mixins.py:5:73: W505 doc line too long (88 > 72 characters)
+backend/apps/core/mixins.py:5:80: E501 line too long (88 > 79 characters)
+backend/apps/core/models.py:14:1: E302 expected 2 blank lines, found 1
+backend/apps/core/models.py:39:1: E302 expected 2 blank lines, found 1
+backend/apps/core/models.py:53:1: E302 expected 2 blank lines, found 1
+backend/apps/core/models.py:6:1: E302 expected 2 blank lines, found 1
+backend/apps/core/permissions.py:13:1: E302 expected 2 blank lines, found 1
+backend/apps/core/permissions.py:22:1: W293 blank line contains whitespace
+backend/apps/core/permissions.py:28:80: E501 line too long (96 > 79 characters)
+backend/apps/core/permissions.py:40:1: E302 expected 2 blank lines, found 1
+backend/apps/core/permissions.py:49:1: E302 expected 2 blank lines, found 1
+backend/apps/core/permissions.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/core/storage.py:109:73: W505 doc line too long (85 > 72 characters)
+backend/apps/core/storage.py:109:80: E501 line too long (85 > 79 characters)
+backend/apps/core/storage.py:12:1: E302 expected 2 blank lines, found 1
+backend/apps/core/storage.py:134:73: W505 doc line too long (74 > 72 characters)
+backend/apps/core/storage.py:13:73: W505 doc line too long (85 > 72 characters)
+backend/apps/core/storage.py:13:80: E501 line too long (85 > 79 characters)
+backend/apps/core/storage.py:16:1: E302 expected 2 blank lines, found 1
+backend/apps/core/storage.py:16:80: E501 line too long (80 > 79 characters)
+backend/apps/core/storage.py:17:73: W505 doc line too long (86 > 72 characters)
+backend/apps/core/storage.py:17:80: E501 line too long (86 > 79 characters)
+backend/apps/core/storage.py:36:80: E501 line too long (83 > 79 characters)
+backend/apps/core/storage.py:54:78: E251 unexpected spaces around keyword / parameter equals
+backend/apps/core/storage.py:54:80: E251 unexpected spaces around keyword / parameter equals
+backend/apps/core/storage.py:54:80: E501 line too long (84 > 79 characters)
+backend/apps/core/storage.py:59:73: W505 doc line too long (82 > 72 characters)
+backend/apps/core/storage.py:59:80: E501 line too long (82 > 79 characters)
+backend/apps/core/storage.py:82:66: E251 unexpected spaces around keyword / parameter equals
+backend/apps/core/storage.py:82:68: E251 unexpected spaces around keyword / parameter equals
+backend/apps/core/storage.py:82:80: E501 line too long (81 > 79 characters)
+backend/apps/core/storage.py:86:73: W505 doc line too long (84 > 72 characters)
+backend/apps/core/storage.py:86:80: E501 line too long (84 > 79 characters)
+backend/apps/core/test_utils.py:12:73: W505 doc line too long (82 > 72 characters)
+backend/apps/core/test_utils.py:12:80: E501 line too long (82 > 79 characters)
+backend/apps/core/test_utils.py:29:80: E501 line too long (94 > 79 characters)
+backend/apps/core/test_utils.py:9:1: E302 expected 2 blank lines, found 1
+backend/apps/core/tests.py:8:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/admin.py:10:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/admin.py:12:80: E501 line too long (89 > 79 characters)
+backend/apps/documents/admin.py:16:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/admin.py:18:80: E501 line too long (117 > 79 characters)
+backend/apps/documents/admin.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/admin.py:6:80: E501 line too long (82 > 79 characters)
+backend/apps/documents/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/models.py:14:80: E501 line too long (84 > 79 characters)
+backend/apps/documents/models.py:26:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/models.py:33:80: E501 line too long (100 > 79 characters)
+backend/apps/documents/models.py:34:80: E501 line too long (112 > 79 characters)
+backend/apps/documents/models.py:35:80: E501 line too long (89 > 79 characters)
+backend/apps/documents/models.py:44:80: E501 line too long (111 > 79 characters)
+backend/apps/documents/models.py:46:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/models.py:65:80: E501 line too long (88 > 79 characters)
+backend/apps/documents/models.py:67:80: E501 line too long (94 > 79 characters)
+backend/apps/documents/models.py:6:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/models.py:83:80: E501 line too long (83 > 79 characters)
+backend/apps/documents/models.py:85:80: E501 line too long (81 > 79 characters)
+backend/apps/documents/models.py:91:80: E501 line too long (80 > 79 characters)
+backend/apps/documents/serializers.py:14:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/serializers.py:15:80: E501 line too long (91 > 79 characters)
+backend/apps/documents/serializers.py:20:80: E501 line too long (115 > 79 characters)
+backend/apps/documents/serializers.py:22:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/serializers.py:23:80: E501 line too long (91 > 79 characters)
+backend/apps/documents/serializers.py:29:80: E501 line too long (86 > 79 characters)
+backend/apps/documents/serializers.py:30:80: E501 line too long (83 > 79 characters)
+backend/apps/documents/serializers.py:33:80: E501 line too long (92 > 79 characters)
+backend/apps/documents/serializers.py:35:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/serializers.py:36:80: E501 line too long (88 > 79 characters)
+backend/apps/documents/serializers.py:37:80: E501 line too long (80 > 79 characters)
+backend/apps/documents/serializers.py:47:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/serializers.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/serializers.py:50:80: E501 line too long (83 > 79 characters)
+backend/apps/documents/serializers.py:53:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/serializers.py:7:80: E501 line too long (95 > 79 characters)
+backend/apps/documents/serializers.py:9:1: E302 expected 2 blank lines, found 1
+backend/apps/documents/urls.py:16:80: E501 line too long (93 > 79 characters)
+backend/apps/documents/urls.py:18:80: E501 line too long (98 > 79 characters)
+backend/apps/documents/urls.py:19:80: E501 line too long (106 > 79 characters)
+backend/apps/documents/urls.py:20:80: E501 line too long (91 > 79 characters)
+backend/apps/documents/urls.py:21:80: E501 line too long (99 > 79 characters)
+backend/apps/documents/urls.py:22:80: E501 line too long (100 > 79 characters)
+backend/apps/marketing/admin.py:10:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/admin.py:12:80: E501 line too long (81 > 79 characters)
+backend/apps/marketing/admin.py:16:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/admin.py:18:80: E501 line too long (88 > 79 characters)
+backend/apps/marketing/admin.py:22:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/admin.py:24:80: E501 line too long (98 > 79 characters)
+backend/apps/marketing/admin.py:28:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/admin.py:30:80: E501 line too long (100 > 79 characters)
+backend/apps/marketing/admin.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/models.py:16:80: E501 line too long (84 > 79 characters)
+backend/apps/marketing/models.py:22:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/models.py:24:80: E501 line too long (87 > 79 characters)
+backend/apps/marketing/models.py:38:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/models.py:40:80: E501 line too long (84 > 79 characters)
+backend/apps/marketing/models.py:53:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/models.py:55:80: E501 line too long (96 > 79 characters)
+backend/apps/marketing/models.py:5:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/models.py:68:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/models.py:70:80: E501 line too long (91 > 79 characters)
+backend/apps/marketing/models.py:7:80: E501 line too long (95 > 79 characters)
+backend/apps/marketing/serializers.py:10:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/serializers.py:13:80: E501 line too long (98 > 79 characters)
+backend/apps/marketing/serializers.py:15:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/serializers.py:18:80: E501 line too long (84 > 79 characters)
+backend/apps/marketing/serializers.py:20:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/serializers.py:23:80: E501 line too long (105 > 79 characters)
+backend/apps/marketing/serializers.py:25:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/serializers.py:28:80: E501 line too long (102 > 79 characters)
+backend/apps/marketing/serializers.py:30:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/serializers.py:35:80: E501 line too long (81 > 79 characters)
+backend/apps/marketing/serializers.py:38:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/serializers.py:5:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/tests.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/urls.py:15:80: E501 line too long (86 > 79 characters)
+backend/apps/marketing/urls.py:17:80: E501 line too long (89 > 79 characters)
+backend/apps/marketing/urls.py:18:80: E501 line too long (83 > 79 characters)
+backend/apps/marketing/urls.py:19:80: E501 line too long (83 > 79 characters)
+backend/apps/marketing/urls.py:20:80: E501 line too long (91 > 79 characters)
+backend/apps/marketing/views.py:17:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/views.py:18:73: W505 doc line too long (73 > 72 characters)
+backend/apps/marketing/views.py:25:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/views.py:31:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/views.py:32:73: W505 doc line too long (82 > 72 characters)
+backend/apps/marketing/views.py:32:80: E501 line too long (82 > 79 characters)
+backend/apps/marketing/views.py:37:80: E501 line too long (90 > 79 characters)
+backend/apps/marketing/views.py:43:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/views.py:49:80: E501 line too long (96 > 79 characters)
+backend/apps/marketing/views.py:52:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/views.py:61:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/views.py:70:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/views.py:76:80: E501 line too long (95 > 79 characters)
+backend/apps/marketing/views.py:79:1: E302 expected 2 blank lines, found 1
+backend/apps/marketing/views.py:80:73: W505 doc line too long (98 > 72 characters)
+backend/apps/marketing/views.py:80:80: E501 line too long (98 > 79 characters)
+backend/apps/training/admin.py:10:1: E302 expected 2 blank lines, found 1
+backend/apps/training/admin.py:12:80: E501 line too long (99 > 79 characters)
+backend/apps/training/admin.py:14:80: E501 line too long (85 > 79 characters)
+backend/apps/training/admin.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/training/admin.py:6:80: E501 line too long (94 > 79 characters)
+backend/apps/training/apps.py:3:1: E302 expected 2 blank lines, found 1
+backend/apps/training/models.py:21:1: E302 expected 2 blank lines, found 1
+backend/apps/training/models.py:29:80: E501 line too long (100 > 79 characters)
+backend/apps/training/models.py:30:80: E501 line too long (107 > 79 characters)
+backend/apps/training/models.py:31:80: E501 line too long (91 > 79 characters)
+backend/apps/training/models.py:42:80: E501 line too long (83 > 79 characters)
+backend/apps/training/models.py:46:80: E501 line too long (82 > 79 characters)
+backend/apps/training/models.py:6:1: E302 expected 2 blank lines, found 1
+backend/apps/training/models.py:8:80: E501 line too long (85 > 79 characters)
+backend/apps/training/serializers.py:22:1: E302 expected 2 blank lines, found 1
+backend/apps/training/serializers.py:24:80: E501 line too long (125 > 79 characters)
+backend/apps/training/serializers.py:25:80: E501 line too long (80 > 79 characters)
+backend/apps/training/serializers.py:26:80: E501 line too long (85 > 79 characters)
+backend/apps/training/serializers.py:4:1: E302 expected 2 blank lines, found 1
+backend/apps/training/serializers.py:7:80: E501 line too long (107 > 79 characters)
+backend/apps/training/serializers.py:9:1: E302 expected 2 blank lines, found 1
+backend/apps/training/services.py:27:21: E261 at least two spaces before inline comment
+backend/apps/training/services.py:64:1: W293 blank line contains whitespace
+backend/apps/training/services.py:65:80: E501 line too long (90 > 79 characters)
+backend/apps/training/services.py:68:1: W293 blank line contains whitespace
+backend/apps/training/services.py:71:80: E501 line too long (93 > 79 characters)
+backend/apps/training/services.py:77:80: E501 line too long (103 > 79 characters)
+backend/apps/training/services.py:79:80: E501 line too long (112 > 79 characters)
+backend/apps/training/services.py:8:1: E302 expected 2 blank lines, found 1
+backend/apps/training/services.py:9:73: W505 doc line too long (76 > 72 characters)
+backend/apps/training/tests.py:40:80: E501 line too long (92 > 79 characters)
+backend/apps/training/tests.py:43:80: E501 line too long (91 > 79 characters)
+backend/apps/training/tests.py:7:1: E302 expected 2 blank lines, found 1
+backend/apps/training/urls.py:11:80: E501 line too long (80 > 79 characters)
+backend/apps/training/urls.py:12:80: E501 line too long (88 > 79 characters)
+backend/apps/training/urls.py:13:80: E501 line too long (95 > 79 characters)
+backend/apps/training/urls.py:14:80: E501 line too long (101 > 79 characters)
+backend/apps/training/urls.py:15:80: E501 line too long (110 > 79 characters)
+backend/apps/training/views.py:101:80: E501 line too long (99 > 79 characters)
+backend/apps/training/views.py:14:1: E302 expected 2 blank lines, found 1
+backend/apps/training/views.py:15:73: W505 doc line too long (83 > 72 characters)
+backend/apps/training/views.py:15:80: E501 line too long (83 > 79 characters)
+backend/apps/training/views.py:22:1: E302 expected 2 blank lines, found 1
+backend/apps/training/views.py:23:73: W505 doc line too long (90 > 72 characters)
+backend/apps/training/views.py:23:80: E501 line too long (90 > 79 characters)
+backend/apps/training/views.py:28:80: E501 line too long (101 > 79 characters)
+backend/apps/training/views.py:29:80: E501 line too long (82 > 79 characters)
+backend/apps/training/views.py:31:1: E302 expected 2 blank lines, found 1
+backend/apps/training/views.py:38:1: W293 blank line contains whitespace
+backend/apps/training/views.py:44:80: E501 line too long (85 > 79 characters)
+backend/apps/training/views.py:52:1: E305 expected 2 blank lines after class or function definition, found 1
+backend/apps/training/views.py:52:1: E402 module level import not at top of file
+backend/apps/training/views.py:54:1: E302 expected 2 blank lines, found 1
+backend/apps/training/views.py:67:80: E501 line too long (101 > 79 characters)
+backend/apps/training/views.py:84:80: E501 line too long (97 > 79 characters)
+backend/apps/training/views.py:88:73: W505 doc line too long (85 > 72 characters)
+backend/apps/training/views.py:88:80: E501 line too long (85 > 79 characters)
+backend/config/settings/base.py:117:80: E501 line too long (91 > 79 characters)
+backend/config/settings/base.py:120:80: E501 line too long (81 > 79 characters)
+backend/config/settings/base.py:124:80: E501 line too long (82 > 79 characters)
+backend/config/settings/base.py:127:80: E501 line too long (83 > 79 characters)
+backend/config/settings/base.py:154:80: E501 line too long (81 > 79 characters)
+backend/config/settings/base.py:207:73: W505 doc line too long (82 > 72 characters)
+backend/config/settings/base.py:207:80: E501 line too long (82 > 79 characters)
+backend/config/settings/base.py:210:80: E501 line too long (96 > 79 characters)
+backend/config/settings/base.py:212:80: E501 line too long (95 > 79 characters)
+backend/config/settings/base.py:213:80: E501 line too long (128 > 79 characters)
+backend/config/settings/base.py:21:80: E501 line too long (89 > 79 characters)
+backend/config/urls.py:12:1: E305 expected 2 blank lines after class or function definition, found 1
+backend/config/urls.py:28:1: W391 blank line at end of file
+backend/config/urls.py:5:1: E302 expected 2 blank lines, found 1
+backend/manage.py:18:1: E305 expected 2 blank lines after class or function definition, found 1
+backend/manage.py:5:1: E302 expected 2 blank lines, found 1
+backend/manage.py:7:80: E501 line too long (82 > 79 characters)
+backend/seed_all_features.py:103:80: E501 line too long (81 > 79 characters)
+backend/seed_all_features.py:104:80: E501 line too long (99 > 79 characters)
+backend/seed_all_features.py:105:80: E501 line too long (106 > 79 characters)
+backend/seed_all_features.py:109:80: E501 line too long (80 > 79 characters)
+backend/seed_all_features.py:10:1: E402 module level import not at top of file
+backend/seed_all_features.py:110:80: E501 line too long (98 > 79 characters)
+backend/seed_all_features.py:111:80: E501 line too long (128 > 79 characters)
+backend/seed_all_features.py:116:80: E501 line too long (81 > 79 characters)
+backend/seed_all_features.py:117:80: E501 line too long (102 > 79 characters)
+backend/seed_all_features.py:118:80: E501 line too long (128 > 79 characters)
+backend/seed_all_features.py:11:1: E402 module level import not at top of file
+backend/seed_all_features.py:122:80: E501 line too long (84 > 79 characters)
+backend/seed_all_features.py:123:80: E501 line too long (94 > 79 characters)
+backend/seed_all_features.py:124:80: E501 line too long (106 > 79 characters)
+backend/seed_all_features.py:129:80: E501 line too long (95 > 79 characters)
+backend/seed_all_features.py:12:1: E402 module level import not at top of file
+backend/seed_all_features.py:130:80: E501 line too long (128 > 79 characters)
+backend/seed_all_features.py:13:1: E402 module level import not at top of file
+backend/seed_all_features.py:141:80: E501 line too long (82 > 79 characters)
+backend/seed_all_features.py:14:1: E402 module level import not at top of file
+backend/seed_all_features.py:14:80: E501 line too long (96 > 79 characters)
+backend/seed_all_features.py:15:1: E402 module level import not at top of file
+backend/seed_all_features.py:16:1: E402 module level import not at top of file
+backend/seed_all_features.py:170:80: E501 line too long (110 > 79 characters)
+backend/seed_all_features.py:171:80: E501 line too long (90 > 79 characters)
+backend/seed_all_features.py:173:80: E501 line too long (153 > 79 characters)
+backend/seed_all_features.py:17:1: E402 module level import not at top of file
+backend/seed_all_features.py:230:80: E501 line too long (91 > 79 characters)
+backend/seed_all_features.py:231:80: E501 line too long (83 > 79 characters)
+backend/seed_all_features.py:287:80: E501 line too long (80 > 79 characters)
+backend/seed_all_features.py:288:80: E501 line too long (86 > 79 characters)
+backend/seed_all_features.py:289:80: E501 line too long (90 > 79 characters)
+backend/seed_all_features.py:290:80: E501 line too long (100 > 79 characters)
+backend/seed_all_features.py:294:80: E501 line too long (84 > 79 characters)
+backend/seed_all_features.py:295:80: E501 line too long (82 > 79 characters)
+backend/seed_all_features.py:296:80: E501 line too long (90 > 79 characters)
+backend/seed_all_features.py:297:80: E501 line too long (84 > 79 characters)
+backend/seed_all_features.py:301:80: E501 line too long (83 > 79 characters)
+backend/seed_all_features.py:302:80: E501 line too long (89 > 79 characters)
+backend/seed_all_features.py:303:80: E501 line too long (93 > 79 characters)
+backend/seed_all_features.py:304:80: E501 line too long (104 > 79 characters)
+backend/seed_all_features.py:308:80: E501 line too long (80 > 79 characters)
+backend/seed_all_features.py:309:80: E501 line too long (89 > 79 characters)
+backend/seed_all_features.py:311:80: E501 line too long (94 > 79 characters)
+backend/seed_all_features.py:316:80: E501 line too long (82 > 79 characters)
+backend/seed_all_features.py:317:80: E501 line too long (91 > 79 characters)
+backend/seed_all_features.py:318:80: E501 line too long (92 > 79 characters)
+backend/seed_all_features.py:319:80: E501 line too long (94 > 79 characters)
+backend/seed_all_features.py:323:80: E501 line too long (84 > 79 characters)
+backend/seed_all_features.py:324:80: E501 line too long (86 > 79 characters)
+backend/seed_all_features.py:325:80: E501 line too long (91 > 79 characters)
+backend/seed_all_features.py:326:80: E501 line too long (84 > 79 characters)
+backend/seed_all_features.py:331:80: E501 line too long (84 > 79 characters)
+backend/seed_all_features.py:332:80: E501 line too long (80 > 79 characters)
+backend/seed_all_features.py:333:80: E501 line too long (94 > 79 characters)
+backend/seed_all_features.py:338:80: E501 line too long (80 > 79 characters)
+backend/seed_all_features.py:339:80: E501 line too long (87 > 79 characters)
+backend/seed_all_features.py:340:80: E501 line too long (93 > 79 characters)
+backend/seed_all_features.py:341:80: E501 line too long (92 > 79 characters)
+backend/seed_all_features.py:345:80: E501 line too long (83 > 79 characters)
+backend/seed_all_features.py:346:80: E501 line too long (83 > 79 characters)
+backend/seed_all_features.py:347:80: E501 line too long (93 > 79 characters)
+backend/seed_all_features.py:348:80: E501 line too long (97 > 79 characters)
+backend/seed_all_features.py:34:80: E501 line too long (152 > 79 characters)
+backend/seed_all_features.py:352:80: E501 line too long (83 > 79 characters)
+backend/seed_all_features.py:353:80: E501 line too long (82 > 79 characters)
+backend/seed_all_features.py:354:80: E501 line too long (96 > 79 characters)
+backend/seed_all_features.py:355:80: E501 line too long (98 > 79 characters)
+backend/seed_all_features.py:35:80: E501 line too long (133 > 79 characters)
+backend/seed_all_features.py:37:80: E501 line too long (127 > 79 characters)
+backend/seed_all_features.py:386:80: E501 line too long (124 > 79 characters)
+backend/seed_all_features.py:387:80: E501 line too long (129 > 79 characters)
+backend/seed_all_features.py:38:80: E501 line too long (127 > 79 characters)
+backend/seed_all_features.py:39:80: E501 line too long (130 > 79 characters)
+backend/seed_all_features.py:400:80: E501 line too long (99 > 79 characters)
+backend/seed_all_features.py:402:80: E501 line too long (147 > 79 characters)
+backend/seed_all_features.py:40:80: E501 line too long (127 > 79 characters)
+backend/seed_all_features.py:416:80: E501 line too long (97 > 79 characters)
+backend/seed_all_features.py:417:80: E501 line too long (86 > 79 characters)
+backend/seed_all_features.py:418:80: E501 line too long (112 > 79 characters)
+backend/seed_all_features.py:422:80: E501 line too long (94 > 79 characters)
+backend/seed_all_features.py:424:80: E501 line too long (114 > 79 characters)
+backend/seed_all_features.py:425:80: E501 line too long (132 > 79 characters)
+backend/seed_all_features.py:428:80: E501 line too long (93 > 79 characters)
+backend/seed_all_features.py:429:80: E501 line too long (83 > 79 characters)
+backend/seed_all_features.py:430:80: E501 line too long (84 > 79 characters)
+backend/seed_all_features.py:431:80: E501 line too long (108 > 79 characters)
+backend/seed_all_features.py:436:80: E501 line too long (99 > 79 characters)
+backend/seed_all_features.py:438:80: E501 line too long (105 > 79 characters)
+backend/seed_all_features.py:442:80: E501 line too long (96 > 79 characters)
+backend/seed_all_features.py:443:80: E501 line too long (82 > 79 characters)
+backend/seed_all_features.py:444:80: E501 line too long (108 > 79 characters)
+backend/seed_all_features.py:445:80: E501 line too long (99 > 79 characters)
+backend/seed_all_features.py:448:80: E501 line too long (98 > 79 characters)
+backend/seed_all_features.py:449:80: E501 line too long (80 > 79 characters)
+backend/seed_all_features.py:451:80: E501 line too long (100 > 79 characters)
+backend/seed_all_features.py:456:80: E501 line too long (96 > 79 characters)
+backend/seed_all_features.py:458:80: E501 line too long (123 > 79 characters)
+backend/seed_all_features.py:462:80: E501 line too long (94 > 79 characters)
+backend/seed_all_features.py:464:80: E501 line too long (90 > 79 characters)
+backend/seed_all_features.py:465:80: E501 line too long (132 > 79 characters)
+backend/seed_all_features.py:468:80: E501 line too long (93 > 79 characters)
+backend/seed_all_features.py:469:80: E501 line too long (83 > 79 characters)
+backend/seed_all_features.py:470:80: E501 line too long (98 > 79 characters)
+backend/seed_all_features.py:471:80: E501 line too long (102 > 79 characters)
+backend/seed_all_features.py:499:80: E501 line too long (119 > 79 characters)
+backend/seed_all_features.py:500:80: E501 line too long (132 > 79 characters)
+backend/seed_all_features.py:501:80: E501 line too long (118 > 79 characters)
+backend/seed_all_features.py:502:80: E501 line too long (132 > 79 characters)
+backend/seed_all_features.py:503:80: E501 line too long (120 > 79 characters)
+backend/seed_all_features.py:504:80: E501 line too long (136 > 79 characters)
+backend/seed_all_features.py:519:80: E501 line too long (80 > 79 characters)
+backend/seed_all_features.py:521:80: E501 line too long (154 > 79 characters)
+backend/seed_all_features.py:528:80: E501 line too long (171 > 79 characters)
+backend/seed_all_features.py:529:80: E501 line too long (172 > 79 characters)
+backend/seed_all_features.py:530:80: E501 line too long (148 > 79 characters)
+backend/seed_all_features.py:531:80: E501 line too long (154 > 79 characters)
+backend/seed_all_features.py:532:80: E501 line too long (144 > 79 characters)
+backend/seed_all_features.py:661:80: E501 line too long (82 > 79 characters)
+backend/seed_all_features.py:666:1: W293 blank line contains whitespace
+backend/seed_all_features.py:678:80: E501 line too long (116 > 79 characters)
+backend/seed_all_features.py:691:80: E501 line too long (150 > 79 characters)
+backend/seed_all_features.py:698:80: E501 line too long (154 > 79 characters)
+backend/seed_all_features.py:705:80: E501 line too long (157 > 79 characters)
+backend/seed_all_features.py:712:80: E501 line too long (149 > 79 characters)
+backend/seed_all_features.py:72:80: E501 line too long (81 > 79 characters)
+backend/seed_all_features.py:736:80: E501 line too long (85 > 79 characters)
+backend/seed_all_features.py:73:80: E501 line too long (96 > 79 characters)
+backend/seed_all_features.py:743:80: E501 line too long (92 > 79 characters)
+backend/seed_all_features.py:74:80: E501 line too long (124 > 79 characters)
+backend/seed_all_features.py:757:80: E501 line too long (81 > 79 characters)
+backend/seed_all_features.py:776:80: E501 line too long (221 > 79 characters)
+backend/seed_all_features.py:777:80: E501 line too long (201 > 79 characters)
+backend/seed_all_features.py:778:80: E501 line too long (224 > 79 characters)
+backend/seed_all_features.py:779:80: E501 line too long (191 > 79 characters)
+backend/seed_all_features.py:780:80: E501 line too long (221 > 79 characters)
+backend/seed_all_features.py:781:80: E501 line too long (249 > 79 characters)
+backend/seed_all_features.py:782:80: E501 line too long (211 > 79 characters)
+backend/seed_all_features.py:78:80: E501 line too long (80 > 79 characters)
+backend/seed_all_features.py:79:80: E501 line too long (100 > 79 characters)
+backend/seed_all_features.py:80:80: E501 line too long (106 > 79 characters)
+backend/seed_all_features.py:84:80: E501 line too long (80 > 79 characters)
+backend/seed_all_features.py:85:80: E501 line too long (99 > 79 characters)
+backend/seed_all_features.py:86:80: E501 line too long (108 > 79 characters)
+backend/seed_all_features.py:91:80: E501 line too long (104 > 79 characters)
+backend/seed_all_features.py:92:80: E501 line too long (113 > 79 characters)
+backend/seed_all_features.py:97:80: E501 line too long (81 > 79 characters)
+backend/seed_all_features.py:98:80: E501 line too long (102 > 79 characters)
+backend/seed_all_features.py:99:80: E501 line too long (113 > 79 characters)
+backend/seed_all_features.py:9:1: E402 module level import not at top of file
+backend/seed_users.py:108:80: E501 line too long (132 > 79 characters)
+backend/seed_users.py:10:1: E402 module level import not at top of file
+backend/seed_users.py:114:80: E501 line too long (126 > 79 characters)
+backend/seed_users.py:115:80: E501 line too long (136 > 79 characters)
+backend/seed_users.py:116:80: E501 line too long (122 > 79 characters)
+backend/seed_users.py:117:80: E501 line too long (119 > 79 characters)
+backend/seed_users.py:11:1: E402 module level import not at top of file
+backend/seed_users.py:12:1: E402 module level import not at top of file
+backend/seed_users.py:132:80: E501 line too long (171 > 79 characters)
+backend/seed_users.py:133:80: E501 line too long (146 > 79 characters)
+backend/seed_users.py:134:80: E501 line too long (185 > 79 characters)
+backend/seed_users.py:135:80: E501 line too long (142 > 79 characters)
+backend/seed_users.py:136:80: E501 line too long (158 > 79 characters)
+backend/seed_users.py:13:1: E402 module level import not at top of file
+backend/seed_users.py:31:80: E501 line too long (123 > 79 characters)
+backend/seed_users.py:32:80: E501 line too long (110 > 79 characters)
+backend/seed_users.py:34:80: E501 line too long (104 > 79 characters)
+backend/seed_users.py:35:80: E501 line too long (104 > 79 characters)
+backend/seed_users.py:36:80: E501 line too long (107 > 79 characters)
+backend/seed_users.py:37:80: E501 line too long (104 > 79 characters)
+backend/seed_users.py:39:80: E501 line too long (133 > 79 characters)
+backend/seed_users.py:40:80: E501 line too long (136 > 79 characters)
+backend/seed_users.py:41:80: E501 line too long (133 > 79 characters)
+backend/seed_users.py:43:80: E501 line too long (126 > 79 characters)
+backend/seed_users.py:44:80: E501 line too long (131 > 79 characters)
+backend/seed_users.py:45:80: E501 line too long (126 > 79 characters)
+backend/seed_users.py:8:1: E402 module level import not at top of file
+backend/seed_users.py:9:1: E402 module level import not at top of file

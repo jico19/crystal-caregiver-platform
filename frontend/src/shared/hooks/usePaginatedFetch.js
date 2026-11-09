@@ -9,12 +9,14 @@ import { api } from '../services/api';
  *
  * Expects responses shaped `{ <listKey>: [...], total, page, page_size, pages }`
  * and appends `page`/`page_size` to the request URL.
+ * A fetchPage service can own transport while this hook retains pagination/cache behavior.
  */
 export default function usePaginatedFetch({
   url,
   token,
   params = {},
   listKey,
+  fetchPage,
   pageSize: initialPageSize = 20,
 }) {
   const [page, setPageState] = useState(1);
@@ -35,6 +37,7 @@ export default function usePaginatedFetch({
   const query = useQuery({
     queryKey,
     queryFn: () => {
+      if (fetchPage) return fetchPage({ params, page, pageSize, token });
       const queryString = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
         if (value === '' || value === null || value === undefined || value === 'all') return;

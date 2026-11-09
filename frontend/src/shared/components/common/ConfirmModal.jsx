@@ -45,7 +45,7 @@ export default function ConfirmModal({
             size="sm"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`text-xs font-medium ${!isDestructive ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}`}
+            className="text-xs font-medium"
           >
             {isLoading ? 'Processing...' : confirmText}
           </Button>

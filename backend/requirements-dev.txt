@@ -1,0 +1,2 @@
+# Style tooling only; runtime dependencies remain in requirements.txt.
+pycodestyle==2.15.0

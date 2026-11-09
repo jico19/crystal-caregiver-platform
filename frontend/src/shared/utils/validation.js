@@ -16,8 +16,10 @@ const trimName = (label, max) =>
     .min(1, `${label} is required.`)
     .max(max, `${label} must be ${max} characters or fewer.`);
 
-// Mirrors Pydantic rules in backend/app/schemas/caregivers.py, plus the
-// signature requirement enforced in caregivers.py (_validate_signature).
+// Client-side application checks for form feedback. Authoritative validation
+// lives in backend/apps/caregivers/serializers.py (CaregiverApplyPublicSerializer)
+// and backend/apps/caregivers/services.py (submit_caregiver_application).
+// These checks do not claim complete parity with backend validation.
 export const caregiverApplicationSchema = z
   .object({
     state_id: z.coerce.number().int().min(1).max(3),

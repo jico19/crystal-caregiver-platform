@@ -1,172 +1,145 @@
-# Caregiver Platform — Frontend Design & RBAC Context Guide
+# Caregiver Platform frontend and backend context
 
-> **Target Audience**: AI coding agents implementing features, refactoring pages, or auditing security in `Caregiver-v2`.
-> **Primary Rule**: Always preserve design system consistency and enforce fail-closed state-scoped Role-Based Access Control (RBAC).
+For agents implementing or reviewing the clinical care portal. Preserve the
+compact layout, readable status colors, and state-scoped access boundaries.
+`docs/Scope of work.md` records product scope; `docs/specs/` records cleanup
+requirements. Verify implementation claims against the current source.
 
----
+## Repository and runtime
 
-## 1. Project Overview & Repository Map
+- `frontend/`: React 19, Vite, Tailwind CSS v4, Radix UI, Lucide React,
+  React Router v7, and TanStack Query v5. Role screens live in `src/features/`;
+  hooks, services, layouts, and shared components live in `src/shared/`.
+  Low-level UI primitives live in `src/components/ui/`.
+- `backend/`: Django and Django REST Framework (DRF). Domain code lives in
+  `apps/`, including models, serializers, views, services, tests, and migrations.
+  `config/urls.py` mounts `/api/v1/`, `/api/health/`, and `/django-admin/`.
+- `backend/config/settings/base.py` loads `backend/.env`. `development.py`
+  and `production.py` supply environment-specific behavior; `manage.py`
+  defaults to development. Production settings enable HTTPS redirects, HSTS,
+  secure cookies, and other security headers.
+- SQLite is the database default. `DB_ENGINE=postgresql` explicitly selects
+  PostgreSQL; consult `base.py` for the exact fallback condition.
+  `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, and `DB_PORT` configure it.
+  Local media is the storage default. `USE_S3=true` with AWS keys enables the
+  S3 path in `apps/core/storage.py`; bucket, region, and presigned expiration
+  are environment-driven. `.env.example` does not enumerate every setting.
+- `src/shared/services/api.js` uses `VITE_API_URL`, defaulting to
+  `http://localhost:8000/api/v1`. Vite also proxies relative `/api` and
+  `/media` requests to port 8000 during development.
 
-- **Frontend**: `frontend/` — React 19, Vite, Tailwind CSS v4 (`@tailwindcss/vite`), Radix UI, Lucide React, React Router v7, TanStack Query v5.
-- **Backend**: `backend/app/` — FastAPI, SQLAlchemy 2.0, Pydantic v2, PostgreSQL 16+, native JWT / Supabase GoTrue auth.
-- **Specifications & Schemas**: `docs/` — `SECURITY_REQUIREMENTS.md`, `PRD.md`, `SAD.md`, `API_CONTRACTS.md`, `DATABASE_SCHEMA_AND_DATA_DICTIONARY.md`.
+## Authentication, roles, and state scope
 
----
+The backend uses DRF SimpleJWT and the Django user model in
+`apps/authentication/models.py`. `StrictJWTAuthentication` in
+`apps/authentication/authentication.py` checks the database user on each
+authenticated request and rejects inactive, suspended, or deleted accounts.
+DRF defaults to `IsAuthenticated`.
 
-## 2. Frontend Design System
+`apps/authentication/urls.py` defines token obtain/refresh, registration,
+logout, and `/auth/me/`. `SIMPLE_JWT` in `config/settings/base.py` configures
+60-minute access tokens and seven-day refresh tokens, rotation, and blacklisting.
+`src/shared/contexts/AuthContext.jsx` restores the profile via `/auth/me/`.
+It stores access tokens under `localStorage['caregiver_access_token']` and
+refresh tokens under `localStorage['refresh']`. The shared API client sends
+Bearer tokens and attempts refresh on eligible 401 responses. Logout posts
+the refresh token for blacklisting and clears the local session/query cache.
+Legacy fallback endpoint names remain in the frontend; they are not separate
+authentication providers.
 
-### 2.1 Aesthetic & Visual Principles
-- **Clinical B2B SaaS**: Clean, trustworthy, high contrast, medical-grade clarity.
-- **Anti-AI-Slop**: No gratuitous background gradients, glowing borders, floating pill gimmicks, or low-contrast text.
-- **ADHD-Friendly Layout**: Clear visual hierarchy, scannable tables, bold metric callouts, and bounded action buttons.
+| Role | Intended scope |
+| --- | --- |
+| `super_admin` | Administrative access across states. |
+| `administrator` | Administrative access within the assigned `state_id`. |
+| `caregiver` | Own onboarding/credentials and assigned client care. |
+| `client` | Own intake, agreements, documents, and care records. |
 
-### 2.2 Color Tokens & Theme System (`frontend/src/index.css`)
-- **Primary / Brand**: Emerald (`#16a34a` / `hsl(142.1 76.2% 36.3%)`), hover: `emerald-700`.
-- **Canvas / Background**: `bg-slate-50` (`#f8fafc`).
-- **Cards & Surfaces**: `bg-white` with `border border-slate-200 shadow-xs rounded-lg`.
-- **Typography Scale**:
-  - Headings: `text-slate-900 font-bold tracking-tight` (`text-xl` to `text-2xl` for page headers).
-  - Body: `text-slate-700 text-sm`.
-  - Captions & Meta: `text-slate-500 text-xs`.
-- **Semantic Statuses** (enforced via `StatusBadge.jsx`):
-  - **Success** (`bg-emerald-50 text-emerald-800 border-emerald-200`): `active`, `approved`, `completed`, `pass`, `valid`, `signed`, `hired`.
-  - **Warning** (`bg-amber-50 text-amber-800 border-amber-200`): `pending`, `draft`, `submitted`, `in_review`, `under_review`, `expiring_soon`.
-  - **Error / Destructive** (`bg-red-50 text-red-800 border-red-200`): `rejected`, `expired`, `suspended`, `terminated`, `discharged`, `failed`.
-  - **Neutral** (`bg-slate-50 text-slate-700 border-slate-200`): `info`, `not_started`, `archived`.
+Use `isAdmin`, `isSuperAdmin`, `isStateAdmin`, `homePathFor`, and
+`stateLabelFor` from `src/shared/lib/roles.js`. `isAdmin` includes both admin
+roles. Display helpers and frontend route guards do not enforce API access.
 
-### 2.3 Shell & Navigation Architecture
-- **Layout Shell**: `src/shared/components/sidebar/PortalShell.jsx` wraps authenticated views:
-  - Collapsible desktop sidebar (`PortalSidebar.jsx`, state saved in `localStorage['cp_sidebar_collapsed']`).
-  - Mobile slide-out drawer (`mobileOpen` + ESC key handler).
-  - Top navigation bar (`PortalTopBar.jsx`) with dynamic state jurisdiction pill, unread notifications badge, and profile/logout menu.
-- **Sectioned Nav Menus**:
-  - **Admin**: Overview (Dashboard) | People (Caregivers, Clients, Users, Referrals) | Operations (Compliance, Authorizations, Training) | Oversight (Reports, Announcements, Audit Logs) | System (Settings, Notifications).
-  - **Caregiver**: Overview (Dashboard) | Care Delivery (My Clients) | Onboarding (Application) | Compliance (Credentials, Training) | Account (Profile, Notifications).
-  - **Client**: Overview (Dashboard) | My Care (Care Plan, Schedule) | Documents & Records (Intake, Forms, Records, Authorizations) | Account (Profile, Alerts).
+`src/routes/AppRoutes.jsx` mounts the portals under layouts in
+`src/shared/layouts/`. `AdminLayout` uses `StateAdminLayout` for regional
+administrators. Reports, users, settings, and audit-log routes additionally
+use `SuperAdminOnlyRoute`. Missing sessions redirect to the relevant login.
+Public state pages live under `/:state`; `/caregiver/application` also
+supports public applications.
 
-### 2.4 Reusable Component Catalog
-When building or modifying pages, use these standard components from `src/shared/components/common/` and `@/components/ui/`:
+Offer all-state filters only to super administrators. Regional administrators
+must receive only their assigned state. Use state IDs returned by the API;
+do not hardcode database IDs. Filter values and `X-Agency-State` are request
+hints, never authoritative identity. `stateLabelFor` has legacy fallbacks
+and is a display helper only.
 
-1. **Layout Wrapper**: `PageContainer` (`size="default" | "narrow" | "wide"`).
-2. **Page Header**: `PageHeader` (`title`, `subtitle`, `badge`, `actions`, `breadcrumbs`).
-3. **Card Container**: `Card` (`title`, `subtitle`, `actions`, `compact`).
-4. **Data Grid**: `DataTable` (pagination, search, sorting, empty states).
-5. **Status Badges**: `StatusBadge` (`status`, `label`, `size="xs"|"sm"|"md"`).
-6. **Feedback & States**: `LoadingState`, `Skeleton`, `EmptyState`, `ErrorBoundary`.
-7. **Interactive Modals**: `ConfirmModal` for confirmations/deletions.
-8. **UI Primitives (`src/components/ui/`)**: `Button`, `Badge`, `Input`, `Select`, `Dialog`, `Tabs`, `Table`, `DropdownMenu`.
+Backend enforcement lives in `apps/core/permissions.py` and `mixins.py`.
+`IsStateScopedAdmin` rejects administrators without a jurisdiction.
+`ScopedStateQuerySetMixin` filters regional admin querysets to that state;
+super administrators can query across states. Custom views also perform
+explicit owner, assignment, or state checks. Scoped lookups can return 404;
+explicit permission checks can return 403. Do not promise one status code
+for all cross-state requests. `IsCaregiver` and `IsClient` also permit super
+administrators; endpoints still enforce their object lookups and ownership.
 
-### 2.5 Standard Page Template Pattern
-```jsx
-import PageContainer from '../../../shared/components/common/PageContainer';
-import PageHeader from '../../../shared/components/common/PageHeader';
-import Card from '../../../shared/components/common/Card';
-import StatusBadge from '../../../shared/components/common/StatusBadge';
-import { Button } from '@/components/ui/button';
-import useFetch from '../../../shared/hooks/useFetch';
+## UI system and page composition
 
-export default function ExamplePage() {
-  const { data, loading, error, refetch } = useFetch('/admin/example');
+`src/index.css` owns semantic HSL values. Tailwind's `@theme inline` maps
+them to `bg-primary`, `text-primary-foreground`, `border-input`, `ring-ring`,
+and related utilities. Primary actions use green 700 with white text for
+readable small labels and a darker hover. Destructive actions use red;
+neutral surfaces/borders use slate. Legacy `--color-base-*` and content
+aliases remain for shell CSS. Do not duplicate the primary palette in controls.
+The portal exposes a light UI without a theme switch. CSS has dark overrides;
+that does not establish full dark-theme support across feature screens.
 
-  return (
-    <PageContainer>
-      <PageHeader
-        title="Page Title"
-        subtitle="Concise explanation of this operational view."
-        actions={
-          <Button onClick={refetch} variant="outline" size="sm">
-            Refresh
-          </Button>
-        }
-      />
-      <Card title="Section Overview" subtitle="Key details and status">
-        {/* Table, metrics, or form contents */}
-      </Card>
-    </PageContainer>
-  );
-}
-```
+`src/shared/components/sidebar/PortalShell.jsx` composes `PortalSidebar` and
+`PortalTopBar`, with desktop collapse state in
+`localStorage['cp_sidebar_collapsed']` and an Escape-dismissable mobile drawer.
+Navigation groups live in each role layout; consult those files and routes
+instead of assuming all administrators share a menu.
 
----
+Prefer existing shared components in `src/shared/components/common/`:
 
-## 3. Role-Based Access Control (RBAC) & State Scoping
+- `PageContainer`: default (`max-w-6xl`), narrow (`max-w-4xl`), or wide
+  (`max-w-7xl`); `PageHeader`: title, subtitle, badge, and actions.
+- Shared `Card`: title, subtitle, actions, and compact padding. The primitive
+  `@/components/ui/card` has a separate composable API.
+- `DataTable`, `StatusBadge`, `LoadingState`, `Skeleton`, `EmptyState`,
+  `ErrorBoundary`, and `ConfirmModal` for their existing use cases.
+- `@/components/ui/`: Button, Input, Badge, Select, Dialog, Tabs, Table,
+  DropdownMenu. Use Button variants instead of repeating palettes.
 
-### 3.1 The 4 Tiers of Authorization
+`StatusBadge.jsx` maps approved/active/completed states to emerald,
+pending/review/expiring-soon states to amber, rejected/expired/failed states
+to red, and neutral/unknown states to slate. Preserve these distinctions,
+compact text, visible keyboard focus, accessible names, and loading feedback.
 
-| Role Key | Name | Access Boundary | State Scoping Rule |
-|---|---|---|---|
-| `super_admin` | Super Administrator | Global system & multi-state oversight | `state_id IS NULL` (All states: FL, IN, GA). Can view/switch any state. |
-| `administrator` | State Administrator | Single assigned state branch | `state_id` NOT NULL (1=FL, 2=IN, 3=GA). Must NEVER access other states. |
-| `caregiver` | Caregiver / Aide | Own credentials, training, assigned clients | Self profile + assigned client IDs only. |
-| `client` | Client / Patient / Family | Own intake, care plan, visit schedules, forms | Self profile and own signed agreements only. |
+Pages compose components and feature hooks. Put API calls in services using
+the shared client, workflow state/mutations in hooks, and validation in
+schemas or pure helpers. `useFetch` returns `data`, `loading` (`isLoading`),
+`error`, and `refetch` through TanStack Query. Examples include
+`features/admin/hooks/useReferralsData.js`,
+`features/admin/services/referralService.js`, and
+`features/client/hooks/useClientIntake.js`.
 
-*(Public visitors access `/:state` landing pages and `/caregiver/application` unauthenticated).*
+## Backend responsibilities and validation
 
-### 3.2 Frontend RBAC Implementation Rules
+Views handle HTTP parsing, permissions, serializer validation, delegation,
+and responses. Serializers own contracts/representations; services own
+domain operations and persistence. Examples: `apps/admin_portal/serializers.py`,
+`apps/caregivers/services.py`, `apps/clients/services.py`, and
+`apps/documents/services.py` / `validators.py`.
 
-1. **Always Use Role Helpers**: Import from `src/shared/lib/roles.js`.
-   ```js
-   import { isAdmin, isSuperAdmin, homePathFor, stateLabelFor } from '../shared/lib/roles';
-   ```
-   - **DO NOT** use `role === 'administrator'` directly, as it ignores `super_admin` and drops them into caregiver fallbacks.
-   - Use `isAdmin(user)` to check for both `super_admin` and `administrator`.
-   - Use `isSuperAdmin(user)` when guarding national-only features (e.g. user administration, system settings, global switching).
+Frontend schemas provide form feedback, not verified complete backend parity.
+For public caregiver applications, consult `CaregiverApplyPublicSerializer`
+in `apps/caregivers/serializers.py` and `submit_caregiver_application` in
+`apps/caregivers/services.py`.
 
-2. **Portal Route Protection (`src/routes/AppRoutes.jsx`)**:
-   - `/admin/*` guarded by `AdminLayout.jsx` (requires `isAdmin(user) === true`).
-   - `/caregiver/*` guarded by `CaregiverLayout.jsx` (requires `user.role === 'caregiver'`).
-   - `/client/*` guarded by `ClientLayout.jsx` (requires `user.role === 'client'`).
-   - Unauthenticated users redirect to `/caregiver/login` or `/client/login`.
+`apps/compliance/audit.py` filters logged payloads using a whitelist and
+sensitive-key filtering. Logging catches failures and returns `None`; do not
+claim every mutation or PHI read is durably audited. Application/agreement
+services record content hashes; preserve their canonical inputs and historical
+signatures.
 
-3. **State Jurisdiction Selector Rules in UI**:
-   - For `super_admin`: State dropdown allows selecting `"all"` (All States) or specific states (`florida`, `indiana`, `georgia`).
-   - For `administrator`: State dropdown must be **disabled or hidden**, locked strictly to the administrator's assigned state (`user.state_id` / `stateLabelFor(user)`).
-   - Never allow state administrators to send query params requesting records for another state.
-
-### 3.3 Backend RBAC & State Isolation Rules (`backend/app/core/dependencies.py`)
-
-1. **Authoritative Context**: Never trust client-supplied user, role, or state in the request body. Resolve user from Bearer JWT and PostgreSQL record.
-2. **Fail-Closed on Unassigned Admin**:
-   - If `user.role == 'administrator'` and `user.state_id IS NULL`, raise `HTTP 403 Forbidden` (`detail: "Administrator is not assigned to a state"`).
-3. **Database Scope Injection**:
-   - `require_admin_scoped` returns `AdminScope`:
-     ```python
-     # super_admin: states=None, is_super=True
-     # administrator: states=[user.state_id], is_super=False
-     ```
-   - All queries filter:
-     ```python
-     if not scope.is_super:
-         query = query.filter(Entity.state_id.in_(scope.states))
-     ```
-4. **Cross-State Access Defense**:
-   - Call `assert_state_allowed(scope, entity.state_id)` on any resource access.
-   - Cross-state tampering results in immediate `HTTP 403 Forbidden`.
-
-### 3.4 Audit Logging & Document Integrity
-- Every state mutation and PHI view must append to `audit_logs` (immutable table).
-- Sensitive fields (passwords, JWTs, large raw signatures) are excluded via `AUDIT_WHITELIST`.
-- Legal agreements and applications store a SHA-256 `content_hash` along with electronic signature vectors for non-repudiation.
-
----
-
-## 4. Agent Checklist for New / Refactored Features
-
-Follow this 5-step checklist for any frontend page or API endpoint:
-
-1. **Verify Route & Role Guard**:
-   - Check if page is inside `AdminLayout`, `CaregiverLayout`, or `ClientLayout`.
-   - Ensure role check uses `isAdmin(user)` or `isSuperAdmin(user)` from `roles.js`.
-2. **Enforce State Scope**:
-   - If admin page has a state filter, ensure `administrator` cannot switch outside their assigned state.
-   - Backend endpoint uses `require_admin_scoped` and checks `assert_state_allowed`.
-3. **Apply Shell & Containers**:
-   - Wrap page content in `<PageContainer>`.
-   - Provide `<PageHeader title="..." subtitle="..." actions={...} />`.
-4. **Standardize Cards & Badges**:
-   - Wrap sections in `<Card>`.
-   - Format statuses with `<StatusBadge status={item.status} />`.
-5. **Verify Loading, Empty, and Error States**:
-   - Provide `<Skeleton>` or `<LoadingState>` while fetching.
-   - Provide `<EmptyState>` when lists are empty.
-   - Handle API errors gracefully with `<Alert variant="destructive">` or Toast.
+For changes, verify route/API permissions, state/owner scope, loading, empty,
+error, and keyboard behavior. Run frontend lint/build and affected browser
+flows for UI changes. See [Python style commands and baseline policy](../docs/development/python-style.md).

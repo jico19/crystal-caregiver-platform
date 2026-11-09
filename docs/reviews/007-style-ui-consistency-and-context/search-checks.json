@@ -1,0 +1,54 @@
+[
+  {
+    "name": "Search dimensions and icon retained",
+    "passed": true
+  },
+  {
+    "name": "Desktop has no page overflow",
+    "passed": true
+  },
+  {
+    "name": "Search uses shared semantic focus",
+    "passed": true
+  },
+  {
+    "name": "Trimmed case-insensitive name filtering retained",
+    "passed": true
+  },
+  {
+    "name": "Search stays client-side",
+    "passed": true
+  },
+  {
+    "name": "Search keyboard focus is visible",
+    "passed": true
+  },
+  {
+    "name": "Phone filtering retained",
+    "passed": true
+  },
+  {
+    "name": "Email filtering retained",
+    "passed": true
+  },
+  {
+    "name": "Referral source filtering retained",
+    "passed": true
+  },
+  {
+    "name": "No-match search hides both leads",
+    "passed": true
+  },
+  {
+    "name": "Reset restores both leads and clears search",
+    "passed": true
+  },
+  {
+    "name": "Narrow search keeps dimensions with no page overflow",
+    "passed": true
+  },
+  {
+    "name": "Table view retains trimmed search filtering",
+    "passed": true
+  }
+]

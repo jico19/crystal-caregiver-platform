@@ -1,0 +1,74 @@
+﻿[
+  {
+    "name": "default label contrast >= 4.5",
+    "passed": true
+  },
+  {
+    "name": "destructive label contrast >= 4.5",
+    "passed": true
+  },
+  {
+    "name": "outline label contrast >= 4.5",
+    "passed": true
+  },
+  {
+    "name": "secondary label contrast >= 4.5",
+    "passed": true
+  },
+  {
+    "name": "Destructive and primary remain distinct",
+    "passed": true
+  },
+  {
+    "name": "Disabled/loading buttons block interaction",
+    "passed": true
+  },
+  {
+    "name": "Disabled input is retained",
+    "passed": true
+  },
+  {
+    "name": "Control sizes retained",
+    "passed": true
+  },
+  {
+    "name": "Desktop controls do not overflow",
+    "passed": true
+  },
+  {
+    "name": "Primary hover responds",
+    "passed": true
+  },
+  {
+    "name": "Destructive hover responds",
+    "passed": true
+  },
+  {
+    "name": "Button keyboard focus visible",
+    "passed": true
+  },
+  {
+    "name": "ConfirmModal uses primary variant without palette overrides",
+    "passed": true
+  },
+  {
+    "name": "Dialog has accessible title and description",
+    "passed": true
+  },
+  {
+    "name": "Destructive dialog uses red variant",
+    "passed": true
+  },
+  {
+    "name": "Narrow destructive dialog fits viewport",
+    "passed": true
+  },
+  {
+    "name": "Pending confirmation stays open on Escape",
+    "passed": true
+  },
+  {
+    "name": "Pending confirm and cancel are disabled",
+    "passed": true
+  }
+]

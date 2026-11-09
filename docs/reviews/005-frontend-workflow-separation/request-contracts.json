@@ -1,0 +1,114 @@
+{
+  "browserChecks": 90,
+  "contracts": {
+    "intake": {
+      "body": {
+        "address": null,
+        "date_of_birth": "1950-02-03",
+        "first_name": "Synthetic",
+        "last_name": "Recipient",
+        "medicaid_number": null,
+        "phone": "(555) 123-4567",
+        "signature_data": "<drawn signature>",
+        "signed_name": "Synthetic Signer",
+        "state_id": 1
+      },
+      "method": "POST",
+      "path": "/clients/intake",
+      "query": {}
+    },
+    "authorization": {
+      "body": {
+        "end_date": "2027-03-03",
+        "file": {
+          "name": "synthetic.pdf",
+          "size": 41,
+          "type": "application/pdf"
+        },
+        "notes": "Synthetic renewal",
+        "start_date": "2027-02-02"
+      },
+      "method": "POST",
+      "path": "/clients/me/authorizations",
+      "query": {}
+    },
+    "clientDocumentIntent": {
+      "body": {
+        "content_type": "application/pdf",
+        "document_type_id": "1",
+        "expiration_date": "2027-12-31",
+        "filename": "synthetic.pdf"
+      },
+      "method": "POST",
+      "path": "/documents/upload-intent",
+      "query": {}
+    },
+    "clientDocumentStorage": {
+      "body": {
+        "name": "synthetic.pdf",
+        "size": 41,
+        "type": "application/pdf"
+      },
+      "method": "PUT",
+      "path": "/storage",
+      "query": {}
+    },
+    "clientOptionalExpiry": {
+      "body": {
+        "content_type": "application/pdf",
+        "document_type_id": "2",
+        "filename": "boundary.pdf"
+      },
+      "method": "POST",
+      "path": "/documents/upload-intent",
+      "query": {}
+    },
+    "caregiverDocumentIntent": {
+      "body": {
+        "content_type": "application/pdf",
+        "document_type_id": "1",
+        "expiration_date": "2027-12-31",
+        "filename": "synthetic.pdf"
+      },
+      "method": "POST",
+      "path": "/documents/upload-intent",
+      "query": {}
+    },
+    "caregiverDocumentStorage": {
+      "body": {
+        "name": "synthetic.pdf",
+        "size": 41,
+        "type": "application/pdf"
+      },
+      "method": "PUT",
+      "path": "/storage",
+      "query": {}
+    },
+    "caregiverOptionalExpiry": {
+      "body": {
+        "content_type": "application/pdf",
+        "document_type_id": "2",
+        "filename": "boundary.pdf"
+      },
+      "method": "POST",
+      "path": "/documents/upload-intent",
+      "query": {}
+    },
+    "referralStatus": {
+      "body": {
+        "status": "contacted"
+      },
+      "method": "PATCH",
+      "path": "/admin/referrals/21",
+      "query": {}
+    },
+    "referralNotes": {
+      "body": {
+        "handled_notes": " Synthetic coordination notes "
+      },
+      "method": "PATCH",
+      "path": "/admin/referrals/21",
+      "query": {}
+    }
+  }
+}

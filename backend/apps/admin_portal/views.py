@@ -1,34 +1,58 @@
 from datetime import date, timedelta
+
+from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
-from rest_framework import status, permissions, generics
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.contrib.auth import get_user_model
-from apps.core.permissions import IsStateScopedAdmin, IsSuperAdmin
-from apps.core.mixins import ScopedStateQuerySetMixin
-from apps.core.models import State, Role
-from apps.caregivers.models import Caregiver, CaregiverApplication
-from apps.caregivers.serializers import CaregiverProfileSerializer, CaregiverApplicationSerializer
-from apps.clients.models import Client, ClientReferral, ClientAgreement
-from apps.clients.serializers import ClientSerializer, ClientReferralSerializer
-from apps.documents.models import Document, DocumentRequirement
-from apps.documents.serializers import DocumentSerializer
+from rest_framework import status, permissions, generics
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.authentication.serializers import UserSerializer
 from apps.authorizations.models import Authorization
 from apps.care.models import CaregiverClientAssignment
 from apps.care.serializers import CaregiverClientAssignmentSerializer
-from apps.training.models import TrainingEnrollment, TrainingCourse
-from apps.training.serializers import TrainingEnrollmentSerializer
-from apps.authentication.serializers import UserSerializer
+from apps.caregivers.models import Caregiver, CaregiverApplication
+from apps.caregivers.serializers import (
+    CaregiverProfileSerializer,
+    CaregiverApplicationSerializer,
+)
+from apps.caregivers.services import review_caregiver_application
+from apps.clients.models import Client, ClientReferral, ClientAgreement
+from apps.clients.serializers import (
+    ClientAgreementSerializer,
+    ClientSerializer,
+    ClientReferralSerializer,
+)
+from apps.clients.services import admit_client
+from apps.compliance.audit import record_audit_log
 from apps.compliance.models import Announcement
 from apps.compliance.serializers import AnnouncementSerializer
-from apps.compliance.audit import record_audit_log
+from apps.core.middleware import get_client_ip
+from apps.core.mixins import ScopedStateQuerySetMixin
+from apps.core.models import State, Role
+from apps.core.permissions import IsStateScopedAdmin, IsSuperAdmin
+from apps.documents.models import Document
+from apps.documents.serializers import DocumentSerializer
+from apps.documents.services import (
+    ADMIN_CAREGIVER_POLICY,
+    calculate_document_compliance,
+)
+from apps.training.models import TrainingEnrollment, TrainingCourse
+from apps.training.serializers import TrainingEnrollmentSerializer
+
+from .serializers import (
+    CaregiverApplicationReviewActionSerializer,
+    ClientAdmissionActionSerializer,
+)
 
 User = get_user_model()
 
+
 class AdminDashboardView(APIView):
     """GET /api/v1/admin/dashboard - Real-time state metrics."""
+
     permission_classes = [IsStateScopedAdmin]
 
     def get(self, request):
@@ -40,7 +64,9 @@ class AdminDashboardView(APIView):
         selected_state_id = state_id
         if not selected_state_id and state_param and state_param != "all":
             state_obj = State.objects.filter(
-                Q(slug__iexact=state_param) | Q(code__iexact=state_param) | Q(name__iexact=state_param)
+                Q(slug__iexact=state_param)
+                | Q(code__iexact=state_param)
+                | Q(name__iexact=state_param)
             ).first()
             if state_obj:
                 selected_state_id = state_obj.id
@@ -74,34 +100,44 @@ class AdminDashboardView(APIView):
         pending_refs = ref_qs.filter(status="new").count()
         active_auths = auth_qs.filter(status="active").count()
 
-        ann_qs = Announcement.objects.filter(active=True, deleted_at__isnull=True)
+        ann_qs = Announcement.objects.filter(
+            active=True, deleted_at__isnull=True
+        )
         if selected_state_id:
-            ann_qs = ann_qs.filter(Q(state_id=selected_state_id) | Q(state__isnull=True))
-        ann_qs = ann_qs.filter(audience__in=["all", "administrator"]).order_by("-created_at")[:10]
+            ann_qs = ann_qs.filter(
+                Q(state_id=selected_state_id) | Q(state__isnull=True)
+            )
+        ann_qs = ann_qs.filter(audience__in=["all", "administrator"]).order_by(
+            "-created_at"
+        )[:10]
         announcements_data = AnnouncementSerializer(ann_qs, many=True).data
 
-        return Response({
-            "state_scope": selected_state_id or "ALL",
-            "active_caregivers": active_caregivers,
-            "active_clients": active_clients,
-            "pending_clients": pending_clients,
-            "pending_applications": pending_apps,
-            "pending_referrals": pending_refs,
-            "expiring_documents": expiring_docs_count,
-            "active_authorizations": active_auths,
-            "metrics": {
-                "total_caregivers": active_caregivers,
-                "total_clients": active_clients,
+        return Response(
+            {
+                "state_scope": selected_state_id or "ALL",
+                "active_caregivers": active_caregivers,
+                "active_clients": active_clients,
+                "pending_clients": pending_clients,
                 "pending_applications": pending_apps,
-                "pending_documents": expiring_docs_count,
-                "new_referrals": pending_refs,
-                "pending_compliance": expiring_docs_count,
-            },
-            "announcements": announcements_data,
-        })
+                "pending_referrals": pending_refs,
+                "expiring_documents": expiring_docs_count,
+                "active_authorizations": active_auths,
+                "metrics": {
+                    "total_caregivers": active_caregivers,
+                    "total_clients": active_clients,
+                    "pending_applications": pending_apps,
+                    "pending_documents": expiring_docs_count,
+                    "new_referrals": pending_refs,
+                    "pending_compliance": expiring_docs_count,
+                },
+                "announcements": announcements_data,
+            }
+        )
+
 
 class AdminReportsView(APIView):
     """GET /api/v1/admin/reports - Summary metrics."""
+
     permission_classes = [IsStateScopedAdmin]
 
     def get(self, request):
@@ -111,24 +147,43 @@ class AdminReportsView(APIView):
 
         report = []
         for s in states:
-            report.append({
-                "state_code": s.code,
-                "state_name": s.name,
-                "caregivers_count": Caregiver.objects.filter(state=s, deleted_at__isnull=True).count(),
-                "clients_count": Client.objects.filter(state=s, deleted_at__isnull=True).count(),
-                "open_referrals": ClientReferral.objects.filter(state=s, status="new", deleted_at__isnull=True).count(),
-                "active_authorizations": Authorization.objects.filter(state=s, status="active", deleted_at__isnull=True).count(),
-            })
+            report.append(
+                {
+                    "state_code": s.code,
+                    "state_name": s.name,
+                    "caregivers_count": Caregiver.objects.filter(
+                        state=s, deleted_at__isnull=True
+                    ).count(),
+                    "clients_count": Client.objects.filter(
+                        state=s, deleted_at__isnull=True
+                    ).count(),
+                    "open_referrals": ClientReferral.objects.filter(
+                        state=s, status="new", deleted_at__isnull=True
+                    ).count(),
+                    "active_authorizations": Authorization.objects.filter(
+                        state=s, status="active", deleted_at__isnull=True
+                    ).count(),
+                }
+            )
         return Response(report)
+
 
 class AdminCaregiverListView(ScopedStateQuerySetMixin, generics.ListAPIView):
     """GET /api/v1/admin/caregivers - Paginated roster."""
+
     permission_classes = [IsStateScopedAdmin]
     serializer_class = CaregiverProfileSerializer
-    queryset = Caregiver.objects.filter(deleted_at__isnull=True).select_related("state", "id")
+    queryset = Caregiver.objects.filter(
+        deleted_at__isnull=True
+    ).select_related("state", "id")
+
 
 class AdminCaregiverAnalyticsView(APIView):
-    """GET /api/v1/admin/caregivers/analytics - Application funnel conversion counts."""
+    """
+    GET /api/v1/admin/caregivers/analytics - Application funnel
+    conversion counts.
+    """
+
     permission_classes = [IsStateScopedAdmin]
 
     def get(self, request):
@@ -142,90 +197,108 @@ class AdminCaregiverAnalyticsView(APIView):
         under_review_count = qs.filter(status="under_review").count()
         onboarding_count = qs.filter(status="onboarding").count()
 
-        return Response({
-            "total_applications": qs.count(),
-            "total_caregivers": cg_qs.count(),
-            "pending_applications": submitted_count + under_review_count,
-            "in_onboarding": onboarding_count,
-            "submitted": submitted_count,
-            "under_review": under_review_count,
-            "approved": qs.filter(status="approved").count(),
-            "rejected": qs.filter(status="rejected").count(),
-            "onboarding": onboarding_count,
-        })
+        return Response(
+            {
+                "total_applications": qs.count(),
+                "total_caregivers": cg_qs.count(),
+                "pending_applications": submitted_count + under_review_count,
+                "in_onboarding": onboarding_count,
+                "submitted": submitted_count,
+                "under_review": under_review_count,
+                "approved": qs.filter(status="approved").count(),
+                "rejected": qs.filter(status="rejected").count(),
+                "onboarding": onboarding_count,
+            }
+        )
+
 
 class AdminCaregiverApplicationDetailView(APIView):
     """GET /api/v1/admin/caregivers/{application_id}"""
+
     permission_classes = [IsStateScopedAdmin]
 
     def get(self, request, application_id):
-        app = get_object_or_404(CaregiverApplication, id=application_id, deleted_at__isnull=True)
-        if request.user.role.name == "administrator" and app.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        app = get_object_or_404(
+            CaregiverApplication, id=application_id, deleted_at__isnull=True
+        )
+        if (
+            request.user.role.name == "administrator"
+            and app.state_id != request.user.state_id
+        ):
+            return Response(
+                {"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN
+            )
 
         data = CaregiverApplicationSerializer(app).data
         cg = app.caregiver
         cg_profile = CaregiverProfileSerializer(cg).data
         state = cg.state if cg.state_id else None
-        cg_profile["states"] = {
-            "id": state.id,
-            "code": state.code,
-            "name": state.name,
-        } if state else None
+        cg_profile["states"] = (
+            {
+                "id": state.id,
+                "code": state.code,
+                "name": state.name,
+            }
+            if state
+            else None
+        )
         cg_user = cg.id if cg else None
-        cg_profile["users"] = {
-            "id": cg_user.id,
-            "email": cg_user.email,
-            "role": cg_user.role.name if cg_user.role else None,
-            "status": cg_user.status,
-            "is_active": cg_user.is_active,
-        } if cg_user else None
+        cg_profile["users"] = (
+            {
+                "id": cg_user.id,
+                "email": cg_user.email,
+                "role": cg_user.role.name if cg_user.role else None,
+                "status": cg_user.status,
+                "is_active": cg_user.is_active,
+            }
+            if cg_user
+            else None
+        )
         data["caregivers"] = cg_profile
         data["users"] = cg_profile["users"]
         data["states"] = cg_profile["states"]
 
-        enrollments = TrainingEnrollment.objects.filter(caregiver=app.caregiver).select_related("course")
-        return Response({
-            "application": data,
-            "enrollments": TrainingEnrollmentSerializer(enrollments, many=True).data,
-        })
+        enrollments = TrainingEnrollment.objects.filter(
+            caregiver=app.caregiver
+        ).select_related("course")
+        return Response(
+            {
+                "application": data,
+                "enrollments": TrainingEnrollmentSerializer(
+                    enrollments, many=True
+                ).data,
+            }
+        )
+
 
 class AdminCaregiverApplicationReviewView(APIView):
     """POST /api/v1/admin/caregivers/{application_id}/review"""
+
     permission_classes = [IsStateScopedAdmin]
 
     def post(self, request, application_id):
-        app = get_object_or_404(CaregiverApplication, id=application_id, deleted_at__isnull=True)
-        if request.user.role.name == "administrator" and app.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        app = get_object_or_404(
+            CaregiverApplication, id=application_id, deleted_at__isnull=True
+        )
+        if (
+            request.user.role.name == "administrator"
+            and app.state_id != request.user.state_id
+        ):
+            return Response(
+                {"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN
+            )
 
-        status_val = request.data.get("status")
-        notes = request.data.get("notes", "")
-        rejection_reason = request.data.get("rejection_reason")
-
-        if status_val not in ("approved", "rejected", "under_review", "onboarding"):
-            return Response({"detail": "Invalid application status."}, status=status.HTTP_400_BAD_REQUEST)
-
-        old_status = app.status
-        app.status = status_val
-        app.notes = notes
-        app.rejection_reason = rejection_reason
-        app.reviewed_at = timezone.now()
-        app.reviewed_by = request.user
-        app.save()
-
-        record_audit_log(
-            action="REVIEW_CAREGIVER_APPLICATION",
-            table_name="caregiver_applications",
-            record_id=app.id,
-            request=request,
-            entity_state=app.state,
-            old_values={"status": old_status},
-            new_values={
-                "status": app.status,
-                "rejection_reason": app.rejection_reason,
-                "notes": app.notes,
-            },
+        serializer = CaregiverApplicationReviewActionSerializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        app = review_caregiver_application(
+            app,
+            actor=request.user,
+            **serializer.validated_data,
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            request_id=getattr(request, "request_id", None),
         )
 
         return Response(CaregiverApplicationSerializer(app).data)
@@ -233,64 +306,95 @@ class AdminCaregiverApplicationReviewView(APIView):
 
 class AdminCaregiverComplianceView(APIView):
     """GET /api/v1/admin/caregivers/{caregiver_id}/compliance"""
+
     permission_classes = [IsStateScopedAdmin]
 
     def get(self, request, caregiver_id):
         cg = get_object_or_404(Caregiver, id=caregiver_id)
-        if request.user.role.name == "administrator" and cg.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        if (
+            request.user.role.name == "administrator"
+            and cg.state_id != request.user.state_id
+        ):
+            return Response(
+                {"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN
+            )
 
-        reqs = DocumentRequirement.objects.filter(
+        result = calculate_document_compliance(
+            owner=cg.id,
             state=cg.state,
-            for_role__in=["caregiver", "both"],
-            required=True
-        ).select_related("document_type")
+            role="caregiver",
+            evaluation_date=date.today(),
+            policy=ADMIN_CAREGIVER_POLICY,
+        )
+        return Response(
+            {
+                "caregiver_id": str(cg.id),
+                "compliant": result.compliant,
+                "missing_requirements": [
+                    item.name for item in result.missing_types
+                ],
+                "approved_credentials": [
+                    item.name for item in result.approved
+                ],
+            }
+        )
 
-        approved_docs = Document.objects.filter(
-            owner_id=cg.id,
-            status="approved",
-            deleted_at__isnull=True,
-        ).values_list("document_type__name", flat=True)
-
-        missing = [r.document_type.name for r in reqs if r.document_type.name not in approved_docs]
-        return Response({
-            "caregiver_id": str(cg.id),
-            "compliant": len(missing) == 0,
-            "missing_requirements": missing,
-            "approved_credentials": list(approved_docs),
-        })
 
 class AdminCaregiverAssignmentsView(APIView):
     """GET /api/v1/admin/caregivers/{caregiver_id}/assignments"""
+
     permission_classes = [IsStateScopedAdmin]
 
     def get(self, request, caregiver_id):
         cg = get_object_or_404(Caregiver, id=caregiver_id)
-        if request.user.role.name == "administrator" and cg.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        if (
+            request.user.role.name == "administrator"
+            and cg.state_id != request.user.state_id
+        ):
+            return Response(
+                {"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN
+            )
 
         assignments = CaregiverClientAssignment.objects.filter(
             caregiver=cg,
             ended_at__isnull=True,
         ).select_related("caregiver", "client")
-        return Response({"assignments": CaregiverClientAssignmentSerializer(assignments, many=True).data})
+        return Response(
+            {
+                "assignments": CaregiverClientAssignmentSerializer(
+                    assignments, many=True
+                ).data
+            }
+        )
+
 
 class AdminClientListView(ScopedStateQuerySetMixin, generics.ListAPIView):
-    """GET /api/v1/admin/clients - Paginated client list with search & filters."""
+    """
+    GET /api/v1/admin/clients - Paginated client list with search &
+    filters.
+    """
+
     permission_classes = [IsStateScopedAdmin]
     serializer_class = ClientSerializer
-    queryset = Client.objects.filter(deleted_at__isnull=True).select_related("state", "id")
+    queryset = Client.objects.filter(deleted_at__isnull=True).select_related(
+        "state", "id"
+    )
 
     def get_queryset(self):
         qs = super().get_queryset()
-        params = getattr(self.request, "query_params", getattr(self.request, "GET", {}))
+        params = getattr(
+            self.request, "query_params", getattr(self.request, "GET", {})
+        )
         status_param = params.get("status")
         if status_param and status_param != "all":
             qs = qs.filter(status=status_param)
 
         state_param = params.get("state")
         if state_param and state_param != "all":
-            qs = qs.filter(Q(state__code__iexact=state_param) | Q(state__slug__iexact=state_param))
+            qs = qs.filter(
+                Q(state__code__iexact=state_param)
+                | Q(state__slug__iexact=state_param)
+            )
 
         search = params.get("search")
         if search:
@@ -310,73 +414,98 @@ class AdminClientListView(ScopedStateQuerySetMixin, generics.ListAPIView):
 
         return qs
 
+
 class AdminClientDetailView(APIView):
     """GET /api/v1/admin/clients/{client_id}"""
+
     permission_classes = [IsStateScopedAdmin]
 
     def get(self, request, client_id):
-        client = get_object_or_404(Client, id=client_id, deleted_at__isnull=True)
-        if request.user.role.name == "administrator" and client.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        client = get_object_or_404(
+            Client, id=client_id, deleted_at__isnull=True
+        )
+        if (
+            request.user.role.name == "administrator"
+            and client.state_id != request.user.state_id
+        ):
+            return Response(
+                {"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN
+            )
 
         agreements = ClientAgreement.objects.filter(client_id=client.id)
-        from apps.clients.serializers import ClientAgreementSerializer
-        return Response({
-            "client": ClientSerializer(client).data,
-            "agreements": ClientAgreementSerializer(agreements, many=True).data,
-        })
+
+        return Response(
+            {
+                "client": ClientSerializer(client).data,
+                "agreements": ClientAgreementSerializer(
+                    agreements, many=True
+                ).data,
+            }
+        )
+
 
 class AdminClientAdmissionView(APIView):
     """POST /api/v1/admin/clients/{client_id}/admission"""
+
     permission_classes = [IsStateScopedAdmin]
 
     def post(self, request, client_id):
-        client = get_object_or_404(Client, id=client_id, deleted_at__isnull=True)
-        if request.user.role.name == "administrator" and client.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        client = get_object_or_404(
+            Client, id=client_id, deleted_at__isnull=True
+        )
+        if (
+            request.user.role.name == "administrator"
+            and client.state_id != request.user.state_id
+        ):
+            return Response(
+                {"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN
+            )
 
-        old_status = client.status
-        client.status = request.data.get("status", "approved")
-        client.service_start_date = request.data.get("service_start_date")
-        client.admission_notes = request.data.get("admission_notes", "")
-        client.rejection_reason = request.data.get("rejection_reason", "")
-        client.admitted_by = request.user
-        client.admitted_at = timezone.now()
-        client.save()
-
-        record_audit_log(
-            action="ADMIT_CLIENT" if client.status in ("approved", "active") else "REJECT_CLIENT",
-            table_name="clients",
-            record_id=client.id,
-            request=request,
-            entity_state=client.state,
-            old_values={"status": old_status},
-            new_values={
-                "status": client.status,
-                "service_start_date": str(client.service_start_date) if client.service_start_date else None,
-                "rejection_reason": client.rejection_reason,
-            },
+        serializer = ClientAdmissionActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        client = admit_client(
+            client,
+            actor=request.user,
+            **serializer.validated_data,
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            request_id=getattr(request, "request_id", None),
         )
 
         return Response(ClientSerializer(client).data)
 
+
 class AdminReferralsListView(ScopedStateQuerySetMixin, generics.ListAPIView):
     """GET /api/v1/admin/referrals - Inbound leads pipeline."""
+
     permission_classes = [IsStateScopedAdmin]
     serializer_class = ClientReferralSerializer
-    queryset = ClientReferral.objects.filter(deleted_at__isnull=True).select_related("state")
+    queryset = ClientReferral.objects.filter(
+        deleted_at__isnull=True
+    ).select_related("state")
+
 
 class AdminReferralDetailView(APIView):
     """PATCH /api/v1/admin/referrals/{referral_id}"""
+
     permission_classes = [IsStateScopedAdmin]
 
     def patch(self, request, referral_id):
-        referral = get_object_or_404(ClientReferral, id=referral_id, deleted_at__isnull=True)
-        if request.user.role.name == "administrator" and referral.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        referral = get_object_or_404(
+            ClientReferral, id=referral_id, deleted_at__isnull=True
+        )
+        if (
+            request.user.role.name == "administrator"
+            and referral.state_id != request.user.state_id
+        ):
+            return Response(
+                {"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN
+            )
 
         old_status = referral.status
-        serializer = ClientReferralSerializer(referral, data=request.data, partial=True)
+        serializer = ClientReferralSerializer(
+            referral, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
         updated_referral = serializer.save()
 
@@ -395,8 +524,10 @@ class AdminReferralDetailView(APIView):
         )
         return Response(serializer.data)
 
+
 class AdminReferralsAnalyticsView(APIView):
     """GET /api/v1/admin/referrals/analytics"""
+
     permission_classes = [IsStateScopedAdmin]
 
     def get(self, request):
@@ -411,24 +542,42 @@ class AdminReferralsAnalyticsView(APIView):
             "converted": qs.filter(status="converted").count(),
             "closed": qs.filter(status="closed").count(),
         }
-        source_rows = qs.values("referral_source").annotate(
-            count=Count("id"),
-        ).order_by("-count")
-        conversion_rate_pct = round((by_status["converted"] / total * 100), 1) if total else 0.0
+        source_rows = (
+            qs.values("referral_source")
+            .annotate(
+                count=Count("id"),
+            )
+            .order_by("-count")
+        )
+        conversion_rate_pct = (
+            round((by_status["converted"] / total * 100), 1) if total else 0.0
+        )
 
-        return Response({
-            "total_referrals": total,
-            "by_status": by_status,
-            "by_source": [{"source": r["referral_source"] or "Unknown", "count": r["count"]} for r in source_rows],
-            "conversion_rate_pct": conversion_rate_pct,
-        })
+        return Response(
+            {
+                "total_referrals": total,
+                "by_status": by_status,
+                "by_source": [
+                    {
+                        "source": r["referral_source"] or "Unknown",
+                        "count": r["count"],
+                    }
+                    for r in source_rows
+                ],
+                "conversion_rate_pct": conversion_rate_pct,
+            }
+        )
+
 
 class AdminTrainingListCreateView(APIView):
     """GET/POST /api/v1/admin/training - Paginated enrollment roster."""
+
     permission_classes = [IsStateScopedAdmin]
 
     def get(self, request):
-        qs = TrainingEnrollment.objects.select_related("course", "caregiver", "caregiver__id", "caregiver__state")
+        qs = TrainingEnrollment.objects.select_related(
+            "course", "caregiver", "caregiver__id", "caregiver__state"
+        )
         user = request.user
         if user.role.name == "administrator" and user.state_id:
             qs = qs.filter(caregiver__state_id=user.state_id)
@@ -447,12 +596,14 @@ class AdminTrainingListCreateView(APIView):
     @property
     def paginator(self):
         if not hasattr(self, "_paginator"):
-            from rest_framework.pagination import PageNumberPagination
+
             self._paginator = PageNumberPagination()
         return self._paginator
 
     def paginate_queryset(self, queryset):
-        return self.paginator.paginate_queryset(queryset, self.request, view=self)
+        return self.paginator.paginate_queryset(
+            queryset, self.request, view=self
+        )
 
     def get_paginated_response(self, data):
         return self.paginator.get_paginated_response(data)
@@ -462,11 +613,19 @@ class AdminTrainingListCreateView(APIView):
         caregiver_id = request.data.get("caregiver_id")
         course_id = request.data.get("course_id")
         if not caregiver_id or not course_id:
-            return Response({"detail": "caregiver_id and course_id are required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "caregiver_id and course_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         caregiver = get_object_or_404(Caregiver, id=caregiver_id)
-        if user.role.name == "administrator" and caregiver.state_id != user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        if (
+            user.role.name == "administrator"
+            and caregiver.state_id != user.state_id
+        ):
+            return Response(
+                {"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN
+            )
 
         course = get_object_or_404(TrainingCourse, id=course_id)
         enrollment, created = TrainingEnrollment.objects.get_or_create(
@@ -474,13 +633,19 @@ class AdminTrainingListCreateView(APIView):
             caregiver=caregiver,
             defaults={
                 "status": "in_progress",
-                "due_at": date.today() + timedelta(days=course.validity_months * 30),
+                "due_at": date.today()
+                + timedelta(days=course.validity_months * 30),
             },
         )
-        return Response(TrainingEnrollmentSerializer(enrollment).data, status=status.HTTP_201_CREATED)
+        return Response(
+            TrainingEnrollmentSerializer(enrollment).data,
+            status=status.HTTP_201_CREATED,
+        )
+
 
 class AdminLegalHoldToggleView(APIView):
     """PATCH /api/v1/admin/{resource}/{id}/legal-hold"""
+
     permission_classes = [IsStateScopedAdmin]
 
     def patch(self, request, resource, id):
@@ -491,11 +656,19 @@ class AdminLegalHoldToggleView(APIView):
         }
         model = model_map.get(resource)
         if not model:
-            return Response({"detail": f"Unknown resource '{resource}'."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": f"Unknown resource '{resource}'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         obj = get_object_or_404(model, id=id)
-        if request.user.role.name == "administrator" and obj.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        if (
+            request.user.role.name == "administrator"
+            and obj.state_id != request.user.state_id
+        ):
+            return Response(
+                {"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN
+            )
 
         old_hold = obj.legal_hold
         obj.legal_hold = not obj.legal_hold
@@ -513,8 +686,10 @@ class AdminLegalHoldToggleView(APIView):
 
         return Response({"id": str(obj.pk), "legal_hold": obj.legal_hold})
 
+
 class AdminRestoreEntityView(APIView):
     """POST /api/v1/admin/{resource}/{id}/restore"""
+
     permission_classes = [IsStateScopedAdmin]
 
     def post(self, request, resource, id):
@@ -527,11 +702,19 @@ class AdminRestoreEntityView(APIView):
         }
         model = model_map.get(resource)
         if not model:
-            return Response({"detail": f"Unknown resource '{resource}'."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": f"Unknown resource '{resource}'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         obj = get_object_or_404(model, id=id)
-        if request.user.role.name == "administrator" and obj.state_id != request.user.state_id:
-            return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        if (
+            request.user.role.name == "administrator"
+            and obj.state_id != request.user.state_id
+        ):
+            return Response(
+                {"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN
+            )
 
         obj.restore()
 
@@ -544,28 +727,40 @@ class AdminRestoreEntityView(APIView):
             new_values={"status": "restored"},
         )
 
-
-        return Response({"message": f"{resource.rstrip('s')} restored successfully.", "id": str(obj.id)})
+        return Response(
+            {
+                "message": f"{resource.rstrip('s')} restored successfully.",
+                "id": str(obj.id),
+            }
+        )
 
 
 class AdminUsersListView(generics.ListAPIView):
     """GET /api/v1/admin/users - User management (Super Admin)."""
+
     permission_classes = [IsSuperAdmin]
     serializer_class = UserSerializer
-    queryset = User.objects.filter(deleted_at__isnull=True).select_related("role", "state")
+    queryset = User.objects.filter(deleted_at__isnull=True).select_related(
+        "role", "state"
+    )
+
 
 class AdminUserStatusView(APIView):
     """POST /api/v1/admin/users/{user_id}/status"""
+
     permission_classes = [IsSuperAdmin]
 
     def post(self, request, user_id):
         target_user = get_object_or_404(User, id=user_id)
         new_status = request.data.get("status")
         if new_status not in ("active", "inactive", "suspended"):
-            return Response({"detail": "Invalid user status."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invalid user status."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         old_status = target_user.status
         target_user.status = new_status
-        target_user.is_active = (new_status == "active")
+        target_user.is_active = new_status == "active"
         target_user.save()
 
         record_audit_log(
@@ -575,12 +770,17 @@ class AdminUserStatusView(APIView):
             request=request,
             entity_state=target_user.state,
             old_values={"status": old_status},
-            new_values={"status": target_user.status, "is_active": target_user.is_active},
+            new_values={
+                "status": target_user.status,
+                "is_active": target_user.is_active,
+            },
         )
         return Response(UserSerializer(target_user).data)
 
+
 class AdminUserRoleView(APIView):
     """POST /api/v1/admin/users/{user_id}/role"""
+
     permission_classes = [IsSuperAdmin]
 
     def post(self, request, user_id):
@@ -591,8 +791,10 @@ class AdminUserRoleView(APIView):
         target_user.save()
         return Response(UserSerializer(target_user).data)
 
+
 class AdminUserStateView(APIView):
     """POST /api/v1/admin/users/{user_id}/state"""
+
     permission_classes = [IsSuperAdmin]
 
     def post(self, request, user_id):
@@ -603,8 +805,10 @@ class AdminUserStateView(APIView):
         target_user.save()
         return Response(UserSerializer(target_user).data)
 
+
 class AdminUserDeleteView(APIView):
     """DELETE /api/v1/admin/users/{user_id}"""
+
     permission_classes = [IsSuperAdmin]
 
     def delete(self, request, user_id):
