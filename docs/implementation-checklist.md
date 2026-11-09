@@ -56,6 +56,11 @@ commands inspected, results and outstanding decisions.
 
 ## Phase 1 — caregiver onboarding and documents (scope sections 2, 4, 6)
 
+Specifications: [requirements](specs/phase-1-requirements.md),
+[technical design](specs/phase-1-design.md), and
+[implementation tasks](specs/phase-1-tasks.md). Specs are prepared; implementation
+remains pending and gated on Phase 0 completion.
+
 - [ ] Confirm application fields, onboarding steps, required credentials and
   review permissions per branch; record unresolved rules before implementation.
 - [ ] Extend the basic application into the agreed synthetic application form;
