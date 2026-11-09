@@ -9,10 +9,8 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
 
   render() {
     return this.state.failed ? (
-      <main>
-        <h1 className="mb-6 font-serif text-[clamp(36px,5vw,72px)] leading-[1.08] tracking-[-1.8px]">
-          This page could not load
-        </h1>
+      <main id="main" tabIndex={-1} className="page-section mx-auto max-w-site">
+        <h1 className="mb-6 font-serif text-display">This page could not load</h1>
         <a href="/">Reload the home page</a>
       </main>
     ) : (

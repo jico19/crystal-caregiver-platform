@@ -18,9 +18,9 @@ export function Header() {
 
   return (
     <>
-      <header className="flex min-h-24 items-center justify-between gap-6 border-b border-[#d8dfd6] bg-[#faf9f5] px-[max(24px,6vw)] py-6 max-md:items-start max-md:gap-4 max-md:px-6 max-md:py-5">
+      <header className="flex min-h-24 flex-col items-start justify-between gap-4 border-b border-border bg-background px-6 py-5 sm:flex-row sm:items-center md:gap-6 md:px-[max(24px,6vw)] md:py-6">
         <a
-          className="absolute left-5 -top-[100px] focus:top-3 focus:z-[5] focus:bg-white focus:p-3"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-5 focus:z-10 focus:bg-card focus:p-3"
           href="#main"
         >
           Skip to content
@@ -30,12 +30,12 @@ export function Header() {
           to="/"
         >
           Crystal Care
-          <span className="mt-[5px] block font-sans text-xs tracking-[1px] max-md:text-[10px]">
+          <span className="mt-1.25 block font-sans text-xs tracking-[1px] max-md:text-[10px]">
             Multi-state home care
           </span>
         </Link>
         <nav
-          className="flex flex-wrap items-center justify-end gap-6 max-md:gap-3.5 [&>a:first-child]:max-md:hidden"
+          className="flex flex-wrap items-center gap-3.5 sm:justify-end md:gap-6"
           aria-label="Main navigation"
         >
           <Link to="/states/FL">Caregiver opportunities</Link>
@@ -43,7 +43,7 @@ export function Header() {
             <>
               <Link to="/portal">Your portal</Link>
               <button
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-[#27543f] bg-transparent px-[22px] py-3 font-semibold text-[#27543f] transition-[transform,background] duration-150 hover:-translate-y-0.5 hover:bg-[#183f2c] hover:text-white disabled:cursor-wait disabled:opacity-60 focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
+                className="button button-outline"
                 disabled={logout.isPending}
                 onClick={() => logout.mutate()}
               >

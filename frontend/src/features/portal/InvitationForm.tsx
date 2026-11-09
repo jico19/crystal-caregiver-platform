@@ -5,7 +5,7 @@ import { z } from "zod";
 import { api } from "../../api/client";
 import type { Session } from "../../api/types";
 import { Failure } from "../../components/Failure";
-import { Field } from "../../components/Forms";
+import { Field } from "../../components/Field";
 import { Panel } from "../../components/Panel";
 
 const invitationSchema = z.object({
@@ -31,29 +31,16 @@ export function InvitationForm({ session }: { session: Session }) {
 
   return (
     <Panel>
-      <h2 className="mb-6 font-serif text-[clamp(27px,3vw,38px)] leading-[1.2] tracking-[-0.6px]">
-        Invite a portal user
-      </h2>
+      <h2 className="mb-6 font-serif text-section">Invite a portal user</h2>
       <p className="mb-6 max-w-[62ch]">
         Invitations are recorded in the local demo email transport. No external email is sent.
       </p>
-      <form
-        className="my-8 grid gap-[22px]"
-        onSubmit={form.handleSubmit((data) => send.mutate(data))}
-      >
+      <form className="my-8 grid gap-5.5" onSubmit={form.handleSubmit((data) => send.mutate(data))}>
         <Field label="Synthetic email" error={form.formState.errors.email}>
-          <input
-            className="w-full rounded border border-[#a6b7a7] bg-white p-3 text-[#263832] focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
-            type="email"
-            required
-            {...form.register("email")}
-          />
+          <input className="form-control" type="email" required {...form.register("email")} />
         </Field>
         <Field label="Branch" error={form.formState.errors.branch}>
-          <select
-            className="w-full rounded border border-[#a6b7a7] bg-white p-3 text-[#263832] focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
-            {...form.register("branch")}
-          >
+          <select className="form-control" {...form.register("branch")}>
             {session.branches.map((branch) => (
               <option key={branch.public_id} value={branch.public_id}>
                 {branch.display_name}
@@ -62,10 +49,7 @@ export function InvitationForm({ session }: { session: Session }) {
           </select>
         </Field>
         <Field label="Portal role">
-          <select
-            className="w-full rounded border border-[#a6b7a7] bg-white p-3 text-[#263832] focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
-            {...form.register("role")}
-          >
+          <select className="form-control" {...form.register("role")}>
             <option value="client">Client</option>
             {session.roles.includes("super-admin") ? (
               <option value="administrator">State administrator</option>
@@ -76,10 +60,7 @@ export function InvitationForm({ session }: { session: Session }) {
         {send.isSuccess ? (
           <output>Invitation recorded. Open the link from the backend console.</output>
         ) : null}
-        <button
-          className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-[#27543f] bg-[#27543f] px-[22px] py-3 font-semibold text-white transition-[transform,background] duration-150 hover:-translate-y-0.5 hover:bg-[#183f2c] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
-          disabled={send.isPending}
-        >
+        <button className="button button-primary" disabled={send.isPending}>
           Create demo invitation
         </button>
       </form>

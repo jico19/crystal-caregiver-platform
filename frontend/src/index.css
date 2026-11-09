@@ -1,1 +1,80 @@
 @import "tailwindcss";
+
+@theme {
+  --color-background: #faf9f5;
+  --color-foreground: #263832;
+  --color-primary: #27543f;
+  --color-primary-hover: #183f2c;
+  --color-primary-foreground: #ffffff;
+  --color-muted-foreground: #4b6456;
+  --color-accent: #e7ede2;
+  --color-border: #d2dacf;
+  --color-input: #a6b7a7;
+  --color-ring: #907246;
+  --color-card: #ffffff;
+  --color-destructive: #8c2929;
+  --color-destructive-muted: #f9ece8;
+  --color-success: #577451;
+  --color-success-muted: #edf0e9;
+  --radius-control: 0.3125rem;
+  --text-caption: 0.8125rem;
+  --text-display: clamp(2.25rem, 5vw, 4.5rem);
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.025em;
+  --text-section: clamp(1.6875rem, 3vw, 2.375rem);
+  --text-section--line-height: 1.2;
+  --text-section--letter-spacing: -0.016em;
+  --text-title: 2.75rem;
+  --text-title--line-height: 1.08;
+  --text-title--letter-spacing: -0.025em;
+  --container-site: 100rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background font-sans leading-relaxed text-foreground antialiased;
+    overflow-wrap: anywhere;
+  }
+
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    @apply outline-3 outline-offset-4 outline-ring;
+  }
+
+  a {
+    @apply underline underline-offset-4;
+  }
+
+  :where(button:not(:disabled), select) {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  .page-section {
+    @apply px-6 py-10 md:px-[max(24px,6vw)] md:py-16;
+  }
+
+  .button {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-primary px-5.5 py-3 text-center font-semibold no-underline transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none;
+  }
+
+  .button-primary {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .button-primary:not(:disabled) {
+    @apply hover:bg-primary-hover;
+  }
+
+  .button-outline {
+    @apply bg-transparent text-primary;
+  }
+
+  .button-outline:not(:disabled) {
+    @apply hover:bg-primary-hover hover:text-primary-foreground;
+  }
+
+  .form-control {
+    @apply min-h-11 w-full min-w-0 rounded border border-input bg-card p-3 text-base text-foreground disabled:cursor-not-allowed disabled:opacity-60;
+  }
+}

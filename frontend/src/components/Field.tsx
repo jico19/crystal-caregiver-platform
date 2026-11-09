@@ -11,10 +11,10 @@ export function Field({
   error?: FieldError;
 }) {
   return (
-    <label className="grid gap-2 text-sm">
+    <label className="grid min-w-0 gap-2 text-sm">
       <span className="font-semibold">{label}</span>
       {children}
-      {error ? <span className="text-[#8c2929]">{error.message}</span> : null}
+      {error ? <span className="text-destructive">{error.message}</span> : null}
     </label>
   );
 }

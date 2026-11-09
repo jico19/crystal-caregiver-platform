@@ -14,18 +14,16 @@ export function Applications() {
 
   return (
     <Panel>
-      <h2 className="mb-6 font-serif text-[clamp(27px,3vw,38px)] leading-[1.2] tracking-[-0.6px]">
-        Your applications
-      </h2>
+      <h2 className="mb-6 font-serif text-section">Your applications</h2>
       {applications.isPending ? <Loading /> : null}
       <Failure error={applications.error} />
       {applications.data?.results.map((app) => (
         <div
-          className="flex justify-between gap-3 border-t border-[#e0e6dc] py-4"
+          className="flex flex-wrap items-start justify-between gap-3 border-t border-border py-4"
           key={app.public_id}
         >
           <span>{app.state_code} application</span>
-          <span className="rounded-sm bg-[#e7ede2] px-2 py-[3px] text-[13px]">{app.status}</span>
+          <span className="rounded-sm bg-accent px-2 py-0.75 text-caption">{app.status}</span>
         </div>
       ))}
       {applications.data?.count === 0 ? (

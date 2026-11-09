@@ -34,6 +34,8 @@ Frontend (run from frontend/)
 
 ## Tooling
 
+- Whenever touching frontend code, read and apply both the `tailwind-design-system`
+  and `vercel-react-best-practices` skills.
 - Python and Node versions: TODO: confirm and pin (`.python-version`, `.nvmrc`).
 - Formatting is done only by tools: ruff (Python), Oxfmt (frontend). Frontend lint uses Oxlint. Never format by hand.
 - If a formatter or lint command is missing or fails to run, stop and report it. Don't skip it.

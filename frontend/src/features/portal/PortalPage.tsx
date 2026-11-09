@@ -29,10 +29,8 @@ export default function PortalPage() {
   if (!role) {
     if (!user.roles.length) {
       return (
-        <section className="px-[max(24px,6vw)] py-16 max-md:py-10">
-          <h1 className="mb-6 font-serif text-[clamp(36px,5vw,72px)] leading-[1.08] tracking-[-1.8px]">
-            Access unavailable
-          </h1>
+        <section className="page-section">
+          <h1 className="mb-6 font-serif text-display">Access unavailable</h1>
           <p className="mb-6 max-w-[62ch]">
             Your account has no active portal assignment. Contact your demo administrator.
           </p>
@@ -43,10 +41,8 @@ export default function PortalPage() {
   }
   if (!user.roles.includes(role)) {
     return (
-      <section className="px-[max(24px,6vw)] py-16 max-md:py-10">
-        <h1 className="mb-6 font-serif text-[clamp(36px,5vw,72px)] leading-[1.08] tracking-[-1.8px]">
-          Access denied
-        </h1>
+      <section className="page-section">
+        <h1 className="mb-6 font-serif text-display">Access denied</h1>
         <p className="mb-6 max-w-[62ch]">Your account does not have this portal role.</p>
         <Link to="/portal">Open your portal</Link>
       </section>
@@ -56,11 +52,9 @@ export default function PortalPage() {
   const admin = role === "super-admin" || role === "state-admin";
 
   return (
-    <section className="px-[max(24px,6vw)] py-16 max-md:py-10">
-      <p className="mb-6 text-[13px] text-[#4b6456]">Your workspace / {user.email}</p>
-      <h1 className="mb-6 font-serif text-[clamp(36px,5vw,72px)] leading-[1.08] tracking-[-1.8px]">
-        {titles[role]}
-      </h1>
+    <section className="page-section">
+      <p className="mb-6 text-caption text-muted-foreground">Your workspace / {user.email}</p>
+      <h1 className="mb-6 font-serif text-display">{titles[role]}</h1>
       <nav className="mb-6 flex flex-wrap items-center gap-6" aria-label="Your portals">
         {user.roles.map((item) => (
           <Link key={item} to={`/portal/${item}`}>
@@ -73,15 +67,15 @@ export default function PortalPage() {
         {user.branches.map((branch) => branch.display_name).join(", ") || "None"}
       </p>
       {params.has("submitted") ? (
-        <output className="border-l-[3px] border-[#577451] bg-[#edf0e9] p-[18px]">
+        <output className="block border-l-[3px] border-success bg-success-muted p-4.5">
           Application submitted. Your portal account is ready. Agency review is a later demo phase.
         </output>
       ) : null}
       {role === "super-admin" ? (
-        <label className="grid gap-2 text-sm">
+        <label className="grid min-w-0 gap-2 text-sm">
           Filter accessible records by state
           <select
-            className="w-full rounded border border-[#a6b7a7] bg-white p-3 text-[#263832] focus-visible:outline-[3px] focus-visible:outline-[#907246] focus-visible:outline-offset-4"
+            className="form-control"
             value={state}
             onChange={(event) => setState(event.target.value)}
           >
@@ -116,7 +110,7 @@ export default function PortalPage() {
           <InvitationForm session={user} />
         ) : (
           <Panel>
-            <h2 className="mb-6 font-serif text-[clamp(27px,3vw,38px)] leading-[1.2] tracking-[-0.6px]">
+            <h2 className="mb-6 font-serif text-section">
               {role === "caregiver" ? "Onboarding" : "Your care information"}
             </h2>
             <p className="mb-6 max-w-[62ch]">
