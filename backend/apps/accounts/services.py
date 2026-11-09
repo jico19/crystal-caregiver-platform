@@ -10,7 +10,7 @@ from django.core.mail import send_mail
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from apps.operations.models import AgencyAdmin, BranchStaff, Client, AuditEvent
 from .access import admin_branches
@@ -145,3 +145,16 @@ def request_reset(email):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         email_link(user.email, "Demo password reset", f"/reset-password?uid={uid}&token={token}")
+
+
+def confirm_reset(data):
+    """Verify a reset token, replace the active account's password, and audit it."""
+    try:
+        user = User.objects.get(pk=urlsafe_base64_decode(data["uid"]).decode(), is_active=True)
+    except User.DoesNotExist, ValueError, UnicodeError, OverflowError:
+        raise ValidationError("Reset link is invalid or expired.")
+    if not default_token_generator.check_token(user, data["token"]):
+        raise ValidationError("Reset link is invalid or expired.")
+    user.set_password(data["password"])
+    user.save(update_fields=["password"])
+    audit(user, "password.reset", uuid.uuid5(uuid.NAMESPACE_OID, str(user.pk)))

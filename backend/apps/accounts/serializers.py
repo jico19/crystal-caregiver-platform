@@ -1,7 +1,15 @@
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
+from apps.operations.models import StateBranch
 from .models import User
+
+
+# Represent the public branch directory without exposing internal identifiers.
+class BranchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StateBranch
+        fields = ["public_id", "state_code", "display_name"]
 
 
 class StrictSerializer(serializers.Serializer):
@@ -26,26 +34,6 @@ class PasswordInput(StrictSerializer):
         except DjangoValidationError as exc:
             raise serializers.ValidationError(exc.messages)
         return value
-
-
-class ApplicationInput(PasswordInput):
-    experience = serializers.CharField(required=False)
-    availability = serializers.ListField(child=serializers.CharField(), required=False)
-    name = serializers.CharField(max_length=200)
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, required=False, trim_whitespace=False)
-    demo_acknowledged = serializers.BooleanField()
-
-    def validate_demo_acknowledged(self, value):
-        if not value:
-            raise serializers.ValidationError("Use synthetic data only and acknowledge the demo.")
-        return value
-
-    def validate(self, attrs):
-        user = self.context["request"].user
-        if not user.is_authenticated and not attrs.get("password"):
-            raise serializers.ValidationError({"password": "Required for a new account."})
-        return attrs
 
 
 class InvitationInput(StrictSerializer):

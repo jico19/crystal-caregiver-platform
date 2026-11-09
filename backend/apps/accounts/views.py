@@ -3,27 +3,26 @@ from drf_spectacular.utils import extend_schema
 from .contracts import SessionOutput, CSRFOutput, AuthOutput, DetailOutput, InvitationOutput
 from django.db.models import Q
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.tokens import default_token_generator
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
-from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_protect
-from rest_framework import generics, serializers, status
+from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from apps.operations.models import StateBranch, AgencyAdmin, BranchStaff, Caregiver, Client
-from .access import admin_branches, IsBusinessAdmin
-from .models import User
+from .access import admin_branches
+from .permissions import IsBusinessAdmin
 from .serializers import (
+    BranchSerializer,
     LoginInput,
     InvitationInput,
     AcceptInput,
     ResetRequestInput,
     ResetConfirmInput,
 )
-from .services import audit, invite, accept_invitation, request_reset
+from .services import audit, invite, accept_invitation, request_reset, confirm_reset
 
 
 def identity(user):
@@ -46,12 +45,6 @@ def identity(user):
         "roles": roles,
         "branches": BranchSerializer(branches, many=True).data,
     }
-
-
-class BranchSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StateBranch
-        fields = ["public_id", "state_code", "display_name"]
 
 
 class BranchList(generics.ListAPIView):
@@ -145,13 +138,6 @@ class ResetConfirmView(PublicAuthView):
     @extend_schema(responses=DetailOutput)
     def post(self, request):
         data = self.input(request, ResetConfirmInput)
-        try:
-            user = User.objects.get(pk=urlsafe_base64_decode(data["uid"]).decode(), is_active=True)
-        except User.DoesNotExist, ValueError, UnicodeError, OverflowError:
-            raise ValidationError("Reset link is invalid or expired.")
-        if not default_token_generator.check_token(user, data["token"]):
-            raise ValidationError("Reset link is invalid or expired.")
-        user.set_password(data["password"])
-        user.save(update_fields=["password"])
-        audit(user, "password.reset", uuid.uuid5(uuid.NAMESPACE_OID, str(user.pk)))
+        # The account service owns token verification, password persistence, and audit.
+        confirm_reset(data)
         return Response({"detail": "Password updated. Sign in with your new password."})

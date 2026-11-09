@@ -1,16 +1,9 @@
 """Published illustrative branch content, with no private record data."""
 
-from rest_framework import generics, serializers
+from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from .models import BranchContent
-
-
-class BranchContentSerializer(serializers.ModelSerializer):
-    state_code = serializers.CharField(source="branch.state_code", read_only=True)
-
-    class Meta:
-        model = BranchContent
-        fields = ["public_id", "state_code", "content_key", "title", "body"]
+from .content_serializers import BranchContentSerializer
 
 
 class BranchContentList(generics.ListAPIView):

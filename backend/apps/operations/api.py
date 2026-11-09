@@ -4,32 +4,19 @@ from apps.accounts.contracts import ApplicationOutput
 from django.db.models import Q, Prefetch
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, serializers, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from apps.accounts.access import admin_branches, scope_people, IsBusinessAdmin
-from apps.accounts.serializers import ApplicationInput
+from apps.accounts.access import admin_branches, scope_people
+from apps.accounts.permissions import IsBusinessAdmin
 from apps.accounts.views import PublicAuthView, identity
 from .models import JobPosting, Caregiver, Client, CaregiverApplication, ApplicationReview
 from .review_inputs import TransitionInput
 from .services import apply_to_job
-from .application_serializers import FormVersionSerializer, ApplicationDetailSerializer
-
-
-class JobSerializer(serializers.ModelSerializer):
-    state_code = serializers.CharField(source="branch.state_code", read_only=True)
-
-    class Meta:
-        model = JobPosting
-        fields = ["public_id", "title", "description", "state_code"]
-
-
-class JobDetailSerializer(JobSerializer):
-    application_form = FormVersionSerializer(source="form_version")
-
-    class Meta(JobSerializer.Meta):
-        fields = JobSerializer.Meta.fields + ["application_form"]
+from .application_serializers import ApplicationInput, ApplicationSerializer, ApplicationDetailSerializer
+from .job_serializers import JobSerializer, JobDetailSerializer
+from .person_serializers import PersonSerializer, ClientSerializer
 
 
 def published_jobs():
@@ -77,19 +64,6 @@ class ApplyView(PublicAuthView):
         )
 
 
-class PersonSerializer(serializers.ModelSerializer):
-    state_code = serializers.CharField(source="branch.state_code", read_only=True)
-
-    class Meta:
-        model = Caregiver
-        fields = ["public_id", "name", "state_code", "active"]
-
-
-class ClientSerializer(PersonSerializer):
-    class Meta(PersonSerializer.Meta):
-        model = Client
-
-
 class CaregiverViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PersonSerializer
     lookup_field = "public_id"
@@ -114,14 +88,6 @@ class ClientViewSet(CaregiverViewSet):
             .select_related("branch")
             .order_by("name", "public_id")
         )
-
-
-class ApplicationSerializer(serializers.ModelSerializer):
-    state_code = serializers.CharField(source="branch.state_code", read_only=True)
-
-    class Meta:
-        model = CaregiverApplication
-        fields = ["public_id", "state_code", "status", "submitted_at"]
 
 
 class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):

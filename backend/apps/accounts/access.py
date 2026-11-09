@@ -1,7 +1,6 @@
 """Default-deny business access, independent of Django admin flags."""
 
 from django.db.models import Q
-from rest_framework.permissions import BasePermission
 from apps.operations.models import AgencyAdmin, BranchStaff, StateBranch
 
 
@@ -25,9 +24,3 @@ def scope_people(queryset, user):
     )
 
 
-class IsBusinessAdmin(BasePermission):
-    def has_permission(self, request, view):
-        return admin_branches(request.user).exists()
-
-    def has_object_permission(self, request, view, obj):
-        return admin_branches(request.user).filter(pk=obj.branch_id).exists()

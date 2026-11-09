@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, serializers
+from rest_framework import generics
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
-from apps.accounts.access import scope_people, IsBusinessAdmin, admin_branches
+from apps.accounts.access import scope_people, admin_branches
+from apps.accounts.permissions import IsBusinessAdmin
 from .models import Caregiver, Document, DocumentVersion
 from .document_serializers import DocumentSerializer, DocumentVersionSerializer, UploadInput
 from .review_inputs import ReviewInput, CompletionInput
@@ -11,6 +12,7 @@ from .services.documents import upload_document, review_document
 from .services.checklist import onboarding_snapshot, complete_onboarding
 from .private_files import attachment
 from .filters import OnboardingFilter
+from .onboarding_serializers import OnboardingOutput
 
 
 def scoped_caregivers(user):
@@ -19,19 +21,6 @@ def scoped_caregivers(user):
 
 def scoped_documents(user):
     return Document.objects.filter(caregiver__in=scoped_caregivers(user)).select_related("document_type", "caregiver").prefetch_related("documentversion_set__documentreview_set")
-
-
-class OnboardingOutput(serializers.Serializer):
-    caregiver = serializers.UUIDField()
-    name = serializers.CharField()
-    state_code = serializers.CharField()
-    status = serializers.CharField()
-    ready_to_complete = serializers.BooleanField()
-    application_approved = serializers.BooleanField()
-    requirements = serializers.ListField(child=serializers.DictField())
-    counts = serializers.DictField(child=serializers.IntegerField())
-    history = serializers.ListField(child=serializers.DictField())
-    allowed_actions = serializers.DictField(child=serializers.BooleanField())
 
 
 class OnboardingView(generics.GenericAPIView):
